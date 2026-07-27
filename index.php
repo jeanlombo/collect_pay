@@ -1,164 +1,115 @@
 <?php
 /*
 |--------------------------------------------------------------------------
-| cOllect_Pay - Vitrine publique / Tableau public des recettes
+| cOllect_Pay - Vitrine publique premium
 |--------------------------------------------------------------------------
-| Version serveur AwardSpace corrigée :
-| - charge proprement config/database.php
-| - évite l'erreur Undefined variable $pdo
-| - accepte PDO, et reste silencieuse si la base est temporairement indisponible
+| Mise à jour : design public modernisé et ajout du paiement en ligne.
+| Les liens historiques du projet sont conservés sans modification.
 |--------------------------------------------------------------------------
 */
 
-ini_set('display_errors', 0);
-ini_set('display_startup_errors', 0);
+ini_set('display_errors', '0');
+ini_set('display_startup_errors', '0');
 error_reporting(E_ALL);
 
-$databaseFile = __DIR__ . "/config/database.php";
-
-if (file_exists($databaseFile)) {
+$databaseFile = __DIR__ . '/config/database.php';
+if (is_file($databaseFile)) {
     require_once $databaseFile;
 }
 
-/*
-|--------------------------------------------------------------------------
-| Connexion publique normalisée
-|--------------------------------------------------------------------------
-*/
-function publicDb()
+function publicDb(): ?PDO
 {
     global $pdo;
+    return isset($pdo) && $pdo instanceof PDO ? $pdo : null;
+}
 
-    if (isset($pdo) && $pdo instanceof PDO) {
-        return $pdo;
+function safePublic($value): string
+{
+    return htmlspecialchars((string) ($value ?? '-'), ENT_QUOTES, 'UTF-8');
+}
+
+function moneyPublic($amount, string $currency = 'CDF'): string
+{
+    $decimals = strtoupper($currency) === 'USD' ? 2 : 0;
+    return number_format((float) $amount, $decimals, ',', ' ') . ' ' . strtoupper($currency);
+}
+
+function fetchOnePublic(?PDO $db, string $sql, $default = 0)
+{
+    if (!$db) {
+        return $default;
     }
 
-    return null;
+    try {
+        $statement = $db->query($sql);
+        $row = $statement ? $statement->fetch(PDO::FETCH_NUM) : false;
+        return $row ? ($row[0] ?? $default) : $default;
+    } catch (Throwable $exception) {
+        error_log('Vitrine cOllect_Pay : ' . $exception->getMessage());
+        return $default;
+    }
+}
+
+function fetchAllPublic(?PDO $db, string $sql): array
+{
+    if (!$db) {
+        return [];
+    }
+
+    try {
+        $statement = $db->query($sql);
+        return $statement ? $statement->fetchAll(PDO::FETCH_ASSOC) : [];
+    } catch (Throwable $exception) {
+        error_log('Vitrine cOllect_Pay : ' . $exception->getMessage());
+        return [];
+    }
 }
 
 $db = publicDb();
 
-/*
-|--------------------------------------------------------------------------
-| Helpers sécurisés
-|--------------------------------------------------------------------------
-*/
-function safePublic($v) {
-    return htmlspecialchars((string)($v ?? '-'), ENT_QUOTES, 'UTF-8');
-}
-
-function moneyPublic($n) {
-    return number_format((float)$n, 0, ',', ' ') . ' CDF';
-}
-
-function fetchOnePublic($db, $sql, $default = 0) {
-    if (!$db instanceof PDO) {
-        return $default;
-    }
-
-    try {
-        $stmt = $db->query($sql);
-        $row = $stmt ? $stmt->fetch(PDO::FETCH_NUM) : false;
-        return $row ? ($row[0] ?? $default) : $default;
-    } catch (Throwable $e) {
-        return $default;
-    }
-}
-
-function fetchAllPublic($db, $sql) {
-    if (!$db instanceof PDO) {
-        return [];
-    }
-
-    try {
-        $stmt = $db->query($sql);
-        return $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
-    } catch (Throwable $e) {
-        return [];
-    }
-}
-
-/*
-|--------------------------------------------------------------------------
-| Statistiques publiques
-|--------------------------------------------------------------------------
-*/
 $totalSemaine = fetchOnePublic($db, "
-    SELECT IFNULL(SUM(montant_converti_cdf),0)
+    SELECT IFNULL(SUM(montant_converti_cdf), 0)
     FROM paiements
-    WHERE YEARWEEK(COALESCE(date_paiement, created_at),1)=YEARWEEK(CURDATE(),1)
+    WHERE YEARWEEK(COALESCE(date_paiement, created_at), 1) = YEARWEEK(CURDATE(), 1)
 ");
 
 $totalMois = fetchOnePublic($db, "
-    SELECT IFNULL(SUM(montant_converti_cdf),0)
+    SELECT IFNULL(SUM(montant_converti_cdf), 0)
     FROM paiements
-    WHERE MONTH(COALESCE(date_paiement, created_at))=MONTH(CURDATE())
-    AND YEAR(COALESCE(date_paiement, created_at))=YEAR(CURDATE())
+    WHERE MONTH(COALESCE(date_paiement, created_at)) = MONTH(CURDATE())
+      AND YEAR(COALESCE(date_paiement, created_at)) = YEAR(CURDATE())
 ");
 
 $totalAnnee = fetchOnePublic($db, "
-    SELECT IFNULL(SUM(montant_converti_cdf),0)
+    SELECT IFNULL(SUM(montant_converti_cdf), 0)
     FROM paiements
-    WHERE YEAR(COALESCE(date_paiement, created_at))=YEAR(CURDATE())
+    WHERE YEAR(COALESCE(date_paiement, created_at)) = YEAR(CURDATE())
 ");
 
-$totalNT = fetchOnePublic($db, "SELECT COUNT(*) FROM notes_taxation");
-$totalNP = fetchOnePublic($db, "SELECT COUNT(*) FROM notes_perception");
-$totalPaiements = fetchOnePublic($db, "SELECT COUNT(*) FROM paiements");
-$totalQuittances = fetchOnePublic($db, "SELECT COUNT(*) FROM quittances");
+$totalNT = fetchOnePublic($db, 'SELECT COUNT(*) FROM notes_taxation');
+$totalNP = fetchOnePublic($db, 'SELECT COUNT(*) FROM notes_perception');
+$totalPaiements = fetchOnePublic($db, 'SELECT COUNT(*) FROM paiements');
+$totalQuittances = fetchOnePublic($db, 'SELECT COUNT(*) FROM quittances');
+$totalConstatation = fetchOnePublic($db, 'SELECT IFNULL(SUM(total_estime), 0) FROM notes_taxation');
+$totalOrdonnance = fetchOnePublic($db, 'SELECT IFNULL(SUM(montant_initial), 0) FROM notes_perception');
+$totalRecouvre = fetchOnePublic($db, 'SELECT IFNULL(SUM(montant_converti_cdf), 0) FROM paiements');
+$totalSolde = fetchOnePublic($db, "SELECT IFNULL(SUM(solde_restant), 0) FROM notes_perception WHERE statut <> 'payee'");
+$tauxRecouvrement = (float) $totalOrdonnance > 0
+    ? ((float) $totalRecouvre / (float) $totalOrdonnance) * 100
+    : 0;
 
-$totalConstatation = fetchOnePublic($db, "
-    SELECT IFNULL(SUM(total_estime),0)
-    FROM notes_taxation
-");
-
-$totalOrdonnance = fetchOnePublic($db, "
-    SELECT IFNULL(SUM(montant_initial),0)
-    FROM notes_perception
-");
-
-$totalRecouvre = fetchOnePublic($db, "
-    SELECT IFNULL(SUM(montant_converti_cdf),0)
-    FROM paiements
-");
-
-$totalSolde = fetchOnePublic($db, "
-    SELECT IFNULL(SUM(solde_restant),0)
-    FROM notes_perception
-    WHERE statut <> 'payee'
-");
-
-$tauxRecouvrement = 0;
-if ((float)$totalOrdonnance > 0) {
-    $tauxRecouvrement = ((float)$totalRecouvre / (float)$totalOrdonnance) * 100;
-}
-
-/*
-|--------------------------------------------------------------------------
-| Listes publiques limitées
-|--------------------------------------------------------------------------
-*/
 $npDefaillantes = fetchAllPublic($db, "
-    SELECT 
-        numero_np,
-        type_np,
-        montant_initial,
-        solde_restant,
-        date_echeance
+    SELECT numero_np, type_np, montant_initial, solde_restant, date_echeance
     FROM notes_perception
     WHERE statut <> 'payee'
-    AND date_echeance IS NOT NULL
-    AND date_echeance < CURDATE()
+      AND date_echeance IS NOT NULL
+      AND date_echeance < CURDATE()
     ORDER BY date_echeance ASC
     LIMIT 5
 ");
 
 $notesPayees = fetchAllPublic($db, "
-    SELECT 
-        np.numero_np,
-        q.numero_quittance,
-        q.montant_acquitte,
-        q.date_emission
+    SELECT np.numero_np, q.numero_quittance, q.montant_acquitte, q.date_emission
     FROM quittances q
     JOIN apurements a ON q.apurement_id = a.id
     JOIN notes_perception np ON a.reference_id = np.id
@@ -167,12 +118,7 @@ $notesPayees = fetchAllPublic($db, "
 ");
 
 $notesNonPayees = fetchAllPublic($db, "
-    SELECT 
-        numero_np,
-        type_np,
-        montant_initial,
-        solde_restant,
-        date_echeance
+    SELECT numero_np, type_np, montant_initial, solde_restant, date_echeance
     FROM notes_perception
     WHERE statut <> 'payee'
     ORDER BY created_at DESC
@@ -180,705 +126,460 @@ $notesNonPayees = fetchAllPublic($db, "
 ");
 
 $derniersPaiements = fetchAllPublic($db, "
-    SELECT 
-        p.reference_transaction,
-        p.montant_converti_cdf,
-        p.devise,
-        COALESCE(p.date_paiement, p.created_at) AS date_paiement,
-        np.numero_np
+    SELECT p.reference_transaction,
+           p.montant_converti_cdf,
+           p.devise,
+           COALESCE(p.date_paiement, p.created_at) AS date_paiement,
+           np.numero_np
     FROM paiements p
     LEFT JOIN notes_perception np ON p.note_perception_id = np.id
     ORDER BY p.created_at DESC
     LIMIT 5
 ");
 ?>
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>cOllect_Pay | Canalisation des Recettes Publiques</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
+    <meta name="description" content="cOllect_Pay, guichet digital sécurisé de mobilisation et de paiement des recettes publiques.">
+    <title>cOllect_Pay | Recettes publiques digitales</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="assets/css/public.css" rel="stylesheet">
-
-    <style>
-        :root{
-            --primary:#06152b;
-            --secondary:#0f3460;
-            --gold:#fbbf24;
-            --green:#16a34a;
-            --red:#dc2626;
-            --muted:#64748b;
-            --soft:#f8fafc;
-        }
-
-        body{
-            background:#f4f7fb;
-            font-family:Segoe UI,Arial,sans-serif;
-            color:#0f172a;
-        }
-
-        .premium-nav{
-            background:rgba(6,21,43,.95);
-            backdrop-filter:blur(14px);
-            box-shadow:0 10px 35px rgba(2,6,23,.25);
-        }
-
-        .navbar-brand span{
-            color:var(--gold);
-            font-size:12px;
-            display:block;
-            line-height:1;
-        }
-
-        .hero{
-            min-height:92vh;
-            background:
-                radial-gradient(circle at top right, rgba(251,191,36,.25), transparent 30%),
-                linear-gradient(135deg,#06152b,#0f3460,#1e3a8a);
-            color:white;
-            display:flex;
-            align-items:center;
-            padding:110px 0 70px;
-            overflow:hidden;
-            position:relative;
-        }
-
-        .hero:before{
-            content:"";
-            position:absolute;
-            width:420px;
-            height:420px;
-            border-radius:50%;
-            background:rgba(255,255,255,.06);
-            bottom:-160px;
-            right:-120px;
-        }
-
-        .hero h1{
-            font-size:48px;
-            line-height:1.08;
-            font-weight:950;
-            margin-bottom:22px;
-        }
-
-        .hero p{
-            font-size:19px;
-            color:#dbeafe;
-            max-width:760px;
-        }
-
-        .hero-badge{
-            display:inline-flex;
-            align-items:center;
-            gap:8px;
-            background:rgba(255,255,255,.12);
-            border:1px solid rgba(255,255,255,.2);
-            padding:10px 14px;
-            border-radius:999px;
-            margin-bottom:18px;
-            font-weight:800;
-            color:#fff7ed;
-        }
-
-        .hero-card{
-            background:rgba(255,255,255,.95);
-            color:#0f172a;
-            border-radius:28px;
-            padding:26px;
-            box-shadow:0 25px 70px rgba(2,6,23,.35);
-            border:1px solid rgba(255,255,255,.3);
-        }
-
-        .hero-card h4{
-            font-weight:950;
-            color:var(--primary);
-            margin-bottom:18px;
-        }
-
-        .stat-line{
-            display:flex;
-            justify-content:space-between;
-            gap:15px;
-            border-bottom:1px solid #e5e7eb;
-            padding:13px 0;
-        }
-
-        .stat-line span{
-            color:var(--muted);
-            font-weight:800;
-        }
-
-        .stat-line strong{
-            color:var(--secondary);
-            text-align:right;
-        }
-
-        .kpi-public{
-            margin-top:-45px;
-            position:relative;
-            z-index:2;
-        }
-
-        .kpi-box{
-            background:#fff;
-            border-radius:22px;
-            padding:22px;
-            box-shadow:0 15px 40px rgba(15,23,42,.12);
-            border:1px solid #e5e7eb;
-            height:100%;
-        }
-
-        .kpi-box span{
-            display:block;
-            color:var(--muted);
-            font-weight:900;
-            margin-bottom:8px;
-            font-size:13px;
-        }
-
-        .kpi-box h3{
-            color:var(--primary);
-            font-weight:950;
-            margin:0;
-        }
-
-        .section-title{
-            font-weight:950;
-            color:var(--primary);
-            margin-bottom:12px;
-        }
-
-        .section-subtitle{
-            color:var(--muted);
-            max-width:800px;
-            margin:0 auto 35px;
-        }
-
-        .premium-card{
-            background:white;
-            border-radius:24px;
-            padding:24px;
-            height:100%;
-            box-shadow:0 12px 32px rgba(15,23,42,.08);
-            border:1px solid #e5e7eb;
-        }
-
-        .premium-card h5{
-            font-weight:950;
-            color:var(--primary);
-            margin-bottom:16px;
-        }
-
-        .mini-item{
-            padding:12px 0;
-            border-bottom:1px dashed #e5e7eb;
-        }
-
-        .mini-item:last-child{
-            border-bottom:none;
-        }
-
-        .mini-item strong{
-            color:var(--secondary);
-        }
-
-        .workflow{
-            background:#fff;
-            padding:70px 0;
-        }
-
-        .step-box{
-            background:#f8fafc;
-            border:1px solid #e5e7eb;
-            padding:22px;
-            border-radius:22px;
-            height:100%;
-            position:relative;
-        }
-
-        .step-number{
-            width:38px;
-            height:38px;
-            border-radius:50%;
-            background:var(--secondary);
-            color:white;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            font-weight:950;
-            margin-bottom:12px;
-        }
-
-        .features{
-            background:linear-gradient(135deg,#06152b,#0f3460);
-            padding:70px 0;
-            color:white;
-        }
-
-        .feature-box{
-            background:rgba(255,255,255,.1);
-            border:1px solid rgba(255,255,255,.18);
-            border-radius:22px;
-            padding:24px;
-            height:100%;
-            font-weight:900;
-            text-align:center;
-            color:white;
-        }
-
-        .feature-box small{
-            display:block;
-            color:#dbeafe;
-            margin-top:8px;
-            font-weight:600;
-        }
-
-        .public-table{
-            width:100%;
-            border-collapse:collapse;
-            font-size:14px;
-        }
-
-        .public-table th{
-            background:#f1f5f9;
-            color:#0f172a;
-            padding:11px;
-        }
-
-        .public-table td{
-            padding:11px;
-            border-bottom:1px solid #e5e7eb;
-        }
-
-        .badge-soft{
-            display:inline-block;
-            padding:6px 10px;
-            border-radius:999px;
-            background:#dbeafe;
-            color:#1e40af;
-            font-weight:900;
-            font-size:12px;
-        }
-
-        .badge-red{
-            background:#fee2e2;
-            color:#991b1b;
-        }
-
-        .badge-green{
-            background:#dcfce7;
-            color:#166534;
-        }
-
-        .cta-section{
-            background:#fff;
-            padding:70px 0;
-        }
-
-        .cta-box{
-            background:linear-gradient(135deg,#fbbf24,#f59e0b);
-            border-radius:30px;
-            padding:36px;
-            color:#111827;
-            box-shadow:0 20px 50px rgba(245,158,11,.25);
-        }
-
-        footer{
-            background:#020617;
-            color:#cbd5e1;
-            text-align:center;
-            padding:24px 10px;
-        }
-
-        @media(max-width:992px){
-            .hero h1{font-size:36px}
-            .hero{padding-top:120px}
-            .kpi-public{margin-top:25px}
-            .navbar .ms-auto{
-                display:flex;
-                gap:6px;
-                flex-wrap:wrap;
-                justify-content:flex-end;
-            }
-        }
-    </style>
 </head>
 <body>
-
-<?php if (!$db instanceof PDO): ?>
-<div style="position:fixed;left:15px;right:15px;bottom:15px;z-index:9999;background:#fff7ed;color:#9a3412;border:1px solid #fdba74;border-radius:14px;padding:12px 16px;font-weight:800;box-shadow:0 10px 30px rgba(0,0,0,.12)">
-    Connexion base de données indisponible : les statistiques publiques sont affichées à zéro. Vérifiez <code>config/database.php</code> sur le serveur.
+<?php if (!$db): ?>
+<div class="database-alert">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    Connexion à la base indisponible : les statistiques sont temporairement affichées à zéro.
 </div>
 <?php endif; ?>
 
-
-<nav class="navbar navbar-expand-lg navbar-dark fixed-top premium-nav">
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top premium-nav" id="mainNav">
     <div class="container">
-        <a class="navbar-brand fw-bold" href="#">
-            cOllect_Pay
-            <span>LUXORIA PUBLIC REVENUE SUITE</span>
+        <a class="navbar-brand" href="#accueil" aria-label="Accueil cOllect_Pay">
+            <span class="brand-mark"><i class="bi bi-shield-check"></i></span>
+            <span class="brand-copy">
+                <strong>cOllect_Pay</strong>
+                <small>LUXORIA PUBLIC REVENUE SUITE</small>
+            </span>
         </a>
 
-        <div class="ms-auto">
-            <a href="modules/inspection/scan_qr.php" class="btn btn-outline-light btn-sm">Vérifier QR</a>
-            <a href="modules/ordonnancement/np_list.php" class="btn btn-warning btn-sm">Consulter NP</a>
-            <a href="login.php" class="btn btn-light btn-sm">Connexion</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#publicNav" aria-controls="publicNav" aria-expanded="false" aria-label="Afficher le menu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="publicNav">
+            <ul class="navbar-nav mx-auto public-menu">
+                <li class="nav-item"><a class="nav-link" href="#situation">Situation</a></li>
+                <li class="nav-item"><a class="nav-link" href="#processus">Processus</a></li>
+                <li class="nav-item"><a class="nav-link" href="#transparence">Transparence</a></li>
+            </ul>
+
+            <div class="nav-actions">
+                <a href="modules/inspection/scan_qr.php" class="btn btn-nav-outline">
+                    <i class="bi bi-qr-code-scan"></i> Vérifier QR
+                </a>
+                <a href="modules/ordonnancement/np_list.php" class="btn btn-nav-soft">
+                    Consulter NP
+                </a>
+                <a href="login.php" class="btn btn-nav-gold">
+                    <i class="bi bi-person-lock"></i> Connexion
+                </a>
+            </div>
         </div>
     </div>
 </nav>
 
-<section class="hero">
+<main>
+<section class="hero" id="accueil">
+    <div class="hero-grid"></div>
+    <div class="hero-orb hero-orb-one"></div>
+    <div class="hero-orb hero-orb-two"></div>
+
     <div class="container position-relative">
         <div class="row align-items-center g-5">
             <div class="col-lg-7">
-                <div class="hero-badge">🔐 Système fiscal sécurisé avec QR Code vérifiable</div>
+                <div class="hero-eyebrow reveal-up">
+                    <span class="pulse-dot"></span>
+                    Guichet fiscal sécurisé, traçable et vérifiable
+                </div>
 
-                <h1>Plateforme digitale de canalisation et maximisation des recettes publiques</h1>
+                <h1 class="reveal-up delay-1">
+                    La recette publique devient
+                    <span>simple, transparente et sécurisée.</span>
+                </h1>
 
-                <p>
-                    cOllect_Pay sécurise toute la chaîne de mobilisation des recettes :
-                    constatation, liquidation, ordonnancement, paiement, apurement,
-                    quittance et contrôle QR anti-fraude.
+                <p class="hero-lead reveal-up delay-2">
+                    cOllect_Pay digitalise toute la chaîne de mobilisation : constatation,
+                    liquidation, ordonnancement, paiement, apurement, quittance et contrôle QR anti-fraude.
                 </p>
 
-                <div class="d-flex flex-wrap gap-2 mt-4">
-                    <a href="modules/ordonnancement/np_list.php" class="btn btn-warning btn-lg">
-                        Effectuer / Suivre un paiement
+                <div class="hero-actions reveal-up delay-3">
+                    <a href="paiement_en_ligne.php" class="btn btn-hero-primary">
+                        <i class="bi bi-credit-card-2-front"></i>
+                        Payer une NP / NPF
                     </a>
-                    <a href="modules/inspection/scan_qr.php" class="btn btn-outline-light btn-lg">
+                    <a href="modules/inspection/scan_qr.php" class="btn btn-hero-secondary">
+                        <i class="bi bi-patch-check"></i>
                         Vérifier un document
                     </a>
-                    <a href="login.php" class="btn btn-light btn-lg">
+                    <a href="login.php" class="btn btn-hero-ghost">
                         Accéder au Guichet Unique
                     </a>
+                </div>
+
+                <div class="trust-row reveal-up delay-4">
+                    <div><i class="bi bi-shield-lock"></i><span>Données sécurisées</span></div>
+                    <div><i class="bi bi-currency-exchange"></i><span>CDF et USD</span></div>
+                    <div><i class="bi bi-phone"></i><span>Mobile Money</span></div>
                 </div>
             </div>
 
             <div class="col-lg-5">
-                <div class="hero-card">
-                    <h4>Recettes réalisées</h4>
-
-                    <div class="stat-line">
-                        <span>Semaine</span>
-                        <strong><?= moneyPublic($totalSemaine) ?></strong>
+                <aside class="revenue-panel reveal-right">
+                    <div class="panel-heading">
+                        <div>
+                            <small>TABLEAU PUBLIC</small>
+                            <h2>Recettes réalisées</h2>
+                        </div>
+                        <span class="live-badge"><span></span> En direct</span>
                     </div>
 
-                    <div class="stat-line">
-                        <span>Mois</span>
-                        <strong><?= moneyPublic($totalMois) ?></strong>
-                    </div>
-
-                    <div class="stat-line">
-                        <span>Année</span>
+                    <div class="revenue-total">
+                        <small>Recettes de l’année</small>
                         <strong><?= moneyPublic($totalAnnee) ?></strong>
                     </div>
 
-                    <div class="stat-line">
-                        <span>Taux de recouvrement</span>
-                        <strong><?= number_format($tauxRecouvrement, 2, ',', ' ') ?> %</strong>
+                    <div class="revenue-stats">
+                        <div>
+                            <span>Semaine</span>
+                            <strong><?= moneyPublic($totalSemaine) ?></strong>
+                        </div>
+                        <div>
+                            <span>Mois</span>
+                            <strong><?= moneyPublic($totalMois) ?></strong>
+                        </div>
                     </div>
-                </div>
+
+                    <div class="recovery-block">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span>Taux de recouvrement</span>
+                            <strong><?= number_format($tauxRecouvrement, 2, ',', ' ') ?> %</strong>
+                        </div>
+                        <div class="progress" role="progressbar" aria-label="Taux de recouvrement" aria-valuenow="<?= min(100, max(0, $tauxRecouvrement)) ?>" aria-valuemin="0" aria-valuemax="100">
+                            <div class="progress-bar" style="width:<?= min(100, max(0, $tauxRecouvrement)) ?>%"></div>
+                        </div>
+                    </div>
+
+                    <a href="paiement_en_ligne.php" class="panel-pay-link">
+                        Commencer un paiement
+                        <i class="bi bi-arrow-up-right"></i>
+                    </a>
+                </aside>
             </div>
         </div>
     </div>
 </section>
 
-<section class="container kpi-public">
-    <div class="row g-4">
-        <div class="col-md-3">
-            <div class="kpi-box">
-                <span>Notes de taxation</span>
-                <h3><?= (int)$totalNT ?></h3>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="kpi-box">
-                <span>Notes de perception</span>
-                <h3><?= (int)$totalNP ?></h3>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="kpi-box">
-                <span>Paiements enregistrés</span>
-                <h3><?= (int)$totalPaiements ?></h3>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="kpi-box">
-                <span>Quittances émises</span>
-                <h3><?= (int)$totalQuittances ?></h3>
-            </div>
-        </div>
-    </div>
-</section>
-
-<section class="container py-5">
-    <div class="text-center">
-        <h2 class="section-title">Situation publique des recettes</h2>
-        <p class="section-subtitle">
-            Aperçu synthétique des recettes constatées, ordonnancées, recouvrées et restant à recouvrer.
-        </p>
-    </div>
-
-    <div class="row g-4">
-        <div class="col-md-3">
-            <div class="premium-card">
-                <h5>Constaté</h5>
-                <h3><?= moneyPublic($totalConstatation) ?></h3>
-                <p class="text-muted mb-0">Montants issus des NT.</p>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="premium-card">
-                <h5>Ordonnancé</h5>
-                <h3><?= moneyPublic($totalOrdonnance) ?></h3>
-                <p class="text-muted mb-0">Montants des NP/NPF.</p>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="premium-card">
-                <h5>Recouvré</h5>
-                <h3><?= moneyPublic($totalRecouvre) ?></h3>
-                <p class="text-muted mb-0">Paiements convertis CDF.</p>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="premium-card">
-                <h5>Solde</h5>
-                <h3><?= moneyPublic($totalSolde) ?></h3>
-                <p class="text-muted mb-0">Reste à recouvrer.</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<section class="workflow">
+<section class="kpi-strip" id="situation">
     <div class="container">
-        <div class="text-center">
-            <h2 class="section-title">Chaîne officielle de traitement</h2>
-            <p class="section-subtitle">
-                Chaque document est sécurisé, traçable et vérifiable par QR Code.
-            </p>
+        <div class="row g-3">
+            <div class="col-6 col-lg-3">
+                <article class="kpi-card">
+                    <span class="kpi-icon blue"><i class="bi bi-file-earmark-text"></i></span>
+                    <div><small>Notes de taxation</small><strong><?= (int) $totalNT ?></strong></div>
+                </article>
+            </div>
+            <div class="col-6 col-lg-3">
+                <article class="kpi-card">
+                    <span class="kpi-icon violet"><i class="bi bi-receipt"></i></span>
+                    <div><small>Notes de perception</small><strong><?= (int) $totalNP ?></strong></div>
+                </article>
+            </div>
+            <div class="col-6 col-lg-3">
+                <article class="kpi-card">
+                    <span class="kpi-icon green"><i class="bi bi-wallet2"></i></span>
+                    <div><small>Paiements enregistrés</small><strong><?= (int) $totalPaiements ?></strong></div>
+                </article>
+            </div>
+            <div class="col-6 col-lg-3">
+                <article class="kpi-card">
+                    <span class="kpi-icon gold"><i class="bi bi-patch-check"></i></span>
+                    <div><small>Quittances émises</small><strong><?= (int) $totalQuittances ?></strong></div>
+                </article>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section section-light">
+    <div class="container">
+        <div class="section-heading centered">
+            <span class="section-kicker">TRANSPARENCE FINANCIÈRE</span>
+            <h2>Situation synthétique des recettes</h2>
+            <p>Une lecture claire des montants constatés, ordonnancés, recouvrés et restant à recouvrer.</p>
         </div>
 
         <div class="row g-4">
-            <div class="col-md-2 col-6">
-                <div class="step-box">
-                    <div class="step-number">1</div>
-                    <h6>NT</h6>
-                    <small>Constatation de l’assiette.</small>
-                </div>
+            <?php
+            $summaryCards = [
+                ['label' => 'Constaté', 'value' => moneyPublic($totalConstatation), 'description' => 'Montants issus des notes de taxation.', 'icon' => 'bi-search', 'tone' => 'blue'],
+                ['label' => 'Ordonnancé', 'value' => moneyPublic($totalOrdonnance), 'description' => 'Montants établis sur les NP et NPF.', 'icon' => 'bi-file-earmark-check', 'tone' => 'violet'],
+                ['label' => 'Recouvré', 'value' => moneyPublic($totalRecouvre), 'description' => 'Paiements validés et convertis en CDF.', 'icon' => 'bi-graph-up-arrow', 'tone' => 'green'],
+                ['label' => 'À recouvrer', 'value' => moneyPublic($totalSolde), 'description' => 'Solde restant sur les notes non soldées.', 'icon' => 'bi-hourglass-split', 'tone' => 'gold'],
+            ];
+            foreach ($summaryCards as $card):
+            ?>
+            <div class="col-md-6 col-xl-3">
+                <article class="summary-card reveal-card">
+                    <span class="summary-icon <?= safePublic($card['tone']) ?>"><i class="bi <?= safePublic($card['icon']) ?>"></i></span>
+                    <small><?= safePublic($card['label']) ?></small>
+                    <h3><?= safePublic($card['value']) ?></h3>
+                    <p><?= safePublic($card['description']) ?></p>
+                </article>
             </div>
-
-            <div class="col-md-2 col-6">
-                <div class="step-box">
-                    <div class="step-number">2</div>
-                    <h6>ND</h6>
-                    <small>Liquidation officielle.</small>
-                </div>
-            </div>
-
-            <div class="col-md-2 col-6">
-                <div class="step-box">
-                    <div class="step-number">3</div>
-                    <h6>NP / NPF</h6>
-                    <small>Ordonnancement.</small>
-                </div>
-            </div>
-
-            <div class="col-md-2 col-6">
-                <div class="step-box">
-                    <div class="step-number">4</div>
-                    <h6>Paiement</h6>
-                    <small>Banque, mobile money, virement.</small>
-                </div>
-            </div>
-
-            <div class="col-md-2 col-6">
-                <div class="step-box">
-                    <div class="step-number">5</div>
-                    <h6>Apurement</h6>
-                    <small>Solde et validation.</small>
-                </div>
-            </div>
-
-            <div class="col-md-2 col-6">
-                <div class="step-box">
-                    <div class="step-number">6</div>
-                    <h6>Quittance</h6>
-                    <small>Acquit libératoire.</small>
-                </div>
-            </div>
+            <?php endforeach; ?>
         </div>
     </div>
 </section>
 
-<section class="container py-5">
-    <div class="row g-4">
-
-        <div class="col-lg-4">
-            <div class="premium-card border-danger">
-                <h5>NP / NPF échues</h5>
-
-                <?php foreach($npDefaillantes as $np): ?>
-                    <div class="mini-item">
-                        <span class="badge-soft badge-red"><?= strtoupper(safePublic($np['type_np'])) ?></span><br>
-                        <strong><?= safePublic($np['numero_np']) ?></strong><br>
-                        Solde : <?= moneyPublic($np['solde_restant']) ?><br>
-                        Échéance : <?= safePublic($np['date_echeance']) ?>
-                    </div>
-                <?php endforeach; ?>
-
-                <?php if(empty($npDefaillantes)): ?>
-                    <p class="text-muted mb-0">Aucune NP échue pour le moment.</p>
-                <?php endif; ?>
-            </div>
-        </div>
-
-        <div class="col-lg-4">
-            <div class="premium-card border-success">
-                <h5>Dernières quittances</h5>
-
-                <?php foreach($notesPayees as $n): ?>
-                    <div class="mini-item">
-                        <span class="badge-soft badge-green">PAYÉE</span><br>
-                        NP : <strong><?= safePublic($n['numero_np']) ?></strong><br>
-                        QT : <?= safePublic($n['numero_quittance']) ?><br>
-                        <?= moneyPublic($n['montant_acquitte']) ?>
-                    </div>
-                <?php endforeach; ?>
-
-                <?php if(empty($notesPayees)): ?>
-                    <p class="text-muted mb-0">Aucune quittance disponible.</p>
-                <?php endif; ?>
-            </div>
-        </div>
-
-        <div class="col-lg-4">
-            <div class="premium-card border-warning">
-                <h5>Notes non soldées</h5>
-
-                <?php foreach($notesNonPayees as $n): ?>
-                    <div class="mini-item">
-                        <span class="badge-soft"><?= strtoupper(safePublic($n['type_np'])) ?></span><br>
-                        <strong><?= safePublic($n['numero_np']) ?></strong><br>
-                        Solde : <?= moneyPublic($n['solde_restant']) ?><br>
-                        Échéance : <?= safePublic($n['date_echeance']) ?>
-                    </div>
-                <?php endforeach; ?>
-
-                <?php if(empty($notesNonPayees)): ?>
-                    <p class="text-muted mb-0">Toutes les notes sont soldées.</p>
-                <?php endif; ?>
-            </div>
-        </div>
-
-    </div>
-</section>
-
-<section class="container pb-5">
-    <div class="premium-card">
-        <h5>Derniers paiements enregistrés</h5>
-
-        <div class="table-responsive">
-            <table class="public-table">
-                <tr>
-                    <th>Date</th>
-                    <th>NP / NPF</th>
-                    <th>Référence</th>
-                    <th>Devise</th>
-                    <th>Montant CDF</th>
-                </tr>
-
-                <?php foreach($derniersPaiements as $p): ?>
-                    <tr>
-                        <td><?= safePublic(date('d/m/Y', strtotime($p['date_paiement']))) ?></td>
-                        <td><strong><?= safePublic($p['numero_np']) ?></strong></td>
-                        <td><?= safePublic($p['reference_transaction']) ?></td>
-                        <td><?= safePublic($p['devise']) ?></td>
-                        <td><strong><?= moneyPublic($p['montant_converti_cdf']) ?></strong></td>
-                    </tr>
-                <?php endforeach; ?>
-
-                <?php if(empty($derniersPaiements)): ?>
-                    <tr>
-                        <td colspan="5">Aucun paiement enregistré.</td>
-                    </tr>
-                <?php endif; ?>
-            </table>
-        </div>
-    </div>
-</section>
-
-<section class="features">
+<section class="online-payment-banner">
     <div class="container">
-        <h2 class="text-center mb-5 fw-bold">Fonctionnalités clés</h2>
+        <div class="payment-banner-inner">
+            <div class="payment-banner-copy">
+                <span class="section-kicker light">NOUVEAU SERVICE</span>
+                <h2>Payez votre NP ou NPF en ligne</h2>
+                <p>
+                    Saisissez le numéro de la note, vérifiez le solde puis choisissez votre mode de paiement :
+                    espèces au guichet, carte bancaire, virement ou Mobile Money.
+                </p>
+                <div class="payment-chips">
+                    <span><i class="bi bi-cash-coin"></i> Espèces</span>
+                    <span><i class="bi bi-credit-card"></i> Carte</span>
+                    <span><i class="bi bi-bank"></i> Banque</span>
+                    <span><i class="bi bi-phone"></i> Mobile Money</span>
+                    <span><i class="bi bi-currency-exchange"></i> CDF / USD</span>
+                </div>
+            </div>
+            <div class="payment-banner-action">
+                <div class="secure-seal"><i class="bi bi-shield-check"></i></div>
+                <a href="paiement_en_ligne.php" class="btn btn-payment-banner">
+                    Rechercher ma NP / NPF
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+                <small>Consultation sécurisée avant toute opération.</small>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section workflow-section" id="processus">
+    <div class="container">
+        <div class="section-heading centered">
+            <span class="section-kicker">TRAITEMENT OFFICIEL</span>
+            <h2>Une chaîne complète, de la taxation à la quittance</h2>
+            <p>Chaque étape est journalisée, sécurisée et vérifiable par QR Code.</p>
+        </div>
+
+        <div class="workflow-line">
+            <?php
+            $steps = [
+                ['NT', 'Constatation', 'Détermination de l’assiette.', 'bi-clipboard-data'],
+                ['ND', 'Liquidation', 'Calcul officiel du montant.', 'bi-calculator'],
+                ['NP / NPF', 'Ordonnancement', 'Émission de l’ordre de paiement.', 'bi-file-earmark-text'],
+                ['Paiement', 'Encaissement', 'Banque, carte, cash ou mobile.', 'bi-wallet2'],
+                ['Apurement', 'Validation', 'Mise à jour du solde.', 'bi-check2-circle'],
+                ['Quittance', 'Acquit libératoire', 'Document final sécurisé.', 'bi-patch-check'],
+            ];
+            foreach ($steps as $index => $step):
+            ?>
+            <article class="workflow-step reveal-card">
+                <div class="step-top">
+                    <span class="step-number"><?= $index + 1 ?></span>
+                    <i class="bi <?= safePublic($step[3]) ?>"></i>
+                </div>
+                <small><?= safePublic($step[0]) ?></small>
+                <h3><?= safePublic($step[1]) ?></h3>
+                <p><?= safePublic($step[2]) ?></p>
+            </article>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+
+<section class="section transparency-section" id="transparence">
+    <div class="container">
+        <div class="section-heading split-heading">
+            <div>
+                <span class="section-kicker">DONNÉES PUBLIQUES</span>
+                <h2>Suivi des notes et quittances</h2>
+            </div>
+            <p>Les dernières informations disponibles sont présentées sans exposer les données sensibles des contribuables.</p>
+        </div>
 
         <div class="row g-4">
-            <div class="col-md-3">
-                <div class="feature-box">
-                    QR Code sécurisé
-                    <small>Chaque document peut être vérifié.</small>
-                </div>
+            <div class="col-lg-4">
+                <article class="public-list-card danger-card">
+                    <div class="list-card-header">
+                        <div><span class="list-icon"><i class="bi bi-calendar-x"></i></span><h3>NP / NPF échues</h3></div>
+                        <span class="list-count"><?= count($npDefaillantes) ?></span>
+                    </div>
+                    <div class="public-items">
+                    <?php foreach ($npDefaillantes as $np): ?>
+                        <div class="public-item">
+                            <div class="item-top"><span class="status-pill danger"><?= strtoupper(safePublic($np['type_np'])) ?></span><small><?= safePublic($np['date_echeance']) ?></small></div>
+                            <strong><?= safePublic($np['numero_np']) ?></strong>
+                            <span>Solde : <?= moneyPublic($np['solde_restant']) ?></span>
+                        </div>
+                    <?php endforeach; ?>
+                    <?php if (!$npDefaillantes): ?><p class="empty-state">Aucune note échue pour le moment.</p><?php endif; ?>
+                    </div>
+                </article>
             </div>
 
-            <div class="col-md-3">
-                <div class="feature-box">
-                    Paiement multi-devise
-                    <small>CDF / USD avec taux du jour.</small>
-                </div>
+            <div class="col-lg-4">
+                <article class="public-list-card success-card">
+                    <div class="list-card-header">
+                        <div><span class="list-icon"><i class="bi bi-patch-check"></i></span><h3>Dernières quittances</h3></div>
+                        <span class="list-count"><?= count($notesPayees) ?></span>
+                    </div>
+                    <div class="public-items">
+                    <?php foreach ($notesPayees as $note): ?>
+                        <div class="public-item">
+                            <div class="item-top"><span class="status-pill success">PAYÉE</span><small><?= !empty($note['date_emission']) ? safePublic(date('d/m/Y', strtotime($note['date_emission']))) : '-' ?></small></div>
+                            <strong><?= safePublic($note['numero_np']) ?></strong>
+                            <span><?= safePublic($note['numero_quittance']) ?> · <?= moneyPublic($note['montant_acquitte']) ?></span>
+                        </div>
+                    <?php endforeach; ?>
+                    <?php if (!$notesPayees): ?><p class="empty-state">Aucune quittance disponible.</p><?php endif; ?>
+                    </div>
+                </article>
             </div>
 
-            <div class="col-md-3">
-                <div class="feature-box">
-                    Apurement automatique
-                    <small>Solde, statut et quittance.</small>
-                </div>
-            </div>
-
-            <div class="col-md-3">
-                <div class="feature-box">
-                    Audit anti-fraude
-                    <small>Traçabilité et inspection QR.</small>
-                </div>
+            <div class="col-lg-4">
+                <article class="public-list-card warning-card">
+                    <div class="list-card-header">
+                        <div><span class="list-icon"><i class="bi bi-hourglass-split"></i></span><h3>Notes non soldées</h3></div>
+                        <span class="list-count"><?= count($notesNonPayees) ?></span>
+                    </div>
+                    <div class="public-items">
+                    <?php foreach ($notesNonPayees as $note): ?>
+                        <div class="public-item">
+                            <div class="item-top"><span class="status-pill warning"><?= strtoupper(safePublic($note['type_np'])) ?></span><small><?= safePublic($note['date_echeance']) ?></small></div>
+                            <strong><?= safePublic($note['numero_np']) ?></strong>
+                            <span>Solde : <?= moneyPublic($note['solde_restant']) ?></span>
+                        </div>
+                    <?php endforeach; ?>
+                    <?php if (!$notesNonPayees): ?><p class="empty-state">Toutes les notes sont soldées.</p><?php endif; ?>
+                    </div>
+                </article>
             </div>
         </div>
     </div>
 </section>
 
-<section class="cta-section">
+<section class="section payments-table-section">
     <div class="container">
-        <div class="cta-box">
-            <div class="row align-items-center g-4">
-                <div class="col-lg-8">
-                    <h2 class="fw-bold">Guichet Unique Digital des Recettes Publiques</h2>
-                    <p class="mb-0">
-                        Accédez au système pour créer les documents, suivre les paiements,
-                        apurer les notes et produire les quittances sécurisées.
-                    </p>
+        <article class="payments-table-card">
+            <div class="table-card-heading">
+                <div>
+                    <span class="section-kicker">TRANSACTIONS RÉCENTES</span>
+                    <h2>Derniers paiements enregistrés</h2>
                 </div>
-
-                <div class="col-lg-4 text-lg-end">
-                    <a href="login.php" class="btn btn-dark btn-lg">Connexion au système</a>
-                </div>
+                <a href="modules/ordonnancement/np_list.php">Consulter les NP <i class="bi bi-arrow-right"></i></a>
             </div>
+
+            <div class="table-responsive">
+                <table class="public-table">
+                    <thead><tr><th>Date</th><th>NP / NPF</th><th>Référence</th><th>Devise</th><th class="text-end">Montant CDF</th></tr></thead>
+                    <tbody>
+                    <?php foreach ($derniersPaiements as $payment): ?>
+                        <tr>
+                            <td><?= !empty($payment['date_paiement']) ? safePublic(date('d/m/Y', strtotime($payment['date_paiement']))) : '-' ?></td>
+                            <td><strong><?= safePublic($payment['numero_np']) ?></strong></td>
+                            <td><span class="reference-tag"><?= safePublic($payment['reference_transaction']) ?></span></td>
+                            <td><?= safePublic($payment['devise']) ?></td>
+                            <td class="text-end"><strong><?= moneyPublic($payment['montant_converti_cdf']) ?></strong></td>
+                        </tr>
+                    <?php endforeach; ?>
+                    <?php if (!$derniersPaiements): ?><tr><td colspan="5" class="empty-table">Aucun paiement enregistré.</td></tr><?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </article>
+    </div>
+</section>
+
+<section class="features-section">
+    <div class="container">
+        <div class="section-heading centered dark-heading">
+            <span class="section-kicker light">CONFIANCE NUMÉRIQUE</span>
+            <h2>Conçu pour protéger chaque franc mobilisé</h2>
+            <p>Des outils orientés sécurité, traçabilité, transparence et performance.</p>
+        </div>
+        <div class="row g-4">
+            <?php
+            $features = [
+                ['bi-qr-code-scan', 'QR Code sécurisé', 'Vérification instantanée de l’authenticité des documents.'],
+                ['bi-currency-exchange', 'Paiement multi-devise', 'Opérations en CDF et USD selon les règles configurées.'],
+                ['bi-arrow-repeat', 'Apurement automatique', 'Mise à jour contrôlée du solde, du statut et de la quittance.'],
+                ['bi-fingerprint', 'Audit anti-fraude', 'Traçabilité des actions et inspection des documents.'],
+            ];
+            foreach ($features as $feature):
+            ?>
+            <div class="col-md-6 col-xl-3">
+                <article class="feature-card reveal-card">
+                    <span><i class="bi <?= safePublic($feature[0]) ?>"></i></span>
+                    <h3><?= safePublic($feature[1]) ?></h3>
+                    <p><?= safePublic($feature[2]) ?></p>
+                </article>
+            </div>
+            <?php endforeach; ?>
         </div>
     </div>
 </section>
 
-<footer>
-    <p class="mb-0">© <?= date('Y') ?> cOllect_Pay — Système digital de gestion et maximisation des recettes publiques</p>
+<section class="final-cta">
+    <div class="container">
+        <div class="final-cta-inner">
+            <div>
+                <span class="section-kicker">GUICHET UNIQUE DIGITAL</span>
+                <h2>Centralisez le cycle complet des recettes publiques</h2>
+                <p>Créez les documents, suivez les paiements, apurez les notes et produisez des quittances sécurisées.</p>
+            </div>
+            <div class="final-cta-actions">
+                <a href="paiement_en_ligne.php" class="btn btn-dark-action"><i class="bi bi-credit-card"></i> Paiement en ligne</a>
+                <a href="login.php" class="btn btn-gold-action">Connexion au système <i class="bi bi-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
+</section>
+</main>
+
+<footer class="public-footer">
+    <div class="container">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <span class="brand-mark"><i class="bi bi-shield-check"></i></span>
+                <div><strong>cOllect_Pay</strong><small>Système digital des recettes publiques</small></div>
+            </div>
+            <p>© <?= date('Y') ?> cOllect_Pay. Tous droits réservés.</p>
+            <div class="footer-links">
+                <a href="modules/inspection/scan_qr.php">Vérifier QR</a>
+                <a href="modules/ordonnancement/np_list.php">Consulter NP</a>
+                <a href="login.php">Connexion</a>
+            </div>
+        </div>
+    </div>
 </footer>
 
-<?php require_once __DIR__ . "/verification_widget.php"; ?>
+<?php require_once __DIR__ . '/verification_widget.php'; ?>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/public.js"></script>
 </body>
 </html>
