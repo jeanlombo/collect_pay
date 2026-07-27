@@ -17,26 +17,29 @@ RUN apt-get update \
         mbstring \
         zip \
         intl \
-    \
-    # Désactiver tous les MPM Apache pour éviter les conflits
-    && rm -f /etc/apache2/mods-enabled/mpm_event.load \
-             /etc/apache2/mods-enabled/mpm_event.conf \
-             /etc/apache2/mods-enabled/mpm_worker.load \
-             /etc/apache2/mods-enabled/mpm_worker.conf \
-             /etc/apache2/mods-enabled/mpm_prefork.load \
-             /etc/apache2/mods-enabled/mpm_prefork.conf \
-    \
-    # Activer uniquement le MPM compatible avec PHP Apache
+    && rm -f \
+        /etc/apache2/mods-enabled/mpm_event.load \
+        /etc/apache2/mods-enabled/mpm_event.conf \
+        /etc/apache2/mods-enabled/mpm_worker.load \
+        /etc/apache2/mods-enabled/mpm_worker.conf \
+        /etc/apache2/mods-enabled/mpm_prefork.load \
+        /etc/apache2/mods-enabled/mpm_prefork.conf \
     && a2enmod mpm_prefork \
-    && a2enmod rewrite headers expires \
+    && a2enmod rewrite \
+    && a2enmod headers \
+    && a2enmod expires \
+    && a2enmod setenvif \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /var/www/html/collect_pay
 
 COPY . /var/www/html/collect_pay
 
-COPY docker/apache-vhost.conf /etc/apache2/sites-available/000-default.conf
-COPY docker/entrypoint.sh /usr/local/bin/collect-pay-entrypoint
+COPY docker/apache-vhost.conf \
+    /etc/apache2/sites-available/000-default.conf
+
+COPY docker/entrypoint.sh \
+    /usr/local/bin/collect-pay-entrypoint
 
 RUN chmod +x /usr/local/bin/collect-pay-entrypoint \
     && mkdir -p \
@@ -45,6 +48,7 @@ RUN chmod +x /usr/local/bin/collect-pay-entrypoint \
         /var/www/html/collect_pay/assets/qr_codes \
     && chown -R www-data:www-data /var/www/html/collect_pay \
     && find /var/www/html/collect_pay -type d -exec chmod 755 {} \; \
+    && find /var/www/html/collect_pay -type f -exec chmod 644 {} \; \
     && chmod -R 775 \
         /var/www/html/collect_pay/uploads \
         /var/www/html/collect_pay/assets/uploads \
