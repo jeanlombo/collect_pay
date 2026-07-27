@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Carte interactive | cOllect_Pay Mobile</title>
+
+<link rel="manifest" href="manifest.json?v=150">
+<link rel="stylesheet" href="assets/css/app.css?v=150">
+<meta name="theme-color" content="#0f3460">
+
+<style>
+.map-head{
+    background:linear-gradient(135deg,#06152b,#0f3460);
+    color:white;
+    padding:22px;
+    border-radius:0 0 24px 24px;
+}
+.map-card{
+    background:#fff;
+    border:1px solid #e5e7eb;
+    border-radius:20px;
+    padding:16px;
+    margin-bottom:14px;
+    box-shadow:0 8px 22px rgba(15,23,42,.08);
+}
+.map-actions{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+}
+#gpsMap{
+    position:relative;
+    height:520px;
+    background:
+        radial-gradient(circle at 20% 25%, #dbeafe 0, #dbeafe 90px, transparent 92px),
+        radial-gradient(circle at 75% 35%, #dcfce7 0, #dcfce7 110px, transparent 112px),
+        radial-gradient(circle at 45% 75%, #fef3c7 0, #fef3c7 120px, transparent 122px),
+        linear-gradient(135deg,#eff6ff,#f8fafc);
+    border:1px solid #cbd5e1;
+    border-radius:22px;
+    overflow:hidden;
+}
+.map-grid-line{
+    position:absolute;
+    inset:0;
+    background-image:
+        linear-gradient(rgba(15,23,42,.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(15,23,42,.06) 1px, transparent 1px);
+    background-size:40px 40px;
+}
+.map-zone{
+    position:absolute;
+    border:2px dashed rgba(15,52,96,.35);
+    border-radius:50%;
+    transform:translate(-50%,-50%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    color:#0f3460;
+    font-weight:900;
+    font-size:12px;
+    background:rgba(255,255,255,.25);
+}
+.map-point{
+    position:absolute;
+    width:22px;
+    height:22px;
+    border-radius:999px;
+    transform:translate(-50%,-50%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:white;
+    font-size:11px;
+    font-weight:1000;
+    border:3px solid white;
+    box-shadow:0 8px 18px rgba(15,23,42,.30);
+    cursor:pointer;
+}
+.map-point.sync{background:#16a34a}
+.map-point.pending{background:#f97316}
+.map-point.no-gps{background:#dc2626}
+.map-popup{
+    position:absolute;
+    background:white;
+    border:1px solid #e5e7eb;
+    border-radius:16px;
+    padding:12px;
+    width:250px;
+    box-shadow:0 14px 36px rgba(15,23,42,.22);
+    z-index:50;
+    display:none;
+    font-size:13px;
+}
+.map-popup strong{color:#0f3460}
+.legend{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    font-size:13px;
+    font-weight:800;
+}
+.dot{
+    display:inline-block;
+    width:12px;
+    height:12px;
+    border-radius:50%;
+    margin-right:5px;
+}
+.green{background:#16a34a}
+.orange{background:#f97316}
+.red{background:#dc2626}
+.table-map{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+}
+.table-map th,.table-map td{
+    border:1px solid #e5e7eb;
+    padding:8px;
+}
+.table-map th{
+    background:#f8fafc;
+    color:#0f3460;
+    text-align:left;
+}
+@media(max-width:700px){
+    #gpsMap{height:430px}
+    .map-popup{width:210px}
+}
+</style>
+</head>
+
+<body>
+
+<div class="map-head">
+    <h1>🗺️ Carte interactive</h1>
+    <p>Visualisation GPS des recettes publiques</p>
+</div>
+
+<div class="container">
+
+    <div class="map-card">
+        <div class="map-actions">
+            <button class="btn-primary" onclick="renderInteractiveMap()">Actualiser</button>
+            <button class="btn-green" onclick="window.print()">🖨 Imprimer</button>
+            <a class="btn-primary" href="dashboard.html?v=150">Retour Dashboard</a>
+        </div>
+        <br>
+        <div class="legend">
+            <span><i class="dot green"></i>Synchronisée</span>
+            <span><i class="dot orange"></i>En attente</span>
+            <span><i class="dot red"></i>Sans GPS</span>
+        </div>
+    </div>
+
+    <div class="map-card">
+        <div id="gpsMap">
+            <div class="map-grid-line"></div>
+            <div id="mapPopup" class="map-popup"></div>
+        </div>
+    </div>
+
+    <div id="mapStats" class="map-card">
+        Chargement...
+    </div>
+
+</div>
+
+<script src="assets/js/indexeddb.js?v=150"></script>
+<script src="assets/js/auth.js?v=150"></script>
+<script src="assets/js/carte_interactive.js?v=150"></script>
+
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./service-worker.js?v=150');
+}
+</script>
+
+</body>
+</html>

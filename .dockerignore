@@ -1,0 +1,10 @@
+.git
+.gitignore
+.DS_Store
+._*
+*.zip
+*.rar
+.env
+.env.*
+Dockerfile.local
+README_RAILWAY_LOCAL.md

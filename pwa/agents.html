@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agents locaux | cOllect_Pay Mobile</title>
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="assets/css/app.css">
+<meta name="theme-color" content="#0f3460">
+
+<style>
+.agent-head{background:linear-gradient(135deg,#06152b,#0f3460);color:white;padding:22px;border-radius:0 0 24px 24px}
+.agent-card{background:white;border:1px solid #e5e7eb;border-radius:20px;padding:16px;margin-bottom:14px;box-shadow:0 8px 22px rgba(15,23,42,.08)}
+.agent-item{border:1px solid #e5e7eb;border-radius:16px;padding:12px;margin-bottom:10px;background:#f8fafc}
+</style>
+</head>
+
+<body>
+
+<div class="agent-head">
+    <h1>👥 Agents locaux</h1>
+    <p>Gestion des profils enregistrés sur ce téléphone</p>
+</div>
+
+<div class="container">
+
+    <div class="agent-card">
+        <a class="btn-primary" href="index.html">Retour</a>
+        <button class="btn-gold" onclick="renderLocalAgents()">Actualiser</button>
+    </div>
+
+    <div class="agent-card">
+        <h3>Agent actuellement connecté</h3>
+        <div id="currentAgentBox">Chargement...</div>
+    </div>
+
+    <div class="agent-card">
+        <h3>Profils agents enregistrés</h3>
+        <div id="agentsList">Chargement...</div>
+    </div>
+
+</div>
+
+<script src="assets/js/indexeddb.js?v=60"></script>
+<script src="assets/js/auth.js?v=60"></script>
+<script src="assets/js/agents.js?v=60"></script>
+
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./service-worker.js');
+}
+</script>
+
+</body>
+</html>

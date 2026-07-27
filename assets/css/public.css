@@ -1,0 +1,85 @@
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #f4f7fb;
+    color: #1f2937;
+}
+
+.premium-nav {
+    background: linear-gradient(90deg, #06152b, #0f3460);
+    box-shadow: 0 10px 30px rgba(0,0,0,.2);
+}
+
+.hero {
+    min-height: 92vh;
+    background: linear-gradient(135deg, #06152b, #123b73);
+    color: white;
+    display: flex;
+    align-items: center;
+    padding-top: 90px;
+}
+
+.hero h1 {
+    font-size: 48px;
+    font-weight: 900;
+    line-height: 1.1;
+}
+
+.hero p {
+    font-size: 19px;
+    margin: 25px 0;
+    color: #dbeafe;
+}
+
+.hero-card {
+    background: white;
+    color: #111827;
+    padding: 30px;
+    border-radius: 24px;
+    box-shadow: 0 25px 60px rgba(0,0,0,.25);
+}
+
+.stat-line {
+    display: flex;
+    justify-content: space-between;
+    padding: 16px 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.stat-line strong {
+    color: #0f3460;
+}
+
+.premium-card {
+    background: white;
+    border-radius: 22px;
+    padding: 25px;
+    min-height: 330px;
+    box-shadow: 0 15px 35px rgba(0,0,0,.08);
+    border-top: 6px solid #0f3460;
+}
+
+.premium-card h5 {
+    font-weight: 800;
+    margin-bottom: 20px;
+}
+
+.features {
+    background: #ffffff;
+    padding: 70px 0;
+}
+
+.feature-box {
+    background: linear-gradient(135deg, #f8fafc, #e0ecff);
+    padding: 28px;
+    border-radius: 20px;
+    font-weight: 800;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,.08);
+}
+
+footer {
+    background: #06152b;
+    color: white;
+    text-align: center;
+    padding: 25px;
+}

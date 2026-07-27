@@ -1,0 +1,10 @@
+{
+  "name": "cOllect_Pay Offline",
+  "short_name": "cOllectPay",
+  "start_url": "/collect_pay/pwa/index.html",
+  "display": "standalone",
+  "background_color": "#06152b",
+  "theme_color": "#0f3460",
+  "orientation": "portrait",
+  "icons": []
+}

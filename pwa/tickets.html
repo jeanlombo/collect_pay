@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Historique Tickets | cOllect_Pay Offline</title>
+<link rel="stylesheet" href="assets/css/app.css">
+
+<style>
+.ticket-card{
+    background:white;
+    border:1px solid #e5e7eb;
+    border-radius:18px;
+    padding:14px;
+    margin-bottom:12px;
+    box-shadow:0 8px 22px rgba(15,23,42,.08);
+}
+.ticket-card strong{color:#0f3460}
+.ticket-actions{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-top:10px;
+}
+.ticket-actions button{
+    padding:9px 11px;
+    font-size:13px;
+}
+.search-box{
+    background:white;
+    border-radius:18px;
+    padding:14px;
+    margin-bottom:14px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <h1>🎫 Historique des tickets</h1>
+    <p>Réimpression et consultation des tickets locaux</p>
+</div>
+
+<div class="container">
+
+    <div class="search-box">
+        <label>Rechercher</label>
+        <input id="searchTicket" placeholder="Nom, plaque, ticket..." oninput="renderTickets()">
+
+        <br><br>
+
+        <a class="btn-gold" href="index.html">Retour menu</a>
+    </div>
+
+    <div id="ticketsList">Chargement...</div>
+
+</div>
+
+<script src="assets/js/indexeddb.js"></script>
+<script src="assets/js/ticket.js"></script>
+<script src="assets/js/tickets.js"></script>
+</body>
+</html>

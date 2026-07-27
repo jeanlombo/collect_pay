@@ -1,0 +1,3 @@
+<?php $page_title="Portail de vérification"; require_once __DIR__."/header.php"; ?>
+<div class="card"><h2>Vérifier l’authenticité d’un document</h2><p>Ce portail permet aux banques, administrations, contribuables et auditeurs de vérifier si un document existe réellement dans cOllect_Pay.</p><div class="hero-grid"><a class="hero-action" href="rechercher.php"><span>🔎</span><strong>Recherche par numéro</strong>Saisir le type et le numéro du document.</a><a class="hero-action" href="scanner.php"><span>📷</span><strong>Scanner QR Code</strong>Utiliser la caméra du téléphone ou du PC.</a><a class="hero-action" href="historique.php"><span>📚</span><strong>Historique</strong>Consulter les vérifications enregistrées.</a></div></div>
+<?php require_once __DIR__."/footer.php"; ?>

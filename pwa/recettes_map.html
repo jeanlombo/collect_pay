@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cartographie des recettes | cOllect_Pay Mobile</title>
+
+<link rel="manifest" href="manifest.json?v=140">
+<link rel="stylesheet" href="assets/css/app.css?v=140">
+<meta name="theme-color" content="#0f3460">
+
+<style>
+.map-head{
+    background:linear-gradient(135deg,#06152b,#0f3460);
+    color:white;
+    padding:22px;
+    border-radius:0 0 24px 24px;
+}
+.map-card{
+    background:#fff;
+    border:1px solid #e5e7eb;
+    border-radius:20px;
+    padding:16px;
+    margin-bottom:14px;
+    box-shadow:0 8px 22px rgba(15,23,42,.08);
+}
+.zone-card{
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    border-radius:16px;
+    padding:14px;
+    margin-bottom:10px;
+}
+.zone-card strong{
+    color:#0f3460;
+    font-size:18px;
+}
+.zone-card span{
+    color:#64748b;
+    font-weight:800;
+}
+.bar-wrap-map{
+    background:#e5e7eb;
+    border-radius:999px;
+    height:14px;
+    overflow:hidden;
+    margin-top:8px;
+}
+.bar-fill-map{
+    height:14px;
+    background:linear-gradient(90deg,#0f3460,#16a34a);
+}
+.table-map{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+}
+.table-map th,.table-map td{
+    border:1px solid #e5e7eb;
+    padding:8px;
+}
+.table-map th{
+    background:#f8fafc;
+    color:#0f3460;
+    text-align:left;
+}
+.map-actions{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+}
+</style>
+</head>
+
+<body>
+
+<div class="map-head">
+    <h1>🗺️ Cartographie des recettes</h1>
+    <p>Province de la Tshopo — Analyse locale par zone de perception</p>
+</div>
+
+<div class="container">
+
+    <div class="map-card">
+        <div class="map-actions">
+            <button class="btn-primary" onclick="renderRecettesMap()">Actualiser</button>
+            <button class="btn-green" onclick="window.print()">🖨 Imprimer</button>
+            <a class="btn-primary" href="dashboard.html">Retour Dashboard</a>
+        </div>
+    </div>
+
+    <div id="mapContent" class="map-card">
+        Chargement...
+    </div>
+
+</div>
+
+<script src="assets/js/indexeddb.js?v=140"></script>
+<script src="assets/js/auth.js?v=140"></script>
+<script src="assets/js/recettes_map.js?v=140"></script>
+
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./service-worker.js?v=140');
+}
+</script>
+
+</body>
+</html>

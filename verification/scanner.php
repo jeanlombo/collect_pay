@@ -1,0 +1,3 @@
+<?php $page_title="Scanner QR Code"; require_once __DIR__."/header.php"; ?>
+<div class="card"><h2>Scanner QR Code</h2><p>Première version : collez ici le numéro lu dans le QR Code. Le scan caméra sera ajouté à l’étape suivante.</p><form method="GET" action="resultat.php" class="form"><input type="hidden" name="type_document" value="ALL"><div style="grid-column:span 2"><label>Résultat QR / Numéro document</label><input name="numero_document" placeholder="Saisissez le numéro du document" required></div><div style="align-self:end"><button type="submit">Vérifier</button></div></form></div>
+<?php require_once __DIR__."/footer.php"; ?>

@@ -1,0 +1,1 @@
+<div class="footer">cOllect_Pay — Service public de vérification documentaire sécurisée</div></div></body></html>

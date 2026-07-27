@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sauvegarde locale | cOllect_Pay Mobile</title>
+
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="assets/css/app.css">
+<meta name="theme-color" content="#0f3460">
+
+<style>
+.header-backup{background:linear-gradient(135deg,#06152b,#0f3460);color:white;padding:22px;border-radius:0 0 24px 24px}
+.backup-card{background:#fff;border:1px solid #e5e7eb;border-radius:20px;padding:16px;margin-bottom:14px;box-shadow:0 8px 22px rgba(15,23,42,.08)}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+</style>
+</head>
+
+<body>
+
+<div class="header-backup">
+    <h1>💾 Sauvegarde locale</h1>
+    <p>Exporter, restaurer et nettoyer les données terrain</p>
+</div>
+
+<div class="container">
+
+    <div class="backup-card">
+        <h3>Exporter les données locales</h3>
+        <p class="small">Cette sauvegarde contient les taxations, tickets, session agent et articles importés.</p>
+        <button class="btn-primary" onclick="exportLocalBackup()">💾 Exporter sauvegarde JSON</button>
+    </div>
+
+    <div class="backup-card">
+        <h3>Restaurer une sauvegarde</h3>
+        <p class="small">Sélectionnez un fichier JSON exporté depuis cOllect_Pay Mobile.</p>
+        <input type="file" id="backupFile" accept="application/json">
+        <br><br>
+        <button class="btn-gold" onclick="restoreLocalBackup()">📥 Restaurer</button>
+    </div>
+
+    <div class="backup-card">
+        <h3>Nettoyage sécurisé</h3>
+        <p class="small">Supprime uniquement les taxations déjà synchronisées. Les taxations en attente restent dans le téléphone.</p>
+        <button class="btn-red" onclick="cleanupSyncedTaxations()">🧹 Nettoyer les données synchronisées</button>
+    </div>
+
+    <div class="backup-card">
+        <h3>État local</h3>
+        <div id="localStats">Chargement...</div>
+    </div>
+
+    <div class="backup-card">
+        <a class="btn-primary" href="index.html">Retour</a>
+    </div>
+
+</div>
+
+<script src="assets/js/indexeddb.js?v=50"></script>
+<script src="assets/js/auth.js?v=50"></script>
+<script src="assets/js/backup.js?v=50"></script>
+
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./service-worker.js');
+}
+</script>
+
+</body>
+</html>

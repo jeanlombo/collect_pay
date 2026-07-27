@@ -1,0 +1,7 @@
+<?php
+$page_title="Certificat d'authenticité"; require_once __DIR__."/header.php";
+$ref=trim($_GET['ref']??''); $type=strtoupper(trim($_GET['type_document']??'ALL')); $numero=trim($_GET['numero_document']??'');
+[$foundType,$meta,$doc]=vFind($pdo,$type,$numero); $contrib=$doc?vContrib($pdo,$foundType,$doc):null;
+?>
+<div class="card"><div class="cert"><h2 style="text-align:center;margin-top:0">CERTIFICAT D’AUTHENTICITÉ</h2><p style="text-align:center;font-weight:900;color:#166534">✅ DOCUMENT AUTHENTIQUE</p><table class="table"><tr><th>Référence vérification</th><td><?= vSafe($ref ?: 'VERIFY-'.date('Y').'-'.time()) ?></td></tr><tr><th>Document</th><td><?= vSafe($numero) ?></td></tr><tr><th>Type</th><td><?= vSafe($meta['label'] ?? '-') ?></td></tr><tr><th>Contribuable</th><td><?= vSafe(vName($contrib)) ?></td></tr><tr><th>Montant</th><td><?= vMoney($doc[$meta['amount']] ?? 0) ?></td></tr><tr><th>Date vérification</th><td><?= date('d/m/Y H:i:s') ?></td></tr><tr><th>Statut</th><td>AUTHENTIQUE</td></tr></table><p>Ce certificat est généré automatiquement par la plateforme cOllect_Pay.</p></div><br><button class="btn" onclick="window.print()">Imprimer</button> <a class="btn btn-gray" href="rechercher.php">Retour</a></div>
+<?php require_once __DIR__."/footer.php"; ?>

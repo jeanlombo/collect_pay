@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rapport Z détaillé | cOllect_Pay Mobile</title>
+
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="assets/css/app.css">
+<meta name="theme-color" content="#0f3460">
+
+<style>
+.report-head{background:linear-gradient(135deg,#06152b,#0f3460);color:white;padding:20px;border-radius:0 0 26px 26px}
+.report-head h1{margin:0;font-size:22px}
+.report-card{background:white;border:1px solid #e5e7eb;border-radius:20px;padding:16px;margin-bottom:14px;box-shadow:0 8px 22px rgba(15,23,42,.08)}
+.kpi-grid-report{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.kpi-report{background:#f8fafc;border:1px solid #e5e7eb;border-radius:16px;padding:12px}
+.kpi-report span{color:#64748b;font-weight:800;display:block;font-size:13px}
+.kpi-report strong{color:#0f3460;font-size:20px}
+.table-report{width:100%;border-collapse:collapse;font-size:13px}
+.table-report th,.table-report td{border:1px solid #e5e7eb;padding:8px}
+.table-report th{background:#f8fafc;text-align:left}
+.print-actions{display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:700px){.kpi-grid-report{grid-template-columns:1fr}}
+@media print{
+    .no-print{display:none!important}
+    body{background:white!important}
+    .container{padding:0!important}
+    .report-head{background:white!important;color:#000!important;border-radius:0!important;border-bottom:2px solid #000}
+    .report-card{box-shadow:none!important;border:1px solid #000!important}
+}
+</style>
+</head>
+
+<body>
+
+<div class="report-head">
+    <h1>📊 Rapport Z détaillé</h1>
+    <p>Fermeture journalière des taxations terrain</p>
+</div>
+
+<div class="container">
+
+    <div class="report-card no-print">
+        <h3>Filtres</h3>
+
+        <label>Date début</label>
+        <input type="date" id="date_debut">
+
+        <label>Date fin</label>
+        <input type="date" id="date_fin">
+
+        <br><br>
+
+        <div class="print-actions">
+            <button class="btn-primary" onclick="generateReportZ()">📊 Générer</button>
+            <button class="btn-green" onclick="window.print()">🖨 Imprimer</button>
+            <button class="btn-gold" onclick="exportReportZJson()">💾 Export JSON</button>
+            <a class="btn-primary" href="index.html">Retour</a>
+        </div>
+    </div>
+
+    <div id="reportContent" class="report-card">
+        Chargement...
+    </div>
+
+</div>
+
+<script src="assets/js/indexeddb.js?v=40"></script>
+<script src="assets/js/auth.js?v=40"></script>
+<script src="assets/js/rapport.js?v=40"></script>
+
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./service-worker.js');
+}
+</script>
+
+</body>
+</html>

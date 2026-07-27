@@ -1,0 +1,6 @@
+# cOllect_Pay - AwardSpace path fix
+RewriteEngine On
+
+# Ancienne URL locale vers nouvelle URL serveur
+RewriteCond %{REQUEST_URI} ^/collect_pay/(.*)$ [NC]
+RewriteRule ^collect_pay/(.*)$ /$1 [R=301,L]

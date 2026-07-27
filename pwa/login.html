@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Connexion Agent | cOllect_Pay Mobile</title>
+
+<link rel="manifest" href="manifest.json?v=131">
+<link rel="stylesheet" href="assets/css/app.css?v=131">
+<meta name="theme-color" content="#0f3460">
+
+<style>
+.login-wrapper{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:18px;
+    background:linear-gradient(135deg,#06152b,#0f3460);
+}
+.login-card{
+    width:100%;
+    max-width:430px;
+    background:white;
+    border-radius:26px;
+    padding:24px;
+    box-shadow:0 18px 50px rgba(0,0,0,.25);
+}
+.login-logo{
+    text-align:center;
+    margin-bottom:18px;
+}
+.login-logo-img{
+    width:230px;
+    max-width:100%;
+    height:auto;
+    display:block;
+    margin:auto;
+}
+.login-card h1{
+    margin:0;
+    color:#0f3460;
+    font-size:25px;
+    font-weight:900;
+    text-align:center;
+}
+.login-card p{
+    color:#64748b;
+    font-weight:700;
+    text-align:center;
+}
+.alert{
+    display:none;
+    padding:12px;
+    border-radius:14px;
+    font-weight:800;
+    margin-bottom:14px;
+}
+.alert.error{
+    background:#fee2e2;
+    color:#991b1b;
+}
+.alert.success{
+    background:#dcfce7;
+    color:#166534;
+}
+.version-note{
+    text-align:center;
+    color:#94a3b8;
+    font-size:12px;
+    margin-top:12px;
+    font-weight:800;
+}
+</style>
+</head>
+
+<body>
+
+<div class="login-wrapper">
+    <div class="login-card">
+
+        <div class="login-logo">
+            <img
+                src="assets/img/logo_collect_pay.png?v=131"
+                alt="cOllect_Pay"
+                class="login-logo-img">
+        </div>
+
+        <h1>cOllect_Pay Mobile</h1>
+        <p>Connexion agent de terrain</p>
+
+        <div id="loginAlert" class="alert"></div>
+
+        <label>Email / Identifiant</label>
+        <input type="text" id="login_email" placeholder="Ex : agent@collectpay.cd" autocomplete="username">
+
+        <label>Mot de passe</label>
+        <input type="password" id="login_password" placeholder="Mot de passe" autocomplete="current-password">
+
+        <br><br>
+
+        <button class="btn-primary" type="button" onclick="loginAgent()">
+            🔐 Se connecter
+        </button>
+
+        <br><br>
+
+        <p class="small">
+            Première connexion : Internet obligatoire.<br>
+            Ensuite, l’agent peut se connecter hors connexion.
+        </p>
+
+        <div class="version-note">
+            Guichet unique — Canalisation & maximisation des recettes publiques<br>
+            Version PWA DGRT Premium v131
+        </div>
+
+    </div>
+</div>
+
+<script src="assets/js/indexeddb.js?v=131"></script>
+<script src="assets/js/auth.js?v=131"></script>
+<script src="assets/js/login.js?v=131"></script>
+
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./service-worker.js?v=131')
+        .then(() => console.log('Service Worker Login v131 OK'))
+        .catch(err => console.log('Erreur Service Worker Login', err));
+}
+</script>
+
+</body>
+</html>

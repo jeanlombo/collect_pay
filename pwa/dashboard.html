@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dashboard | cOllect_Pay Mobile</title>
+
+<link rel="manifest" href="manifest.json?v=150">
+<link rel="stylesheet" href="assets/css/app.css?v=150">
+<link rel="stylesheet" href="assets/css/dashboard.css?v=150">
+<meta name="theme-color" content="#0f3460">
+
+<style>
+.sidebar-logo-wrap{
+    background:white;
+    border-radius:16px;
+    padding:4px;
+    width:56px;
+    height:56px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 6px 14px rgba(15,23,42,.10);
+}
+.sidebar-logo{
+    width:52px;
+    height:auto;
+    display:block;
+}
+.topbar-logo{
+    width:42px;
+    height:42px;
+    border-radius:14px;
+    background:white;
+    padding:3px;
+    object-fit:contain;
+}
+</style>
+</head>
+
+<body class="dash-body">
+
+<div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<aside id="sidebarMenu" class="sidebar-menu">
+
+    <div class="sidebar-brand">
+        <div class="sidebar-logo-wrap">
+            <img
+                src="assets/img/logo_collect_pay.png?v=150"
+                alt="cOllect_Pay"
+                class="sidebar-logo">
+        </div>
+        <div>
+            <strong>cOllect_Pay</strong>
+            <span>Mobile Terrain</span>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav">
+
+        <a href="dashboard.html?v=150" onclick="closeSidebar()">📈 Dashboard</a>
+        <a href="index.html?v=150" onclick="closeSidebar()">🧾 Nouvelle taxation</a>
+        <a href="index.html?v=150#sync" onclick="closeSidebar()">🔄 Synchronisation</a>
+        <a href="rapport.html?v=150" onclick="closeSidebar()">📊 Rapport Z</a>
+        <a href="tickets.html?v=150" onclick="closeSidebar()">🎫 Historique tickets</a>
+        <a href="index.html?v=150#local" onclick="closeSidebar()">📋 Taxations locales</a>
+        <a href="backup.html?v=150" onclick="closeSidebar()">💾 Sauvegarde</a>
+        <a href="agents.html?v=150" onclick="closeSidebar()">👥 Agents</a>
+        <a href="recettes_map.html?v=150" onclick="closeSidebar()">🗺️ Cartographie recettes</a>
+        <a href="carte_interactive.html?v=150" onclick="closeSidebar()">🗺️ Carte interactive</a>
+
+        <button type="button" class="logout-link" onclick="logoutAgent()">
+            🚪 Déconnexion
+        </button>
+
+    </nav>
+
+</aside>
+
+<header class="premium-topbar">
+
+    <button class="hamburger" onclick="openSidebar()" type="button">
+        ☰
+    </button>
+
+    <img
+        src="assets/img/logo_collect_pay.png?v=150"
+        alt="cOllect_Pay"
+        class="topbar-logo">
+
+    <div>
+        <h1>cOllect_Pay Mobile</h1>
+        <p id="agentHeader">Chargement agent...</p>
+    </div>
+
+    <button class="refresh-btn" onclick="renderDashboard()" type="button">
+        ⟳
+    </button>
+
+</header>
+
+<main class="dash-container">
+
+    <section class="hero-balance">
+        <div>
+            <span>Recettes du jour</span>
+            <strong id="heroTotal">0 CDF</strong>
+            <small id="heroDate">Aujourd'hui</small>
+        </div>
+
+        <div class="hero-badge">
+            DGRT
+        </div>
+    </section>
+
+    <section id="dashboardContent">
+        <div class="dash-card">
+            Chargement du dashboard...
+        </div>
+    </section>
+
+</main>
+
+<script src="assets/js/indexeddb.js?v=150"></script>
+<script src="assets/js/auth.js?v=150"></script>
+<script src="assets/js/dashboard.js?v=150"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', async function(){
+
+    if (typeof requireOfflineLogin === 'function') {
+        const ok = await requireOfflineLogin();
+
+        if (!ok) {
+            return;
+        }
+    }
+
+    if (typeof renderDashboard === 'function') {
+        await renderDashboard();
+    }
+
+});
+
+function openSidebar(){
+    const menu = document.getElementById('sidebarMenu');
+    const overlay = document.getElementById('sidebarOverlay');
+
+    if(menu){
+        menu.classList.add('show');
+    }
+
+    if(overlay){
+        overlay.classList.add('show');
+    }
+}
+
+function closeSidebar(){
+    const menu = document.getElementById('sidebarMenu');
+    const overlay = document.getElementById('sidebarOverlay');
+
+    if(menu){
+        menu.classList.remove('show');
+    }
+
+    if(overlay){
+        overlay.classList.remove('show');
+    }
+}
+
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./service-worker.js?v=150')
+        .then(() => console.log('Service Worker Dashboard v150 OK'))
+        .catch(err => console.log('Erreur Service Worker Dashboard', err));
+}
+</script>
+
+</body>
+</html>

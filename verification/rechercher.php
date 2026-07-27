@@ -1,0 +1,3 @@
+<?php $page_title="Recherche document"; require_once __DIR__."/header.php"; $docs=vDocs(); ?>
+<div class="card"><h2>Recherche par numéro</h2><form method="GET" action="resultat.php" class="form"><div><label>Type document</label><select name="type_document"><option value="ALL">Tous les documents</option><?php foreach($docs as $key=>$cfg): ?><option value="<?= vSafe($key) ?>"><?= vSafe($cfg['label']) ?></option><?php endforeach; ?></select></div><div><label>Numéro document</label><input name="numero_document" placeholder="Ex : NP-BU-CPR-26-000012" required></div><div style="align-self:end"><button type="submit">Rechercher</button></div></form></div>
+<?php require_once __DIR__."/footer.php"; ?>

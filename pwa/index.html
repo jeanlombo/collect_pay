@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nouvelle taxation | cOllect_Pay Mobile</title>
+
+<link rel="manifest" href="manifest.json?v=140">
+<link rel="stylesheet" href="assets/css/app.css?v=140">
+<meta name="theme-color" content="#0f3460">
+
+<style>
+.top-menu{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+}
+.menu-btn{
+    background:#fbbf24;
+    color:#111827;
+    border:none;
+    border-radius:14px;
+    padding:12px 16px;
+    font-weight:900;
+    cursor:pointer;
+}
+.menu-panel{
+    display:none;
+    background:white;
+    border:1px solid #e5e7eb;
+    border-radius:20px;
+    padding:14px;
+    margin:14px 0;
+    box-shadow:0 10px 28px rgba(15,23,42,.10);
+}
+.menu-panel.show{display:block}
+.menu-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
+.menu-grid button,
+.menu-grid a{
+    width:100%;
+    text-align:center;
+}
+.section-block{display:none}
+.section-block.active{display:block}
+.progress-box{
+    display:none;
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    border-radius:16px;
+    padding:14px;
+    margin-top:12px;
+}
+.progress-label{
+    font-weight:900;
+    color:#0f3460;
+    margin-bottom:8px;
+}
+.progress-bar-wrap{
+    width:100%;
+    height:16px;
+    background:#e5e7eb;
+    border-radius:999px;
+    overflow:hidden;
+}
+.progress-bar{
+    height:100%;
+    width:0%;
+    background:#16a34a;
+    transition:.25s;
+}
+.progress-text{
+    font-size:13px;
+    color:#64748b;
+    font-weight:800;
+    margin-top:8px;
+}
+@media(max-width:700px){
+    .menu-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <div class="top-menu">
+        <div>
+            <h1>cOllect_Pay Mobile</h1>
+            <p>Taxation spontanée : chargement, déchargement et péage</p>
+        </div>
+
+        <button class="menu-btn" type="button" onclick="toggleMenu()">
+            ☰ Menu
+        </button>
+    </div>
+</div>
+
+<div class="container">
+
+    <div id="statusBox" class="status">
+        Initialisation...
+    </div>
+
+    <div id="menuPanel" class="menu-panel">
+        <div class="menu-grid">
+
+            <a class="btn-primary" href="dashboard.html?v=140">
+                📈 Dashboard
+            </a>
+
+            <button class="btn-gold" type="button" onclick="showSection('importSection')">
+                📥 Importation
+            </button>
+
+            <button class="btn-primary" type="button" onclick="showSection('taxationSection')">
+                🧾 Nouvelle taxation
+            </button>
+
+            <button class="btn-green" type="button" onclick="showSection('syncSection')">
+                🔄 Synchronisation
+            </button>
+
+            <a class="btn-gold" href="rapport.html?v=140">
+                📊 Rapport Z
+            </a>
+
+            <a class="btn-primary" href="tickets.html?v=140">
+                🎫 Historique tickets
+            </a>
+
+            <button class="btn-primary" type="button" onclick="showSection('localSection')">
+                📋 Taxations locales
+            </button>
+
+            <a class="btn-gold" href="backup.html?v=140">
+                💾 Sauvegarde
+            </a>
+
+            <a class="btn-primary" href="agents.html?v=140">
+                👥 Agents
+            </a>
+
+            <a class="btn-primary" href="recettes_map.html?v=140">
+                🗺️ Cartographie recettes
+            </a>
+
+            <button class="btn-primary" type="button" onclick="printLastTicket()">
+                🎫 Dernier ticket
+            </button>
+
+            <button class="btn-red" type="button" onclick="logoutAgent()">
+                🚪 Déconnexion
+            </button>
+
+        </div>
+    </div>
+
+    <!-- IMPORTATION -->
+    <div id="importSection" class="card section-block">
+        <h3>📥 Importation des données</h3>
+
+        <p class="small">
+            À faire avant d’aller sur terrain.
+            Le système importe les actes taxables,
+            les taux et les articles budgétaires
+            pour travailler sans connexion.
+        </p>
+
+        <button class="btn-gold" type="button" onclick="importDataWithProgress()">
+            📥 Importer les données
+        </button>
+
+        <div id="importProgressBox" class="progress-box">
+            <div class="progress-label">Importation en cours...</div>
+
+            <div class="progress-bar-wrap">
+                <div id="importProgressBar" class="progress-bar"></div>
+            </div>
+
+            <div id="importProgressText" class="progress-text">
+                Préparation...
+            </div>
+        </div>
+    </div>
+
+    <!-- TAXATION -->
+    <div id="taxationSection" class="card section-block active">
+        <h3>🧾 Nouvelle taxation offline</h3>
+
+        <label>Nom / Raison sociale</label>
+        <input id="contribuable_nom" placeholder="Nom de l'assujetti">
+
+        <label>Téléphone</label>
+        <input id="telephone" placeholder="Ex : 0820646942">
+
+        <label>Plaque / Référence véhicule</label>
+        <input id="plaque" placeholder="Ex : CGO 1234 AB">
+
+        <label>Type de taxe</label>
+        <select id="type_taxe">
+            <option value="">-- Choisir le type de taxe --</option>
+            <option value="chargement">Taxe de chargement</option>
+            <option value="dechargement">Taxe de déchargement</option>
+            <option value="peage">Taxe de péage</option>
+            <option value="autre">Autre taxe spontanée</option>
+        </select>
+
+        <label>Acte taxable</label>
+        <select id="article_id">
+            <option value="">Choisir un acte taxable</option>
+        </select>
+
+        <label>Quantité</label>
+        <input type="number" id="quantite" value="1" step="0.01" min="1">
+
+        <label>Base imposable</label>
+        <input type="number" id="base_imposable" value="0" step="0.01">
+
+        <label>Montant calculé automatiquement</label>
+        <input type="number" id="montant_cdf" value="0" readonly>
+
+        <div id="calculInfo" class="status">
+            Choisissez un acte taxable pour calculer le montant.
+        </div>
+
+        <label>Photo / Preuve</label>
+        <input type="file" id="photo" accept="image/*" capture="environment">
+
+        <label>Signature</label>
+        <canvas id="signaturePad" class="signature-pad"></canvas>
+
+        <br>
+
+        <button class="btn-red" type="button" onclick="clearSignature()">
+            Effacer signature
+        </button>
+
+        <br><br>
+
+        <button class="btn-primary" type="button" onclick="saveTaxation()">
+            💾 Enregistrer offline
+        </button>
+    </div>
+
+    <!-- SYNCHRONISATION -->
+    <div id="syncSection" class="card section-block">
+        <h3>🔄 Synchronisation</h3>
+
+        <p class="small">
+            Les taxations restent dans le téléphone tant qu'elles ne sont pas synchronisées.
+        </p>
+
+        <button class="btn-green" onclick="syncTaxations()">
+            🔄 Synchroniser
+        </button>
+
+        <div id="syncProgressBox" class="progress-box">
+            <div class="progress-label">Synchronisation en cours...</div>
+
+            <div class="progress-bar-wrap">
+                <div id="syncProgressBar" class="progress-bar"></div>
+            </div>
+
+            <div id="syncProgressText" class="progress-text">
+                Préparation...
+            </div>
+        </div>
+    </div>
+
+    <!-- TAXATIONS LOCALES -->
+    <div id="localSection" class="card section-block">
+        <h3>📋 Taxations locales</h3>
+
+        <div id="pendingList">
+            Chargement...
+        </div>
+    </div>
+
+</div>
+
+<script src="assets/js/indexeddb.js?v=140"></script>
+<script src="assets/js/auth.js?v=140"></script>
+<script src="assets/js/ticket.js?v=140"></script>
+<script src="assets/js/app.js?v=140"></script>
+<script src="assets/js/gps.js?v=140"></script>
+<script src="assets/js/sync.js?v=140"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', async function(){
+
+    if (typeof requireOfflineLogin === 'function') {
+        const ok = await requireOfflineLogin();
+
+        if (!ok) {
+            return;
+        }
+    }
+
+    const hash = window.location.hash;
+
+    if(hash === '#sync'){
+        showSection('syncSection');
+    }
+
+    if(hash === '#local'){
+        showSection('localSection');
+    }
+
+});
+
+function toggleMenu(){
+    document.getElementById('menuPanel').classList.toggle('show');
+}
+
+function showSection(sectionId){
+
+    document.querySelectorAll('.section-block').forEach(function(section){
+        section.classList.remove('active');
+    });
+
+    const target = document.getElementById(sectionId);
+
+    if(target){
+        target.classList.add('active');
+    }
+
+    document.getElementById('menuPanel').classList.remove('show');
+
+    if (sectionId === 'localSection' && typeof renderPendingList === 'function') {
+        renderPendingList();
+    }
+}
+
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./service-worker.js?v=140')
+        .then(() => console.log('Service Worker Index v140 OK'))
+        .catch(err => console.log('Erreur Service Worker Index', err));
+}
+</script>
+
+</body>
+</html>
