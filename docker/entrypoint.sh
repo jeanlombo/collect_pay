@@ -8,20 +8,41 @@ echo " Démarrage de cOllect_Pay"
 echo " Port Railway : ${PORT}"
 echo "=========================================="
 
-# Faire écouter Apache sur le port fourni par Railway
+# ---------------------------------------------------------
+# CORRECTION DU CONFLIT MPM APACHE
+# ---------------------------------------------------------
+
+echo "Nettoyage des modules MPM Apache..."
+
+rm -f /etc/apache2/mods-enabled/mpm_event.load
+rm -f /etc/apache2/mods-enabled/mpm_event.conf
+
+rm -f /etc/apache2/mods-enabled/mpm_worker.load
+rm -f /etc/apache2/mods-enabled/mpm_worker.conf
+
+rm -f /etc/apache2/mods-enabled/mpm_prefork.load
+rm -f /etc/apache2/mods-enabled/mpm_prefork.conf
+
+# Activer uniquement mpm_prefork
+ln -sf /etc/apache2/mods-available/mpm_prefork.load \
+    /etc/apache2/mods-enabled/mpm_prefork.load
+
+if [ -f /etc/apache2/mods-available/mpm_prefork.conf ]; then
+    ln -sf /etc/apache2/mods-available/mpm_prefork.conf \
+        /etc/apache2/mods-enabled/mpm_prefork.conf
+fi
+
+echo "Modules MPM actuellement activés :"
+ls -la /etc/apache2/mods-enabled/mpm_* 2>/dev/null || true
+
+# ---------------------------------------------------------
+# CONFIGURATION DU PORT RAILWAY
+# ---------------------------------------------------------
+
 cat > /etc/apache2/ports.conf <<EOF
 Listen ${PORT}
-
-<IfModule ssl_module>
-    Listen 443
-</IfModule>
-
-<IfModule mod_gnutls.c>
-    Listen 443
-</IfModule>
 EOF
 
-# Génération du VirtualHost avec le port Railway
 cat > /etc/apache2/sites-available/000-default.conf <<EOF
 <VirtualHost *:${PORT}>
     ServerAdmin webmaster@localhost
@@ -29,18 +50,10 @@ cat > /etc/apache2/sites-available/000-default.conf <<EOF
     DocumentRoot /var/www/html/collect_pay
 
     <Directory /var/www/html/collect_pay>
-        Options Indexes FollowSymLinks
+        Options FollowSymLinks
         AllowOverride All
         Require all granted
-
         DirectoryIndex index.php index.html
-    </Directory>
-
-    Alias /collect_pay /var/www/html/collect_pay
-
-    <Directory /var/www/html/collect_pay>
-        AllowOverride All
-        Require all granted
     </Directory>
 
     ErrorLog \${APACHE_LOG_DIR}/error.log
@@ -48,7 +61,10 @@ cat > /etc/apache2/sites-available/000-default.conf <<EOF
 </VirtualHost>
 EOF
 
-# Permissions des répertoires d’écriture
+# ---------------------------------------------------------
+# DOSSIERS ET PERMISSIONS
+# ---------------------------------------------------------
+
 mkdir -p \
     /var/www/html/collect_pay/uploads/users \
     /var/www/html/collect_pay/assets/uploads \
@@ -61,9 +77,19 @@ chmod -R 775 \
     /var/www/html/collect_pay/assets/uploads \
     /var/www/html/collect_pay/assets/qr_codes
 
-# Vérifier la configuration Apache
+# ---------------------------------------------------------
+# DIAGNOSTIC APACHE
+# ---------------------------------------------------------
+
+echo "Vérification des modules MPM chargés :"
+
+apache2ctl -M 2>&1 | grep mpm || true
+
+echo "Vérification de la configuration Apache :"
+
 apache2ctl configtest
 
-echo "Apache démarre sur le port ${PORT}"
+echo "Configuration Apache valide."
+echo "Démarrage d’Apache sur le port ${PORT}..."
 
-exec "$@"
+exec apache2-foreground
