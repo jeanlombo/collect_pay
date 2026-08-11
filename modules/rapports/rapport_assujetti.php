@@ -161,7 +161,8 @@ function badgeStatutNote($statut) {
 <head>
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
 <style>
 .report-hero{
@@ -243,9 +244,10 @@ function badgeStatutNote($statut) {
     .filter-grid,.cards{grid-template-columns:1fr}
 }
 </style>
+<link rel="stylesheet" href="../../assets/css/rapports.css">
 </head>
 
-<body>
+<body class="cp-rapports-page">
 <div class="admin-layout">
 
 <?php require_once "../../includes/sidebar.php"; ?>
@@ -329,7 +331,7 @@ function badgeStatutNote($statut) {
 <div class="panel">
     <h3>Résultat pour : <?= htmlspecialchars($search) ?></h3>
 
-    <table class="table-premium">
+    <table class="table-premium cp-report-table">
         <tr>
             <th>Date émission</th>
             <th>Assujetti</th>
