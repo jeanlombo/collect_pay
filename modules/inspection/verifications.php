@@ -104,7 +104,7 @@ function cellValueVerification($row, array $keys, $default = '-')
 <head>
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
 <style>
 .hero-verif{
@@ -165,9 +165,10 @@ function cellValueVerification($row, array $keys, $default = '-')
     .filter-form{grid-template-columns:1fr;}
 }
 </style>
+<link rel="stylesheet" href="../../assets/css/inspection.css">
 </head>
 
-<body>
+<body class="cp-inspection-page">
 <div class="admin-layout">
 
 <?php require_once "../../includes/sidebar.php"; ?>
@@ -180,7 +181,7 @@ function cellValueVerification($row, array $keys, $default = '-')
     <p>Consultation des contrôles effectués sur les documents sécurisés par QR Code.</p>
 </div>
 
-<div class="panel">
+<div class="panel cp-inspection-panel">
     <form method="GET" class="filter-form">
         <input type="text" name="search" placeholder="Rechercher numéro document, QR Code, statut..."
                value="<?= htmlspecialchars($search) ?>">
@@ -188,8 +189,8 @@ function cellValueVerification($row, array $keys, $default = '-')
     </form>
 </div>
 
-<div class="panel">
-    <table class="table-premium">
+<div class="panel cp-inspection-panel">
+    <table class="table-premium cp-inspection-table">
         <tr>
             <th>Date</th>
             <th>Document</th>
@@ -206,14 +207,14 @@ function cellValueVerification($row, array $keys, $default = '-')
                 $type = cellValueVerification($r, ['type_document','document_type','module','type']);
                 $result = cellValueVerification($r, ['resultat','result','statut','status','action']);
                 $user = cellValueVerification($r, ['user_id','utilisateur','nom_user','agent']);
-                $ip = cellValueVerification($r, ['ip','ip_address','terminal','device','user_agent']);
+                $ip = cellValueVerification($r, ['adresse_ip','ip_inspecteur','ip','ip_address','terminal','device','user_agent']);
             ?>
             <tr>
                 <td><?= htmlspecialchars($date) ?></td>
                 <td><strong><?= htmlspecialchars($document) ?></strong></td>
                 <td><?= htmlspecialchars($type) ?></td>
                 <td>
-                    <?php if (stripos((string)$result, 'valide') !== false || stripos((string)$result, 'ok') !== false): ?>
+                    <?php if (in_array(strtolower(trim((string)$result)), ['valide','authentique','ok'], true)): ?>
                         <span class="badge-ok"><?= htmlspecialchars($result) ?></span>
                     <?php else: ?>
                         <span class="badge-warn"><?= htmlspecialchars($result) ?></span>

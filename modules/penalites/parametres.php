@@ -4,7 +4,13 @@ require_once "../../config/security.php";
 require_once "../../auth/check_auth.php";
 
 checkAuth();
-requirePermission('penalites', 'history');
+if (function_exists('canDo')) {
+    if (!canDo('penalites', 'manage') && !canDo('penalites', 'settings')) {
+        requirePermission('penalites', 'settings');
+    }
+} else {
+    requirePermission('penalites', 'settings');
+}
 
 $page_title = "Paramètres pénalités";
 
@@ -47,7 +53,7 @@ $params = $pdo->query("
 <head>
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
 <style>
 .hero{
@@ -84,9 +90,10 @@ $params = $pdo->query("
     .form-grid{grid-template-columns:1fr}
 }
 </style>
+<link rel="stylesheet" href="../../assets/css/penalites.css">
 </head>
 
-<body>
+<body class="cp-penalites-page">
 <div class="admin-layout">
 
 <?php require_once "../../includes/sidebar.php"; ?>
@@ -99,7 +106,7 @@ $params = $pdo->query("
     <p>Configuration des barèmes progressifs pour les pénalités d’assiette et de recouvrement.</p>
 </div>
 
-<div class="panel">
+<div class="panel cp-penalites-panel">
     <h3>Ajouter une tranche</h3>
 
     <?php if (isset($_GET['success'])): ?>
@@ -136,10 +143,10 @@ $params = $pdo->query("
     </form>
 </div>
 
-<div class="panel">
+<div class="panel cp-penalites-panel">
     <h3>Barème enregistré</h3>
 
-    <table class="table-premium">
+    <table class="table-premium cp-penalites-table">
         <tr>
             <th>Type</th>
             <th>De</th>

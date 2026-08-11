@@ -4,6 +4,7 @@ require_once "../../config/security.php";
 require_once "../../core/penalite_engine.php";
 
 checkAuth();
+requirePermission('penalites', 'apply');
 
 requireRole([
     'SUPER_ADMIN',
@@ -82,7 +83,7 @@ enregistrerPenalite(
 <head>
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
 <style>
 .result-box{
@@ -117,9 +118,10 @@ enregistrerPenalite(
     color:#111827;
 }
 </style>
+<link rel="stylesheet" href="../../assets/css/penalites.css">
 </head>
 
-<body>
+<body class="cp-penalites-page">
 <div class="admin-layout">
 
 <?php require_once "../../includes/sidebar.php"; ?>
@@ -132,7 +134,7 @@ enregistrerPenalite(
         Pénalité appliquée avec succès.
     </div>
 
-    <table class="table-premium">
+    <table class="table-premium cp-penalites-table">
         <tr>
             <th>Document</th>
             <td><?= htmlspecialchars($numero) ?></td>
@@ -156,11 +158,11 @@ enregistrerPenalite(
     </table>
 
     <div class="actions">
-        <a class="btn" href="/collect_pay/modules/penalites/historique.php">
+        <a class="btn" href="historique.php">
             Voir historique
         </a>
 
-        <a class="btn btn-yellow" href="/collect_pay/modules/ordonnancement/np_list.php">
+        <a class="btn btn-yellow" href="../ordonnancement/np_list.php">
             Retour NP / NPF
         </a>
     </div>

@@ -36,7 +36,7 @@ function shortJsonCorr($v) {
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
 
 <meta charset="UTF-8">
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 <style>
 .hero{background:linear-gradient(135deg,#06152b,#0f3460);color:white;padding:24px;border-radius:24px;margin-bottom:20px}
 .hero h2{margin:0;font-weight:1000}
@@ -49,8 +49,9 @@ function shortJsonCorr($v) {
 pre{white-space:pre-wrap;background:#f8fafc;border:1px solid #e5e7eb;border-radius:12px;padding:10px;font-size:12px;max-width:520px}
 </style>
 
+<link rel="stylesheet" href="../../assets/css/corrections.css">
 </head>
-<body>
+<body class="cp-corrections-page">
 <div class="admin-layout">
 <?php require_once "../../includes/sidebar.php"; ?>
 
@@ -62,14 +63,14 @@ pre{white-space:pre-wrap;background:#f8fafc;border:1px solid #e5e7eb;border-radi
     <p>Liste des documents ayant fait l’objet d’une correction administrative.</p>
 </div>
 
-<div class="panel">
+<div class="panel cp-corrections-panel">
     <a class="btn" href="correction_create.php">Nouvelle correction</a>
     <a class="btn btn-gray" href="corrections_list.php">Liste des corrections</a>
     <a class="btn btn-gray" href="historique.php">Historique</a>
 </div>
 
-<div class="panel">
-<table class="table-premium">
+<div class="panel cp-corrections-panel">
+<table class="table-premium cp-corrections-table">
 <tr>
     <th>ID</th>
     <th>Document</th>

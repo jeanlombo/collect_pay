@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($numero === '') {
         $error = "Veuillez saisir le numéro du document.";
     } else {
-        header("Location: /collect_pay/modules/corrections/correction_view.php?numero=" . urlencode($numero));
+        header("Location: correction_view.php?numero=" . urlencode($numero));
         exit;
     }
 }
@@ -24,15 +24,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 <style>
 .hero-correction{background:linear-gradient(135deg,#06152b,#0f3460);color:white;padding:28px;border-radius:24px;margin-bottom:22px}
 .box{max-width:760px;margin:auto}
 .err{background:#fee2e2;color:#991b1b;padding:14px;border-radius:14px;font-weight:800;margin-bottom:14px}
 .hint{background:#f8fafc;border:1px solid #e5e7eb;border-radius:18px;padding:18px;margin-top:18px}
 </style>
+<link rel="stylesheet" href="../../assets/css/corrections.css">
 </head>
-<body>
+<body class="cp-corrections-page">
 <div class="admin-layout">
 <?php require_once "../../includes/sidebar.php"; ?>
 
@@ -51,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="err"><?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
 
-    <form method="POST" action="/collect_pay/modules/corrections/correction_search.php">
+    <form method="POST" action="correction_search.php">
         <label>Numéro du document</label>
         <input type="text"
                name="numero_document"

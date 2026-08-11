@@ -3,6 +3,7 @@ require_once "../../config/database.php";
 require_once "../../config/security.php";
 
 checkAuth();
+requirePermission('inspection', 'view');
 requireRole([
     'SUPER_ADMIN',
     'INSPECTEUR',
@@ -25,19 +26,19 @@ $today = $pdo->query("
 $auth = $pdo->query("
     SELECT COUNT(*)
     FROM qr_verifications
-    WHERE resultat = 'authentique'
+    WHERE resultat = 'valide'
 ")->fetchColumn();
 
 $faux = $pdo->query("
     SELECT COUNT(*)
     FROM qr_verifications
-    WHERE resultat = 'contrefait'
+    WHERE resultat IN ('invalide','suspect')
 ")->fetchColumn();
 
 $fauxToday = $pdo->query("
     SELECT COUNT(*)
     FROM qr_verifications
-    WHERE resultat = 'contrefait'
+    WHERE resultat IN ('invalide','suspect')
     AND DATE(date_verification) = CURDATE()
 ")->fetchColumn();
 
@@ -54,7 +55,7 @@ $stmt = $pdo->query("
         adresse_ip,
         COUNT(*) AS total
     FROM qr_verifications
-    WHERE resultat = 'contrefait'
+    WHERE resultat IN ('invalide','suspect')
     GROUP BY adresse_ip
     HAVING COUNT(*) >= 3
     ORDER BY total DESC
@@ -64,11 +65,11 @@ $alertes = $stmt->fetchAll();
 
 function badgeInspection($resultat)
 {
-    if ($resultat === 'authentique') {
-        return "<span class='badge green'>AUTHENTIQUE</span>";
+    if ($resultat === 'valide') {
+        return "<span class='badge green'>VALIDE</span>";
     }
 
-    return "<span class='badge red'>CONTREFAIT</span>";
+    return "<span class='badge red'>INVALIDE / SUSPECT</span>";
 }
 ?>
 <!DOCTYPE html>
@@ -77,7 +78,7 @@ function badgeInspection($resultat)
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
 
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
 <style>
 
@@ -164,9 +165,10 @@ function badgeInspection($resultat)
 }
 
 </style>
+<link rel="stylesheet" href="../../assets/css/inspection.css">
 </head>
 
-<body>
+<body class="cp-inspection-page">
 
 <div class="admin-layout">
 
@@ -231,11 +233,11 @@ function badgeInspection($resultat)
 
 <?php endif; ?>
 
-<div class="panel">
+<div class="panel cp-inspection-panel">
 
     <h3>Derniers Contrôles QR</h3>
 
-    <table class="table-premium">
+    <table class="table-premium cp-inspection-table">
 
         <tr>
             <th>Date</th>
@@ -298,19 +300,19 @@ function badgeInspection($resultat)
 
 </div>
 
-<div class="panel">
+<div class="panel cp-inspection-panel">
 
     <h3>Accès Rapides</h3>
 
     <div style="display:flex;gap:12px;flex-wrap:wrap;">
 
         <a class="btn-premium"
-           href="/collect_pay/modules/inspection/scan_qr.php">
+           href="scan_qr.php">
             🔍 Lecteur QR
         </a>
 
         <a class="btn-premium"
-           href="/collect_pay/modules/inspection/verifications.php">
+           href="verifications.php">
             📋 Journal Vérifications
         </a>
 

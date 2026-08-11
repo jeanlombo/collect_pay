@@ -3,20 +3,21 @@ require_once "../../config/database.php";
 require_once "../../config/security.php";
 
 checkAuth();
+requirePermission('inspection', 'alerts');
 
 $page_title = "Alertes Inspection";
 
 $fraudesToday = $pdo->query("
     SELECT COUNT(*)
     FROM qr_verifications
-    WHERE resultat = 'contrefait'
+    WHERE resultat IN ('invalide','suspect')
     AND DATE(date_verification) = CURDATE()
 ")->fetchColumn();
 
 $ipsSuspectes = $pdo->query("
     SELECT adresse_ip, COUNT(*) AS total
     FROM qr_verifications
-    WHERE resultat = 'contrefait'
+    WHERE resultat IN ('invalide','suspect')
     GROUP BY adresse_ip
     HAVING COUNT(*) >= 3
     ORDER BY total DESC
@@ -33,7 +34,7 @@ $docsRevoques = $pdo->query("
 $dernieresFraudes = $pdo->query("
     SELECT *
     FROM qr_verifications
-    WHERE resultat = 'contrefait'
+    WHERE resultat IN ('invalide','suspect')
     ORDER BY date_verification DESC
     LIMIT 20
 ")->fetchAll();
@@ -49,7 +50,7 @@ function fmtDateAlerte($date) {
 <head>
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
 <style>
 .hero{
@@ -113,9 +114,10 @@ function fmtDateAlerte($date) {
     color:white;
 }
 </style>
+<link rel="stylesheet" href="../../assets/css/inspection.css">
 </head>
 
-<body>
+<body class="cp-inspection-page">
 <div class="admin-layout">
 
 <?php require_once "../../includes/sidebar.php"; ?>
@@ -152,10 +154,10 @@ function fmtDateAlerte($date) {
     </div>
 </div>
 
-<div class="panel">
+<div class="panel cp-inspection-panel">
     <h3>IP suspectes</h3>
 
-    <table class="table-premium">
+    <table class="table-premium cp-inspection-table">
         <tr>
             <th>Adresse IP</th>
             <th>Nombre de tentatives</th>
@@ -182,10 +184,10 @@ function fmtDateAlerte($date) {
     </table>
 </div>
 
-<div class="panel">
+<div class="panel cp-inspection-panel">
     <h3>Dernières tentatives contrefaites</h3>
 
-    <table class="table-premium">
+    <table class="table-premium cp-inspection-table">
         <tr>
             <th>Date</th>
             <th>Type</th>
@@ -200,7 +202,7 @@ function fmtDateAlerte($date) {
                 <td><?= htmlspecialchars($f['type_document'] ?? '-') ?></td>
                 <td><?= htmlspecialchars($f['numero_document'] ?? '-') ?></td>
                 <td><?= htmlspecialchars($f['adresse_ip'] ?? '-') ?></td>
-                <td><span class="badge-red"><?= htmlspecialchars($f['message'] ?? 'QR suspect') ?></span></td>
+                <td><span class="badge-red"><?= htmlspecialchars(($f['resultat'] ?? '') === 'suspect' ? 'QR suspect' : 'QR invalide') ?></span></td>
             </tr>
         <?php endforeach; ?>
 
@@ -210,10 +212,10 @@ function fmtDateAlerte($date) {
     </table>
 </div>
 
-<div class="panel">
+<div class="panel cp-inspection-panel">
     <h3>Documents révoqués récents</h3>
 
-    <table class="table-premium">
+    <table class="table-premium cp-inspection-table">
         <tr>
             <th>Date révocation</th>
             <th>Type</th>

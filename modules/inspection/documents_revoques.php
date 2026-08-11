@@ -3,6 +3,7 @@ require_once "../../config/database.php";
 require_once "../../config/security.php";
 
 checkAuth();
+requirePermission('inspection', 'revoke');
 
 $page_title = "Documents révoqués";
 
@@ -27,7 +28,7 @@ function formatDateRevocation($date)
 <head>
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
 <style>
 .hero{
@@ -66,9 +67,10 @@ function formatDateRevocation($date)
     color:white;
 }
 </style>
+<link rel="stylesheet" href="../../assets/css/inspection.css">
 </head>
 
-<body>
+<body class="cp-inspection-page">
 <div class="admin-layout">
 
 <?php require_once "../../includes/sidebar.php"; ?>
@@ -87,10 +89,10 @@ function formatDateRevocation($date)
     <a class="btn-premium" href="scan_qr.php">🔍 Scanner QR</a>
 </div>
 
-<div class="panel">
+<div class="panel cp-inspection-panel">
     <h3>Liste des documents révoqués</h3>
 
-    <table class="table-premium">
+    <table class="table-premium cp-inspection-table">
         <tr>
             <th>Type</th>
             <th>Numéro document</th>

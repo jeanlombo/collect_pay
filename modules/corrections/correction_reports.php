@@ -95,7 +95,7 @@ $recentes = $stmt->fetchAll();
 <head>
 <meta charset="UTF-8">
 <title><?= hReport($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 <style>
 .hero-report{background:linear-gradient(135deg,#06152b,#0f3460,#1e3a8a);color:white;padding:26px;border-radius:24px;margin-bottom:22px}
 .kpi-grid-report{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}
@@ -107,8 +107,9 @@ $recentes = $stmt->fetchAll();
 @media(max-width:1000px){.kpi-grid-report{grid-template-columns:repeat(2,1fr)}.grid-2-report{grid-template-columns:1fr}}
 @media(max-width:650px){.kpi-grid-report{grid-template-columns:1fr}}
 </style>
+<link rel="stylesheet" href="../../assets/css/corrections.css">
 </head>
-<body>
+<body class="cp-corrections-page">
 <div class="admin-layout">
 <?php require_once "../../includes/sidebar.php"; ?>
 
@@ -128,9 +129,9 @@ $recentes = $stmt->fetchAll();
 </div>
 
 <div class="grid-2-report">
-    <div class="panel">
+    <div class="panel cp-corrections-panel">
         <h3>Corrections par type de document</h3>
-        <table class="table-premium">
+        <table class="table-premium cp-corrections-table">
             <tr><th>Type document</th><th>Nombre</th></tr>
             <?php foreach ($parType as $r): ?>
                 <tr><td><span class="badge-type"><?= hReport($r['type_document']) ?></span></td><td><strong><?= (int)$r['total'] ?></strong></td></tr>
@@ -139,9 +140,9 @@ $recentes = $stmt->fetchAll();
         </table>
     </div>
 
-    <div class="panel">
+    <div class="panel cp-corrections-panel">
         <h3>Corrections par table concernée</h3>
-        <table class="table-premium">
+        <table class="table-premium cp-corrections-table">
             <tr><th>Table</th><th>Nombre</th></tr>
             <?php foreach ($parTable as $r): ?>
                 <tr><td><?= hReport($r['reference_table']) ?></td><td><strong><?= (int)$r['total'] ?></strong></td></tr>
@@ -152,9 +153,9 @@ $recentes = $stmt->fetchAll();
 </div>
 
 <div class="grid-2-report">
-    <div class="panel">
+    <div class="panel cp-corrections-panel">
         <h3>Top utilisateurs correcteurs</h3>
-        <table class="table-premium">
+        <table class="table-premium cp-corrections-table">
             <tr><th>Utilisateur</th><th>Nombre</th></tr>
             <?php foreach ($parUtilisateur as $r): ?>
                 <tr><td><?= hReport($r['utilisateur'] ?? 'Système') ?></td><td><strong><?= (int)$r['total'] ?></strong></td></tr>
@@ -163,9 +164,9 @@ $recentes = $stmt->fetchAll();
         </table>
     </div>
 
-    <div class="panel">
+    <div class="panel cp-corrections-panel">
         <h3>Dernières corrections</h3>
-        <table class="table-premium">
+        <table class="table-premium cp-corrections-table">
             <tr><th>Date</th><th>Document</th><th>Raison</th></tr>
             <?php foreach ($recentes as $r): ?>
                 <tr>

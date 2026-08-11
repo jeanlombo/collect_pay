@@ -4,6 +4,7 @@ require_once "../../config/security.php";
 require_once "../../core/signature_engine.php";
 
 checkAuth();
+requirePermission('penalites', 'validate');
 
 requireRole([
     'SUPER_ADMIN',
@@ -11,6 +12,25 @@ requireRole([
 ]);
 
 $page_title = "Validation pénalité";
+
+function penaliteCurrentUserId(PDO $pdo): ?int
+{
+    $id = (int)($_SESSION['user_id'] ?? 0);
+    if ($id > 0) return $id;
+
+    $email = trim((string)($_SESSION['email'] ?? $_SESSION['user_email'] ?? ''));
+    if ($email !== '') {
+        $stmt = $pdo->prepare("SELECT id FROM users WHERE email=? LIMIT 1");
+        $stmt->execute([$email]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $id = (int)($row['id'] ?? 0);
+        if ($id > 0) {
+            $_SESSION['user_id'] = $id;
+            return $id;
+        }
+    }
+    return null;
+}
 
 $penalite_id = $_GET['id'] ?? ($_POST['penalite_id'] ?? null);
 
@@ -68,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->execute([
         $justification,
         $signature,
-        $_SESSION['user_id'] ?? null,
+        penaliteCurrentUserId($pdo),
         $penalite_id
     ]);
 
@@ -82,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
 <style>
 .hero{
@@ -108,9 +128,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     margin-bottom:18px;
 }
 </style>
+<link rel="stylesheet" href="../../assets/css/penalites.css">
 </head>
 
-<body>
+<body class="cp-penalites-page">
 <div class="admin-layout">
 
 <?php require_once "../../includes/sidebar.php"; ?>
@@ -123,12 +144,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <p>Validation numérique par le Chef de Recouvrement.</p>
 </div>
 
-<div class="panel">
+<div class="panel cp-penalites-panel">
     <div class="warning-box">
         Cette action signera numériquement la pénalité et la rendra officielle dans le système.
     </div>
 
-    <table class="table-premium">
+    <table class="table-premium cp-penalites-table">
         <tr>
             <th>Référence</th>
             <td><?= htmlspecialchars($penalite['reference_type']) ?> #<?= htmlspecialchars($penalite['reference_id']) ?></td>

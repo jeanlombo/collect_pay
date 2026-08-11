@@ -3,6 +3,7 @@ require_once "../../config/database.php";
 require_once "../../config/security.php";
 
 checkAuth();
+requirePermission('penalites', 'history');
 
 
 $page_title = "Historique des pénalités";
@@ -15,7 +16,7 @@ $stmt = $pdo->query("
 
 $penalites = $stmt->fetchAll();
 
-$role = $_SESSION['role'] ?? '';
+$role = strtoupper(trim((string)($_SESSION['role'] ?? $_SESSION['nom_role'] ?? '')));
 ?>
 
 <!DOCTYPE html>
@@ -23,7 +24,7 @@ $role = $_SESSION['role'] ?? '';
 <head>
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
 <style>
 
@@ -98,8 +99,9 @@ $role = $_SESSION['role'] ?? '';
 
 </style>
 
+<link rel="stylesheet" href="../../assets/css/penalites.css">
 </head>
-<body>
+<body class="cp-penalites-page">
 
 <div class="admin-layout">
 
@@ -120,9 +122,9 @@ $role = $_SESSION['role'] ?? '';
     </div>
 <?php endif; ?>
 
-<div class="panel">
+<div class="panel cp-penalites-panel">
 
-<table class="table-premium">
+<table class="table-premium cp-penalites-table">
 
 <tr>
     <th>Type</th>

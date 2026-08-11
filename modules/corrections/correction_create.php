@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 <style>
 .hero{background:linear-gradient(135deg,#7c2d12,#f59e0b);color:#111827;padding:26px;border-radius:24px;margin-bottom:22px}
 .hero h2{margin:0;font-weight:1000}.hero p{margin:8px 0 0;font-weight:800}
@@ -39,8 +39,9 @@ input{width:100%;padding:14px;border:1px solid #d1d5db;border-radius:12px;font-w
 .btn-gray{background:#e5e7eb;color:#111827}
 .alert{background:#fee2e2;color:#991b1b;padding:12px;border-radius:12px;font-weight:900;margin-bottom:12px}
 </style>
+<link rel="stylesheet" href="../../assets/css/corrections.css">
 </head>
-<body>
+<body class="cp-corrections-page">
 <div class="admin-layout">
 <?php require_once "../../includes/sidebar.php"; ?>
 

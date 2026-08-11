@@ -3,6 +3,7 @@ require_once "../../config/database.php";
 require_once "../../config/security.php";
 require_once "../../core/secure_qr_engine.php";
 checkAuth();
+requirePermission('inspection', 'scan');
 requireRole([
     'SUPER_ADMIN',
     'INSPECTEUR',
@@ -23,6 +24,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ];
     } else {
         $result = verifyEncryptedQrPayload($pdo, $qrContent);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Journal Inspection
+        |--------------------------------------------------------------------------
+        | qr_verifications accepte uniquement :
+        | valide / invalide / annule / suspect
+        */
+        try {
+            $docToken = $result['document_token'] ?? [];
+            $statutLog = !empty($result['valid']) ? 'valide' : 'invalide';
+            $numeroLog = $docToken['numero_document'] ?? null;
+            $typeLog   = $docToken['type_document'] ?? null;
+
+            $userInspecteur = (int)($_SESSION['user_id'] ?? 0);
+            if ($userInspecteur <= 0) {
+                $userInspecteur = null;
+            }
+
+            $adresseIp = $_SERVER['REMOTE_ADDR'] ?? null;
+            $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? null;
+
+            $stmtLog = $pdo->prepare("
+                INSERT INTO qr_verifications
+                (
+                    numero_document,
+                    type_document,
+                    resultat,
+                    ip_inspecteur,
+                    user_inspecteur_id,
+                    adresse_ip,
+                    appareil,
+                    user_agent
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+
+            $stmtLog->execute([
+                $numeroLog,
+                $typeLog,
+                $statutLog,
+                $adresseIp,
+                $userInspecteur,
+                $adresseIp,
+                $userAgent,
+                $userAgent
+            ]);
+        } catch (Throwable $e) {
+            // La vérification du document reste utilisable même si le journal échoue.
+        }
     }
 }
 ?>
@@ -34,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
 <script src="https://unpkg.com/html5-qrcode"></script>
 
@@ -124,9 +175,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 </style>
+<link rel="stylesheet" href="../../assets/css/inspection.css">
 </head>
 
-<body>
+<body class="cp-inspection-page">
 <div class="admin-layout">
 
 <?php require_once "../../includes/sidebar.php"; ?>
@@ -163,7 +215,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?= htmlspecialchars($result['message']) ?>
                 </p>
 
-                <table class="table-premium">
+                <table class="table-premium cp-inspection-table">
                     <tr>
                         <th>Type document</th>
                         <td><?= htmlspecialchars($result['document_token']['type_document']) ?></td>

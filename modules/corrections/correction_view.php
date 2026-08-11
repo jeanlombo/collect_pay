@@ -163,7 +163,7 @@ $page_title = "Modifier document";
 <head>
 <meta charset="UTF-8">
 <title><?= corrSafe($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 <style>
 .head{background:linear-gradient(135deg,#7c2d12,#f59e0b);color:#111827;padding:26px;border-radius:24px;margin-bottom:22px}
 .head h2{margin:0;font-weight:1000}.head p{font-weight:900}
@@ -178,8 +178,9 @@ textarea{min-height:110px}
 .btn-gray{background:#e5e7eb;color:#111827}
 @media(max-width:900px){.grid{grid-template-columns:1fr}}
 </style>
+<link rel="stylesheet" href="../../assets/css/corrections.css">
 </head>
-<body>
+<body class="cp-corrections-page">
 <div class="admin-layout">
 <?php require_once "../../includes/sidebar.php"; ?>
 
@@ -191,11 +192,11 @@ textarea{min-height:110px}
     <p>Document : <strong><?= corrSafe($numero) ?></strong> — Type : <strong><?= corrSafe($meta['type']) ?></strong></p>
 </div>
 
-<form method="POST" action="/collect_pay/modules/corrections/correction_save.php">
+<form method="POST" action="correction_save.php">
 <input type="hidden" name="numero_document" value="<?= corrSafe($numero) ?>">
 <input type="hidden" name="type_document" value="<?= corrSafe($meta['type']) ?>">
 
-<div class="panel">
+<div class="panel cp-corrections-panel">
     <h3>I. Aperçu du contribuable</h3>
 
     <?php if($contribuable): ?>
@@ -215,7 +216,7 @@ textarea{min-height:110px}
     <?php endif; ?>
 </div>
 
-<div class="panel">
+<div class="panel cp-corrections-panel">
     <h3>II. Aperçu du document et champs éditables</h3>
 
     <div class="grid">
@@ -245,7 +246,7 @@ textarea{min-height:110px}
     </div>
 </div>
 
-<div class="panel">
+<div class="panel cp-corrections-panel">
     <h3>III. Comptes bancaires autorisés</h3>
 
     <?php if(!empty($comptes) && in_array($meta['type'], ['NP','NPF'], true)): ?>
@@ -265,7 +266,7 @@ textarea{min-height:110px}
     <?php endif; ?>
 </div>
 
-<div class="panel">
+<div class="panel cp-corrections-panel">
     <h3>IV. Raison obligatoire</h3>
 
     <div class="reason">
@@ -275,7 +276,7 @@ textarea{min-height:110px}
 
     <br>
     <button type="submit" class="btn">💾 Enregistrer la correction</button>
-    <a href="/collect_pay/modules/corrections/correction_create.php" class="btn btn-gray">Annuler</a>
+    <a href="correction_create.php" class="btn btn-gray">Annuler</a>
 </div>
 
 </form>

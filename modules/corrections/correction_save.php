@@ -9,6 +9,25 @@ require_once "../../auth/check_auth.php";
 checkAuth();
 requirePermission('corrections','create');
 
+function corrCurrentUserId(PDO $pdo): ?int {
+    $id = (int)($_SESSION['user_id'] ?? 0);
+    if ($id > 0) return $id;
+
+    $email = trim((string)($_SESSION['email'] ?? $_SESSION['user_email'] ?? ''));
+    if ($email !== '') {
+        $stmt = $pdo->prepare("SELECT id FROM users WHERE email=? LIMIT 1");
+        $stmt->execute([$email]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $id = (int)($row['id'] ?? 0);
+        if ($id > 0) {
+            $_SESSION['user_id'] = $id;
+            return $id;
+        }
+    }
+    return null;
+}
+
+
 function corrDetectDocumentSave($numero){
     $n = strtoupper(trim((string)$numero));
 
@@ -229,7 +248,7 @@ try{
         json_encode($ancienne, JSON_UNESCAPED_UNICODE),
         json_encode($nouvelle, JSON_UNESCAPED_UNICODE),
         $raison,
-        $_SESSION['user_id'] ?? null
+        corrCurrentUserId($pdo)
     ]);
 
     $pdo->commit();

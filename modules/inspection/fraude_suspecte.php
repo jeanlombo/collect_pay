@@ -3,6 +3,7 @@ require_once "../../config/database.php";
 require_once "../../config/security.php";
 
 checkAuth();
+requirePermission('inspection', 'fraud');
 
 $page_title = "Fraudes suspectes";
 
@@ -12,7 +13,7 @@ $stmt = $pdo->prepare("
         COUNT(*) AS total_tentatives,
         MAX(date_verification) AS derniere_tentative
     FROM qr_verifications
-    WHERE resultat = 'contrefait'
+    WHERE resultat IN ('invalide','suspect')
     GROUP BY adresse_ip
     ORDER BY total_tentatives DESC, derniere_tentative DESC
 ");
@@ -22,7 +23,7 @@ $alertes = $stmt->fetchAll();
 $stmt = $pdo->prepare("
     SELECT *
     FROM qr_verifications
-    WHERE resultat = 'contrefait'
+    WHERE resultat IN ('invalide','suspect')
     ORDER BY date_verification DESC
     LIMIT 100
 ");
@@ -41,7 +42,7 @@ function formatDateFraude($date)
 <head>
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
 <style>
 .hero{
@@ -88,9 +89,10 @@ function formatDateFraude($date)
     color:white;
 }
 </style>
+<link rel="stylesheet" href="../../assets/css/inspection.css">
 </head>
 
-<body>
+<body class="cp-inspection-page">
 <div class="admin-layout">
 
 <?php require_once "../../includes/sidebar.php"; ?>
@@ -109,7 +111,7 @@ function formatDateFraude($date)
     <a class="btn-premium" href="documents_revoques.php">🚫 Documents révoqués</a>
 </div>
 
-<div class="panel">
+<div class="panel cp-inspection-panel">
     <h3>Adresses IP suspectes</h3>
 
     <?php foreach ($alertes as $a): ?>
@@ -131,10 +133,10 @@ function formatDateFraude($date)
     <?php endif; ?>
 </div>
 
-<div class="panel">
+<div class="panel cp-inspection-panel">
     <h3>Détails des dernières tentatives frauduleuses</h3>
 
-    <table class="table-premium">
+    <table class="table-premium cp-inspection-table">
         <tr>
             <th>Date</th>
             <th>Type</th>
@@ -149,7 +151,7 @@ function formatDateFraude($date)
                 <td><?= htmlspecialchars($d['type_document'] ?? '-') ?></td>
                 <td><?= htmlspecialchars($d['numero_document'] ?? '-') ?></td>
                 <td><?= htmlspecialchars($d['adresse_ip'] ?? '-') ?></td>
-                <td><span class="badge-red"><?= htmlspecialchars($d['message'] ?? 'QR suspect') ?></span></td>
+                <td><span class="badge-red"><?= htmlspecialchars(($d['resultat'] ?? '') === 'suspect' ? 'QR suspect' : 'QR invalide') ?></span></td>
             </tr>
         <?php endforeach; ?>
 
