@@ -67,9 +67,11 @@ function nomContribuableList($c) {
 <head>
     <meta charset="UTF-8">
     <title><?= $page_title ?> | cOllect_Pay</title>
-    <link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../../assets/css/admin.css">
+    <link rel="stylesheet" href="../../assets/css/constatation.css">
 </head>
-<body>
+<body class="cp-constatation-page cp-nt-list">
 
 <div class="admin-layout">
     <?php require_once "../../includes/sidebar.php"; ?>
@@ -77,22 +79,15 @@ function nomContribuableList($c) {
     <main class="main-content">
         <?php require_once "../../includes/topbar.php"; ?>
 
-        <div class="panel">
-            <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div class="panel cp-nt-shell">
+            <div class="cp-list-heading">
                 <h3>Notes de Taxation</h3>
-                <a href="/collect_pay/modules/contribuables/list.php" style="
-                    background:#0f3460;
-                    color:white;
-                    padding:11px 18px;
-                    border-radius:12px;
-                    text-decoration:none;
-                    font-weight:800;
-                ">
+                <a href="../contribuables/list.php" class="cp-primary-link">
                     + Nouvelle NT
                 </a>
             </div>
 
-            <form method="GET" style="margin-top:20px;display:grid;grid-template-columns:2fr 1fr auto;gap:12px;">
+            <form method="GET" class="cp-filter-bar">
                 <input type="text" name="search" placeholder="Rechercher numéro, contribuable, téléphone"
                        value="<?= htmlspecialchars($search) ?>">
 
@@ -107,8 +102,9 @@ function nomContribuableList($c) {
             </form>
         </div>
 
-        <div class="panel">
-            <table class="table-premium">
+        <div class="panel cp-table-panel">
+            <div class="cp-table-wrap">
+            <table class="table-premium cp-nt-table">
                 <tr>
                     <th>Numéro NT</th>
                     <th>Contribuable</th>
@@ -130,7 +126,7 @@ function nomContribuableList($c) {
                         <td><?= strtoupper(htmlspecialchars($n['statut'])) ?></td>
                         <td><?= htmlspecialchars($n['created_at']) ?></td>
                         <td>
-                            <a href="nt_view.php?numero=<?= urlencode($n['numero_nt']) ?>">Voir</a>
+                            <a class="cp-view-link" href="nt_view.php?numero=<?= urlencode($n['numero_nt']) ?>">Voir</a>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -141,6 +137,7 @@ function nomContribuableList($c) {
                     </tr>
                 <?php endif; ?>
             </table>
+            </div>
         </div>
 
     </main>

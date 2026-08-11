@@ -435,7 +435,8 @@ $page_title = "Note de Taxation";
 <head>
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
 <style>
 .info-card{
@@ -574,9 +575,10 @@ $page_title = "Note de Taxation";
     .cp-smart-grid{grid-template-columns:1fr}
 }
 </style>
+<link rel="stylesheet" href="../../assets/css/constatation.css">
 
 </head>
-<body>
+<body class="cp-constatation-page cp-nt-view">
 
 <div class="admin-layout">
 
@@ -586,9 +588,15 @@ $page_title = "Note de Taxation";
 
 <?php require_once "../../includes/topbar.php"; ?>
 
-<div class="panel">
+<div class="panel cp-nt-shell">
 
-    <h2>NOTE DE TAXATION</h2>
+    <div class="cp-page-heading cp-view-heading">
+        <div>
+            <span class="cp-eyebrow">Constatation fiscale</span>
+            <h2>NOTE DE TAXATION</h2>
+            <p>Consultation, actes taxables, pénalités et soumission à la liquidation.</p>
+        </div>
+    </div>
 
     <div class="info-card">
 
@@ -669,7 +677,7 @@ $page_title = "Note de Taxation";
             <a
                 class="btn-premium"
                 target="_blank"
-                href="/collect_pay/reports/nt_pdf.php?numero=<?= urlencode($nt['numero_nt']) ?>"
+                href="../../reports/nt_pdf.php?numero=<?= urlencode($nt['numero_nt']) ?>"
             >
                 🖨️ Imprimer la NT
             </a>
@@ -867,7 +875,8 @@ $page_title = "Note de Taxation";
 
     <h3>Actes déjà ajoutés</h3>
 
-    <table class="table-premium">
+    <div class="cp-table-wrap">
+    <table class="table-premium cp-nt-table">
         <tr>
             <th>Acte taxable</th>
             <th>Base / Loyer / Qté</th>
@@ -957,6 +966,7 @@ $page_title = "Note de Taxation";
             </tr>
         <?php endif; ?>
     </table>
+    </div>
 
 </div>
 

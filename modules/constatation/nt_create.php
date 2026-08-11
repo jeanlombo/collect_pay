@@ -175,7 +175,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
 <style>
 .info-box{
@@ -227,9 +228,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     font-size:12px;
 }
 </style>
+<link rel="stylesheet" href="../../assets/css/constatation.css">
 </head>
 
-<body>
+<body class="cp-constatation-page cp-nt-create">
 <div class="admin-layout">
 
 <?php require_once "../../includes/sidebar.php"; ?>
@@ -238,8 +240,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <?php require_once "../../includes/topbar.php"; ?>
 
-<div class="panel">
-    <h3>Créer une Note de Taxation</h3>
+<div class="panel cp-nt-shell">
+    <div class="cp-page-heading">
+        <div>
+            <span class="cp-eyebrow">Constatation fiscale</span>
+            <h3>Créer une Note de Taxation</h3>
+            <p>Renseignez le service d’assiette et l’exercice pour ouvrir une nouvelle NT.</p>
+        </div>
+    </div>
 
     <?php if ($parametrageOK): ?>
         <div class="success-box">
@@ -256,13 +264,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <?= $totalTauxChange > 0 ? "✅" : "❌" ?> Taux de change officiel actif
             </div>
 
-            <a class="btn-param" href="/collect_pay/modules/parametrage/index.php">
+            <a class="btn-param" href="../parametrage/index.php">
                 Aller au paramétrage
             </a>
         </div>
     <?php endif; ?>
 
-    <div class="info-box">
+    <div class="info-box cp-taxpayer-card">
         <strong>Contribuable :</strong>
         <?= htmlspecialchars(nomContribuableNTCreate($contribuable)) ?><br>
 
@@ -284,7 +292,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?= htmlspecialchars($contribuable['telephone'] ?? '-') ?>
     </div>
 
-    <form method="POST">
+    <form method="POST" class="cp-nt-form">
 
         <label>Service d’assiette</label>
         <select name="service_id" required <?= !$parametrageOK ? 'disabled' : '' ?>>
@@ -314,11 +322,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </button>
     </form>
 
-    <br>
-
-    <a href="/collect_pay/modules/contribuables/view.php?id=<?= (int)$contribuable['id'] ?>">
+    <div class="cp-form-footer">
+    <a class="cp-back-link" href="../contribuables/view.php?id=<?= (int)$contribuable['id'] ?>">
         ← Retour à la fiche contribuable
     </a>
+    </div>
 </div>
 
 </main>

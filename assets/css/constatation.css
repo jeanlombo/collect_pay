@@ -1,0 +1,449 @@
+/* =========================================================
+   cOllect_Pay — Module Constatation
+   Présentation uniquement : aucune logique métier.
+   ========================================================= */
+
+.cp-constatation-page{
+    --cp-ink:#10233f;
+    --cp-muted:#64748b;
+    --cp-border:#dbe5f0;
+    --cp-soft:#f6f9fc;
+    --cp-soft-blue:#eef6ff;
+    --cp-accent:#0f5fa8;
+    --cp-accent-2:#173f73;
+    --cp-success:#087a55;
+    --cp-danger:#c93636;
+    --cp-shadow:0 14px 34px rgba(15,45,82,.08);
+    background:#f3f7fb;
+    color:var(--cp-ink);
+}
+
+.cp-constatation-page .main-content{
+    background:
+        radial-gradient(circle at 92% 3%, rgba(51,137,214,.10), transparent 22rem),
+        #f3f7fb;
+}
+
+.cp-constatation-page .panel,
+.cp-constatation-page .info-card,
+.cp-constatation-page .info-box{
+    box-sizing:border-box;
+}
+
+.cp-constatation-page .cp-nt-shell{
+    width:min(1180px, calc(100% - 32px));
+    margin:22px auto;
+    padding:26px;
+    border:1px solid var(--cp-border);
+    border-radius:22px;
+    background:rgba(255,255,255,.97);
+    box-shadow:var(--cp-shadow);
+}
+
+.cp-page-heading,
+.cp-list-heading{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    margin-bottom:22px;
+    padding-bottom:18px;
+    border-bottom:1px solid var(--cp-border);
+}
+
+.cp-page-heading h2,
+.cp-page-heading h3,
+.cp-list-heading h3{
+    margin:4px 0 6px;
+    color:var(--cp-ink);
+    font-size:clamp(22px,2.4vw,30px);
+    line-height:1.15;
+    letter-spacing:-.02em;
+}
+
+.cp-page-heading p{
+    margin:0;
+    color:var(--cp-muted);
+    font-size:14px;
+    font-weight:600;
+}
+
+.cp-eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    color:var(--cp-accent);
+    font-size:11px;
+    font-weight:900;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+}
+
+.cp-eyebrow::before{
+    content:"";
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:currentColor;
+    box-shadow:0 0 0 5px rgba(15,95,168,.10);
+}
+
+/* Création NT */
+.cp-nt-create .success-box,
+.cp-nt-create .warning-box{
+    border-radius:16px;
+    padding:15px 17px;
+    box-shadow:none;
+}
+
+.cp-taxpayer-card{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:12px 24px;
+    padding:20px !important;
+    border:1px solid var(--cp-border) !important;
+    border-left:4px solid var(--cp-accent) !important;
+    background:linear-gradient(135deg,#fbfdff,#f2f8ff) !important;
+    line-height:1.75;
+}
+
+.cp-taxpayer-card strong{
+    color:#334c69;
+}
+
+.cp-taxpayer-card .badge-info{
+    vertical-align:middle;
+}
+
+.cp-nt-form{
+    display:grid;
+    grid-template-columns:minmax(0,2fr) minmax(160px,.65fr) auto;
+    gap:16px;
+    align-items:end;
+    margin-top:4px;
+    padding:20px;
+    border:1px solid var(--cp-border);
+    border-radius:18px;
+    background:#fff;
+}
+
+.cp-nt-form label,
+.cp-nt-view label{
+    display:block;
+    margin:0 0 7px;
+    color:#314761;
+    font-size:13px;
+    font-weight:800;
+}
+
+.cp-nt-form select,
+.cp-nt-form input,
+.cp-nt-view input,
+.cp-nt-view select,
+.cp-filter-bar input,
+.cp-filter-bar select{
+    width:100%;
+    min-height:46px;
+    box-sizing:border-box;
+    border:1px solid #cfdbe8;
+    border-radius:12px;
+    background:#fff;
+    padding:10px 13px;
+    color:#12263f;
+    font:inherit;
+    outline:none;
+    transition:border-color .18s, box-shadow .18s;
+}
+
+.cp-nt-form select:focus,
+.cp-nt-form input:focus,
+.cp-nt-view input:focus,
+.cp-nt-view select:focus,
+.cp-filter-bar input:focus,
+.cp-filter-bar select:focus{
+    border-color:#4b94d2;
+    box-shadow:0 0 0 4px rgba(43,126,196,.12);
+}
+
+.cp-nt-form button,
+.cp-filter-bar button,
+.cp-primary-link,
+.cp-view-link,
+.cp-constatation-page .btn-premium,
+.cp-constatation-page .btn-param{
+    min-height:44px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    box-sizing:border-box;
+    border:0;
+    border-radius:12px;
+    padding:10px 17px;
+    background:linear-gradient(135deg,var(--cp-accent-2),var(--cp-accent));
+    color:#fff !important;
+    font-weight:850;
+    text-decoration:none;
+    cursor:pointer;
+    box-shadow:0 7px 16px rgba(15,95,168,.16);
+}
+
+.cp-nt-form button:disabled{
+    opacity:.5;
+    cursor:not-allowed;
+    box-shadow:none;
+}
+
+.cp-form-footer{
+    margin-top:18px;
+}
+
+.cp-back-link{
+    color:var(--cp-accent);
+    font-weight:800;
+    text-decoration:none;
+}
+
+/* Liste NT */
+.cp-nt-list .cp-nt-shell{
+    margin-bottom:16px;
+}
+
+.cp-list-heading{
+    margin-bottom:0;
+}
+
+.cp-filter-bar{
+    display:grid;
+    grid-template-columns:minmax(240px,2fr) minmax(180px,.8fr) auto;
+    gap:12px;
+    align-items:center;
+    margin-top:18px;
+}
+
+.cp-table-panel{
+    width:min(1180px, calc(100% - 32px));
+    margin:0 auto 24px;
+    padding:0;
+    border:1px solid var(--cp-border);
+    border-radius:20px;
+    background:#fff;
+    box-shadow:var(--cp-shadow);
+    overflow:hidden;
+}
+
+.cp-table-wrap{
+    width:100%;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+}
+
+.cp-nt-table{
+    width:100%;
+    min-width:820px;
+    border-collapse:separate;
+    border-spacing:0;
+}
+
+.cp-nt-table th{
+    padding:13px 14px;
+    background:#edf4fb;
+    color:#27445f;
+    border-bottom:1px solid var(--cp-border);
+    font-size:12px;
+    font-weight:900;
+    text-transform:uppercase;
+    letter-spacing:.025em;
+    white-space:nowrap;
+}
+
+.cp-nt-table td{
+    padding:14px;
+    border-bottom:1px solid #e8eef5;
+    color:#293d55;
+    vertical-align:top;
+}
+
+.cp-nt-table tr:last-child td{
+    border-bottom:0;
+}
+
+.cp-nt-table tr:hover td{
+    background:#f9fbfd;
+}
+
+.cp-view-link{
+    min-height:34px;
+    padding:7px 12px;
+    font-size:12px;
+}
+
+/* Vue NT */
+.cp-nt-view .cp-view-heading{
+    margin-bottom:20px;
+}
+
+.cp-nt-view .info-card{
+    margin-bottom:18px;
+    padding:22px;
+    border:1px solid var(--cp-border);
+    border-radius:18px;
+    background:#fff;
+    box-shadow:0 8px 24px rgba(15,45,82,.06);
+}
+
+.cp-nt-view .info-card:first-of-type{
+    background:linear-gradient(135deg,#ffffff,#f4f9ff);
+    border-left:4px solid var(--cp-accent);
+}
+
+.cp-nt-view .info-card h3{
+    margin:0 0 16px;
+    color:var(--cp-ink);
+    font-size:19px;
+}
+
+.cp-nt-view .info-card p{
+    display:grid;
+    grid-template-columns:minmax(135px,175px) 1fr;
+    gap:12px;
+    margin:8px 0;
+    color:#314761;
+}
+
+.cp-nt-view .badge-status{
+    display:inline-flex;
+    vertical-align:middle;
+    margin-left:8px;
+    font-size:11px;
+    padding:6px 11px;
+}
+
+.cp-nt-view .grid-form{
+    gap:16px;
+}
+
+.cp-nt-view .cp-smart-taxation{
+    margin:8px 0 16px;
+    padding:18px;
+    border:1px solid #d9e6f2;
+    background:linear-gradient(135deg,#f9fcff,#f0f7ff);
+}
+
+.cp-nt-view .cp-smart-grid{
+    gap:14px;
+}
+
+.cp-nt-view .cp-results-box{
+    box-shadow:0 14px 26px rgba(20,52,86,.08);
+}
+
+.cp-nt-view .cp-result-item{
+    transition:background .16s, transform .16s;
+}
+
+.cp-nt-view .cp-result-item:hover{
+    transform:translateX(2px);
+}
+
+.cp-nt-view .detail-box{
+    min-width:210px;
+    background:#f6f9fc;
+    border-color:#dbe6f0;
+    color:#40536a;
+}
+
+.cp-nt-view .actions{
+    gap:10px;
+}
+
+.cp-nt-view .btn-danger{
+    display:inline-flex;
+    align-items:center;
+    min-height:34px;
+    border-radius:10px;
+    padding:7px 11px;
+    background:var(--cp-danger);
+    color:#fff !important;
+    text-decoration:none;
+    font-weight:800;
+}
+
+.cp-nt-view .form-hint{
+    font-size:12px;
+    line-height:1.45;
+    color:#718096;
+}
+
+/* Responsive */
+@media (max-width: 980px){
+    .cp-taxpayer-card{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+
+    .cp-nt-form{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .cp-nt-form button{
+        grid-column:1 / -1;
+    }
+}
+
+@media (max-width: 760px){
+    .cp-constatation-page .cp-nt-shell,
+    .cp-table-panel{
+        width:calc(100% - 18px);
+        margin-left:auto;
+        margin-right:auto;
+    }
+
+    .cp-constatation-page .cp-nt-shell{
+        padding:16px;
+        border-radius:17px;
+    }
+
+    .cp-page-heading,
+    .cp-list-heading{
+        align-items:flex-start;
+        flex-direction:column;
+    }
+
+    .cp-taxpayer-card,
+    .cp-nt-form,
+    .cp-filter-bar{
+        grid-template-columns:1fr;
+    }
+
+    .cp-taxpayer-card{
+        gap:8px;
+    }
+
+    .cp-nt-form button{
+        grid-column:auto;
+    }
+
+    .cp-nt-view .info-card{
+        padding:16px;
+    }
+
+    .cp-nt-view .info-card p{
+        grid-template-columns:1fr;
+        gap:2px;
+    }
+
+    .cp-nt-view .badge-status{
+        margin:8px 0 0;
+    }
+}
+
+@media (max-width: 480px){
+    .cp-nt-table{
+        font-size:12px;
+    }
+
+    .cp-page-heading h2,
+    .cp-page-heading h3,
+    .cp-list-heading h3{
+        font-size:21px;
+    }
+}
