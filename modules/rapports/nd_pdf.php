@@ -241,6 +241,11 @@ class NDPDF extends FPDF
 
     function Header()
     {
+        $logoProvince = __DIR__ . '/../../assets/images/logo_province.png';
+        if (is_file($logoProvince)) {
+            $this->Image($logoProvince, 12, 8, 22);
+        }
+
         if (file_exists("../assets/images/logo_province.png")) {
             $this->Image("../assets/images/logo_province.png", 10, 8, 24);
         }
