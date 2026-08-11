@@ -150,6 +150,7 @@ $derniersPaiements = fetchAllPublic($db, "
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="assets/css/public.css" rel="stylesheet">
+    <link href="assets/css/public_interactive.css" rel="stylesheet">
 </head>
 <body>
 <?php if (!$db): ?>
@@ -181,12 +182,15 @@ $derniersPaiements = fetchAllPublic($db, "
             </ul>
 
             <div class="nav-actions">
-                <a href="modules/inspection/scan_qr.php" class="btn btn-nav-outline">
+                <a href="verification_qr.php" class="btn btn-nav-outline">
                     <i class="bi bi-qr-code-scan"></i> Vérifier QR
                 </a>
-                <a href="modules/ordonnancement/np_list.php" class="btn btn-nav-soft">
+                <a href="consultation_np.php" class="btn btn-nav-soft">
                     Consulter NP
                 </a>
+                <button type="button" class="btn btn-nav-verify-doc" onclick="openVerifModal()">
+                    <i class="bi bi-patch-check"></i> Vérifier document
+                </button>
                 <a href="login.php" class="btn btn-nav-gold">
                     <i class="bi bi-person-lock"></i> Connexion
                 </a>
@@ -224,10 +228,10 @@ $derniersPaiements = fetchAllPublic($db, "
                         <i class="bi bi-credit-card-2-front"></i>
                         Payer une NP / NPF
                     </a>
-                    <a href="modules/inspection/scan_qr.php" class="btn btn-hero-secondary">
+                    <button type="button" class="btn btn-hero-secondary" onclick="openVerifModal()">
                         <i class="bi bi-patch-check"></i>
                         Vérifier un document
-                    </a>
+                    </button>
                     <a href="login.php" class="btn btn-hero-ghost">
                         Accéder au Guichet Unique
                     </a>
@@ -252,17 +256,17 @@ $derniersPaiements = fetchAllPublic($db, "
 
                     <div class="revenue-total">
                         <small>Recettes de l’année</small>
-                        <strong><?= moneyPublic($totalAnnee) ?></strong>
+                        <strong class="live-money" data-value="<?= (float) $totalAnnee ?>" data-currency="CDF"><?= moneyPublic($totalAnnee) ?></strong>
                     </div>
 
                     <div class="revenue-stats">
                         <div>
                             <span>Semaine</span>
-                            <strong><?= moneyPublic($totalSemaine) ?></strong>
+                            <strong class="live-money" data-value="<?= (float) $totalSemaine ?>" data-currency="CDF"><?= moneyPublic($totalSemaine) ?></strong>
                         </div>
                         <div>
                             <span>Mois</span>
-                            <strong><?= moneyPublic($totalMois) ?></strong>
+                            <strong class="live-money" data-value="<?= (float) $totalMois ?>" data-currency="CDF"><?= moneyPublic($totalMois) ?></strong>
                         </div>
                     </div>
 
@@ -292,26 +296,101 @@ $derniersPaiements = fetchAllPublic($db, "
             <div class="col-6 col-lg-3">
                 <article class="kpi-card">
                     <span class="kpi-icon blue"><i class="bi bi-file-earmark-text"></i></span>
-                    <div><small>Notes de taxation</small><strong><?= (int) $totalNT ?></strong></div>
+                    <div><small>Notes de taxation</small><strong class="live-count" data-value="<?= (int) $totalNT ?>"><?= (int) $totalNT ?></strong></div>
                 </article>
             </div>
             <div class="col-6 col-lg-3">
                 <article class="kpi-card">
                     <span class="kpi-icon violet"><i class="bi bi-receipt"></i></span>
-                    <div><small>Notes de perception</small><strong><?= (int) $totalNP ?></strong></div>
+                    <div><small>Notes de perception</small><strong class="live-count" data-value="<?= (int) $totalNP ?>"><?= (int) $totalNP ?></strong></div>
                 </article>
             </div>
             <div class="col-6 col-lg-3">
                 <article class="kpi-card">
                     <span class="kpi-icon green"><i class="bi bi-wallet2"></i></span>
-                    <div><small>Paiements enregistrés</small><strong><?= (int) $totalPaiements ?></strong></div>
+                    <div><small>Paiements enregistrés</small><strong class="live-count" data-value="<?= (int) $totalPaiements ?>"><?= (int) $totalPaiements ?></strong></div>
                 </article>
             </div>
             <div class="col-6 col-lg-3">
                 <article class="kpi-card">
                     <span class="kpi-icon gold"><i class="bi bi-patch-check"></i></span>
-                    <div><small>Quittances émises</small><strong><?= (int) $totalQuittances ?></strong></div>
+                    <div><small>Quittances émises</small><strong class="live-count" data-value="<?= (int) $totalQuittances ?>"><?= (int) $totalQuittances ?></strong></div>
                 </article>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="public-services-impact" id="services-publics">
+    <div class="impact-glow impact-glow-a"></div>
+    <div class="impact-glow impact-glow-b"></div>
+
+    <div class="container position-relative">
+        <div class="impact-heading">
+            <div>
+                <span class="section-kicker light">SERVICES PUBLICS SÉCURISÉS</span>
+                <h2>Contrôlez une recette sans accéder à l’administration</h2>
+            </div>
+            <p>
+                Trois services publics lisent directement les données officielles de cOllect_Pay,
+                sans ouvrir les modules réservés aux agents.
+            </p>
+        </div>
+
+        <div class="impact-services-grid">
+            <a href="verification_qr.php" class="impact-service-card qr-service">
+                <div class="impact-card-orbit"></div>
+                <span class="impact-service-icon"><i class="bi bi-qr-code-scan"></i></span>
+                <div class="impact-service-copy">
+                    <small>CONTRÔLE ANTI-FRAUDE</small>
+                    <h3>Vérifier QR</h3>
+                    <p>Scannez le QR chiffré d’un document cOllect_Pay avec la caméra ou collez son contenu sécurisé.</p>
+                </div>
+                <span class="impact-arrow"><i class="bi bi-arrow-up-right"></i></span>
+            </a>
+
+            <a href="consultation_np.php" class="impact-service-card np-service">
+                <div class="impact-card-orbit"></div>
+                <span class="impact-service-icon"><i class="bi bi-receipt-cutoff"></i></span>
+                <div class="impact-service-copy">
+                    <small>SITUATION DE LA CRÉANCE</small>
+                    <h3>Consulter NP / NPF</h3>
+                    <p>Vérifiez le montant dû, les paiements enregistrés, le solde, l’échéance et le statut réel de la note.</p>
+                </div>
+                <span class="impact-arrow"><i class="bi bi-arrow-up-right"></i></span>
+            </a>
+
+            <button type="button" class="impact-service-card document-service" onclick="openVerifModal()">
+                <div class="impact-card-orbit"></div>
+                <span class="impact-service-icon"><i class="bi bi-patch-check-fill"></i></span>
+                <div class="impact-service-copy">
+                    <small>REGISTRE DOCUMENTAIRE</small>
+                    <h3>Vérifier un document</h3>
+                    <p>Recherchez une NT, ND, NP, NPF, AMR ou Quittance dans le registre officiel.</p>
+                </div>
+                <span class="impact-arrow"><i class="bi bi-arrow-up-right"></i></span>
+            </button>
+        </div>
+
+        <div class="impact-revenue-ribbon">
+            <div class="ribbon-live"><span></span> DONNÉES RÉELLES</div>
+            <div>
+                <small>Constaté</small>
+                <strong><?= moneyPublic($totalConstatation) ?></strong>
+            </div>
+            <i class="bi bi-chevron-right"></i>
+            <div>
+                <small>Ordonnancé</small>
+                <strong><?= moneyPublic($totalOrdonnance) ?></strong>
+            </div>
+            <i class="bi bi-chevron-right"></i>
+            <div>
+                <small>Recouvré</small>
+                <strong><?= moneyPublic($totalRecouvre) ?></strong>
+            </div>
+            <div class="ribbon-rate">
+                <small>Taux</small>
+                <strong><?= number_format($tauxRecouvrement, 2, ',', ' ') ?> %</strong>
             </div>
         </div>
     </div>
@@ -491,7 +570,7 @@ $derniersPaiements = fetchAllPublic($db, "
                     <span class="section-kicker">TRANSACTIONS RÉCENTES</span>
                     <h2>Derniers paiements enregistrés</h2>
                 </div>
-                <a href="modules/ordonnancement/np_list.php">Consulter les NP <i class="bi bi-arrow-right"></i></a>
+                <a href="consultation_np.php">Consulter les NP <i class="bi bi-arrow-right"></i></a>
             </div>
 
             <div class="table-responsive">
@@ -570,8 +649,9 @@ $derniersPaiements = fetchAllPublic($db, "
             </div>
             <p>© <?= date('Y') ?> cOllect_Pay. Tous droits réservés.</p>
             <div class="footer-links">
-                <a href="modules/inspection/scan_qr.php">Vérifier QR</a>
-                <a href="modules/ordonnancement/np_list.php">Consulter NP</a>
+                <a href="verification_qr.php">Vérifier QR</a>
+                <a href="consultation_np.php">Consulter NP / NPF</a>
+                <button type="button" class="footer-verif-button" onclick="openVerifModal()">Vérifier un document</button>
                 <a href="login.php">Connexion</a>
             </div>
         </div>
@@ -581,5 +661,6 @@ $derniersPaiements = fetchAllPublic($db, "
 <?php require_once __DIR__ . '/verification_widget.php'; ?>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="assets/js/public.js"></script>
+<script src="assets/js/public_interactive.js"></script>
 </body>
 </html>
