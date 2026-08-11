@@ -242,7 +242,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
 <style>
 .grid-2 {
@@ -323,9 +324,10 @@ label {
     margin-top: 14px;
 }
 </style>
+<link rel="stylesheet" href="../../assets/css/ordonnancement.css">
 </head>
 
-<body>
+<body class="cp-ordonnancement-page">
 <div class="admin-layout">
 
 <?php require_once "../../includes/sidebar.php"; ?>
@@ -333,20 +335,20 @@ label {
 <main class="main-content">
 <?php require_once "../../includes/topbar.php"; ?>
 
-<div class="panel">
-    <h2>Créer une Note de Perception Globale</h2>
+<div class="panel cp-panel cp-np-create-shell">
+    <div class="cp-page-heading"><span class="cp-kicker">Ordonnancement</span><h2>Créer une Note de Perception Globale</h2><p>Génération d’une NP depuis une Note de Débit validée conforme.</p></div>
 
     <div class="info-box">
         Cette NP sera générée depuis une ND validée conforme.
         L’échéance est automatiquement fixée à 8 jours ouvrables.
     </div>
 
-    <p><strong>ND :</strong> <?= htmlspecialchars($nd['numero_nd']) ?></p>
+    <div class="cp-reference-grid"><p><strong>ND :</strong> <?= htmlspecialchars($nd['numero_nd']) ?></p>
     <p><strong>NT :</strong> <?= htmlspecialchars($nd['numero_nt']) ?></p>
     <p><strong>Contribuable :</strong> <?= htmlspecialchars(nomContribuableNP($nd)) ?></p>
-    <p><strong>NIF :</strong> <?= htmlspecialchars($nd['nif'] ?? '-') ?></p>
+    <p><strong>NIF :</strong> <?= htmlspecialchars($nd['nif'] ?? '-') ?></p></div>
 
-    <table class="table-premium">
+    <table class="table-premium cp-ord-table">
         <tr>
             <th>Montant principal ND</th>
             <td><?= number_format($nd['montant_acte'] ?? 0, 2, ',', ' ') ?> CDF</td>
@@ -379,7 +381,7 @@ label {
 
     <br>
 
-    <form method="POST">
+    <form method="POST" class="cp-form">
         <div class="grid-2">
             <div>
                 <label>Nom du déclarant / signataire</label>
@@ -398,14 +400,14 @@ label {
             </div>
         </div>
 
-        <div class="panel" style="margin-top:18px;">
+        <div class="panel cp-bank-panel">
             <h3>Répartition bancaire de la NP</h3>
 
             <div class="warning-box">
                 La somme affectée aux comptes bancaires doit être exactement égale au montant total de la NP.
             </div>
 
-            <table class="table-premium">
+            <table class="table-premium cp-ord-table">
                 <tr>
                     <th>Banque</th>
                     <th>Compte</th>
@@ -439,7 +441,7 @@ label {
             </table>
 
             <div class="bank-total">
-                Total réparti : <span id="bankTotalDisplay">0,00</span> CDF
+                <span>Total réparti : <strong><span id="bankTotalDisplay">0,00</span> CDF</strong></span><span class="cp-bank-remaining">Reste à répartir : <strong><span id="bankRemainingDisplay">0,00</span> CDF</strong></span>
             </div>
         </div>
 
@@ -460,6 +462,8 @@ label {
 document.addEventListener('DOMContentLoaded', function(){
     const inputs = document.querySelectorAll('.bank-input');
     const display = document.getElementById('bankTotalDisplay');
+    const remainingDisplay = document.getElementById('bankRemainingDisplay');
+    const totalExpected = parseFloat(document.getElementById('montantTotalNP')?.dataset.total || '0');
 
     function formatNumber(n){
         return n.toLocaleString('fr-FR', {
@@ -476,6 +480,7 @@ document.addEventListener('DOMContentLoaded', function(){
         });
 
         display.textContent = formatNumber(total);
+        if (remainingDisplay) remainingDisplay.textContent = formatNumber(Math.max(totalExpected - total, 0));
     }
 
     inputs.forEach(function(input){

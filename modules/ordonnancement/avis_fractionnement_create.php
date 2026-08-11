@@ -220,7 +220,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
 <style>
 .hero-luxoria{
@@ -268,9 +269,10 @@ textarea{
     min-height:130px;
 }
 </style>
+<link rel="stylesheet" href="../../assets/css/ordonnancement.css">
 </head>
 
-<body>
+<body class="cp-ordonnancement-page">
 <div class="admin-layout">
 
 <?php require_once "../../includes/sidebar.php"; ?>
@@ -278,12 +280,12 @@ textarea{
 <main class="main-content">
 <?php require_once "../../includes/topbar.php"; ?>
 
-<div class="hero-luxoria">
+<div class="hero-luxoria cp-hero">
     <h2>Avis de fractionnement</h2>
     <p>Le numéro d’avis sera généré automatiquement par le système.</p>
 </div>
 
-<div class="panel">
+<div class="panel cp-panel cp-form-shell">
     <h3>I. NP globale concernée</h3>
 
     <div class="info-box">
@@ -294,7 +296,7 @@ textarea{
         Une NP globale ne peut être fractionnée qu’une seule fois. Après création de l’avis, aucun deuxième fractionnement ne sera accepté.
     </div>
 
-    <table class="table-premium">
+    <table class="table-premium cp-ord-table">
         <tr>
             <th>NP globale</th>
             <td><strong><?= htmlspecialchars($np['numero_np']) ?></strong></td>
@@ -325,7 +327,7 @@ textarea{
 <div class="panel">
     <h3>II. Décision de l’autorité</h3>
 
-    <form method="POST">
+    <form method="POST" class="cp-form">
 
         <div class="grid-2">
             <div>

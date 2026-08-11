@@ -76,7 +76,8 @@ function badgeFraction($statut)
 <head>
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
 <style>
 .hero-luxoria {
@@ -151,9 +152,10 @@ function badgeFraction($statut)
     font-size: 12px;
 }
 </style>
+<link rel="stylesheet" href="../../assets/css/ordonnancement.css">
 </head>
 
-<body>
+<body class="cp-ordonnancement-page">
 <div class="admin-layout">
 
 <?php require_once "../../includes/sidebar.php"; ?>
@@ -161,12 +163,12 @@ function badgeFraction($statut)
 <main class="main-content">
 <?php require_once "../../includes/topbar.php"; ?>
 
-<div class="hero-luxoria">
+<div class="hero-luxoria cp-hero">
     <h2>Notes de Perception Fractionnées</h2>
     <p>Suivi des NPF générées à partir des avis de fractionnement accordés.</p>
 </div>
 
-<div class="panel">
+<div class="panel cp-panel cp-list-shell">
     <div class="filters-luxoria">
         <a href="np_list.php?type=globale" class="btn-luxoria">NP globales</a>
         <a href="np_list.php?statut=non_payee" class="btn-luxoria">NP non payées</a>
@@ -174,7 +176,7 @@ function badgeFraction($statut)
         <a href="np_list.php" class="btn-luxoria primary">Toutes les NP</a>
     </div>
 
-    <table class="table-premium">
+    <table class="table-premium cp-ord-table">
         <tr>
             <th>N° NPF</th>
             <th>Tranche</th>

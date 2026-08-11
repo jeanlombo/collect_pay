@@ -125,7 +125,8 @@ function noteEstEchue($n)
 <head>
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
 <style>
 .filters{
@@ -188,9 +189,10 @@ function noteEstEchue($n)
     margin-top:4px;
 }
 </style>
+<link rel="stylesheet" href="../../assets/css/ordonnancement.css">
 </head>
 
-<body>
+<body class="cp-ordonnancement-page">
 <div class="admin-layout">
 
 <?php require_once "../../includes/sidebar.php"; ?>
@@ -198,7 +200,7 @@ function noteEstEchue($n)
 <main class="main-content">
 <?php require_once "../../includes/topbar.php"; ?>
 
-<div class="panel">
+<div class="panel cp-panel cp-list-shell">
     <h2>Notes de Perception</h2>
 
     <div class="filters">
@@ -212,7 +214,7 @@ function noteEstEchue($n)
         <a href="np_list.php?statut=defaillante">Défaillantes</a>
     </div>
 
-    <table class="table-premium">
+    <table class="table-premium cp-ord-table">
         <tr>
             <th>N° NP / NPF</th>
             <th>Type</th>
@@ -291,14 +293,14 @@ function noteEstEchue($n)
                             !$amr
                         ): ?>
                             <a class="btn-amr"
-                               href="/collect_pay/modules/recouvrement/amr_generate.php?numero=<?= urlencode($n['numero_np']) ?>">
+                               href="../recouvrement/amr_generate.php?numero=<?= urlencode($n['numero_np']) ?>">
                                 ⚠️ Générer AMR
                             </a>
                         <?php endif; ?>
 
                         <?php if (peutPayerNP($n)): ?>
                             <a class="btn-pay"
-                               href="/collect_pay/modules/recouvrement/paiement_add.php?numero=<?= urlencode($n['numero_np']) ?>">
+                               href="../recouvrement/paiement_add.php?numero=<?= urlencode($n['numero_np']) ?>">
                                 Payer
                             </a>
                         <?php endif; ?>
@@ -319,7 +321,7 @@ function noteEstEchue($n)
 
                         <?php if (($n['statut'] ?? '') === 'payee'): ?>
                             <a class="btn-pay"
-                               href="/collect_pay/modules/recouvrement/apurement_process.php?numero=<?= urlencode($n['numero_np']) ?>">
+                               href="../recouvrement/apurement_process.php?numero=<?= urlencode($n['numero_np']) ?>">
                                 Apurer
                             </a>
                         <?php endif; ?>

@@ -234,7 +234,8 @@ $montant_indicatif = $montant_total / $nombre_tranches;
 <head>
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
 <style>
 .hero-luxoria{
@@ -285,9 +286,10 @@ label{
     margin-bottom:6px;
 }
 </style>
+<link rel="stylesheet" href="../../assets/css/ordonnancement.css">
 </head>
 
-<body>
+<body class="cp-ordonnancement-page">
 <div class="admin-layout">
 
 <?php require_once "../../includes/sidebar.php"; ?>
@@ -295,12 +297,12 @@ label{
 <main class="main-content">
 <?php require_once "../../includes/topbar.php"; ?>
 
-<div class="hero-luxoria">
+<div class="hero-luxoria cp-hero">
     <h2>Génération des NPF</h2>
     <p>Les NPF seront numérotées selon la NP mère : NP-MERE-001, NP-MERE-002...</p>
 </div>
 
-<div class="panel">
+<div class="panel cp-panel cp-form-shell">
     <h3>I. Avis de fractionnement</h3>
 
     <div class="info-box">
@@ -313,7 +315,7 @@ label{
         La première NPF doit être payée le même jour. Son échéance sera égale à la date de génération.
     </div>
 
-    <table class="table-premium">
+    <table class="table-premium cp-ord-table">
         <tr><th>ND</th><td><?= htmlspecialchars($avis['numero_nd']) ?></td></tr>
         <tr><th>NT</th><td><?= htmlspecialchars($avis['numero_nt']) ?></td></tr>
         <tr><th>Contribuable</th><td><?= htmlspecialchars(nomContribuableNPF($avis)) ?></td></tr>
@@ -333,7 +335,7 @@ label{
 <div class="panel">
     <h3>II. Répartition manuelle des tranches</h3>
 
-    <form method="POST">
+    <form method="POST" class="cp-form">
         <input type="hidden" name="numero_avis" value="<?= htmlspecialchars($avis['numero_avis']) ?>">
 
         <div class="grid-2">

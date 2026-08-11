@@ -42,7 +42,8 @@ function nomContribuableAvisList($c) {
 <head>
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
 <style>
 .badge{
@@ -63,20 +64,21 @@ function nomContribuableAvisList($c) {
     color:#111827;
 }
 </style>
+<link rel="stylesheet" href="../../assets/css/ordonnancement.css">
 </head>
 
-<body>
+<body class="cp-ordonnancement-page">
 <div class="admin-layout">
 <?php require_once "../../includes/sidebar.php"; ?>
 
 <main class="main-content">
 <?php require_once "../../includes/topbar.php"; ?>
 
-<div class="panel">
+<div class="panel cp-panel">
     <h2>Avis de fractionnement</h2>
     <p>Une NP globale ne peut être fractionnée qu'une seule fois. Si l'avis existe déjà, vous pouvez seulement consulter ou générer les NPF liées.</p>
 
-    <table class="table-premium">
+    <table class="table-premium cp-ord-table">
         <tr>
             <th>N° NP</th>
             <th>Contribuable</th>

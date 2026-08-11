@@ -127,7 +127,8 @@ $statutLabel = strtoupper(str_replace('_', ' ', $np['statut'] ?? 'en_attente'));
 <head>
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
 <style>
 .doc-header{
@@ -208,9 +209,10 @@ $statutLabel = strtoupper(str_replace('_', ' ', $np['statut'] ?? 'en_attente'));
     font-size:12px;
 }
 </style>
+<link rel="stylesheet" href="../../assets/css/ordonnancement.css">
 </head>
 
-<body>
+<body class="cp-ordonnancement-page">
 <div class="admin-layout">
 
 <?php require_once "../../includes/sidebar.php"; ?>
@@ -233,10 +235,10 @@ $statutLabel = strtoupper(str_replace('_', ' ', $np['statut'] ?? 'en_attente'));
     </span>
 </div>
 
-<div class="panel">
+<div class="panel cp-panel cp-view-shell">
     <h3>I. Références</h3>
 
-    <table class="table-premium">
+    <table class="table-premium cp-ord-table">
         <tr>
             <th>Type NP</th>
             <td><?= strtoupper(htmlspecialchars($np['type_np'] ?? '-')) ?></td>
@@ -283,7 +285,7 @@ $statutLabel = strtoupper(str_replace('_', ' ', $np['statut'] ?? 'en_attente'));
 <div class="panel">
     <h3>III. Montant & échéance</h3>
 
-    <table class="table-premium">
+    <table class="table-premium cp-ord-table">
         <tr>
             <th>Montant initial</th>
             <td><?= number_format($np['montant_initial'] ?? 0, 2, ',', ' ') ?> CDF</td>
@@ -362,7 +364,7 @@ $statutLabel = strtoupper(str_replace('_', ' ', $np['statut'] ?? 'en_attente'));
 <div class="panel">
     <h3>VI. Notes de Perception Fractionnées liées</h3>
 
-    <table class="table-premium">
+    <table class="table-premium cp-ord-table">
         <tr>
             <th>N° NPF</th>
             <th>Tranche</th>
@@ -395,7 +397,7 @@ $statutLabel = strtoupper(str_replace('_', ' ', $np['statut'] ?? 'en_attente'));
                     </a>
 
                     <?php if (in_array(($f['statut'] ?? ''), ['en_attente', 'non_payee', 'partiellement_payee', 'partielle'])): ?>
-                        <a href="/collect_pay/modules/recouvrement/paiement_add.php?numero=<?= urlencode($f['numero_np']) ?>"
+                        <a href="../recouvrement/paiement_add.php?numero=<?= urlencode($f['numero_np']) ?>"
                            class="btn-gold-custom">
                             Payer
                         </a>
@@ -440,7 +442,7 @@ $statutLabel = strtoupper(str_replace('_', ' ', $np['statut'] ?? 'en_attente'));
         <?php endif; ?>
 
         <?php if (in_array(($np['statut'] ?? ''), ['en_attente', 'non_payee', 'partiellement_payee', 'partielle', 'fractionnee'])): ?>
-            <a href="/collect_pay/modules/recouvrement/paiement_add.php?numero=<?= urlencode($np['numero_np']) ?>"
+            <a href="../recouvrement/paiement_add.php?numero=<?= urlencode($np['numero_np']) ?>"
                class="btn-gold-custom">
                 💰 Nouveau paiement
             </a>
