@@ -1,396 +1,67 @@
 <?php
-require_once "../../auth/check_auth.php";
+require_once "_rapport_bootstrap.php";
+$f=cpRapportFilters(); $c=cpRapportCatalogues($pdo);
+$search=trim((string)($_GET['search']??'')); $statut=trim((string)($_GET['statut']??'tous'));
+$rows=[];
 
-checkAuth();
-requirePermission('rapports','analytique');
+if($search!==''){
+ [$where,$params]=cpRapportScopeWhere($f,"COALESCE(np.date_emission,np.created_at)");
+ $like="%{$search}%";
+ $where[]="(ct.raison_sociale LIKE ? OR ct.nom LIKE ? OR ct.postnom LIKE ? OR ct.prenom LIKE ? OR ct.nif LIKE ? OR ct.telephone LIKE ?)";
+ array_push($params,$like,$like,$like,$like,$like,$like);
+ if($statut==='payees')$where[]="np.statut='payee'";
+ elseif($statut==='partielles')$where[]="np.statut='partiellement_payee'";
+ elseif($statut==='non_payees')$where[]="np.statut IN ('en_attente','non_payee','defaillante')";
+ $whereSql="WHERE ".implode(" AND ",$where);
 
-$page_title = "Rapport par Assujetti";
-
-$search = trim($_GET['search'] ?? '');
-$date_debut = $_GET['date_debut'] ?? '';
-$date_fin = $_GET['date_fin'] ?? '';
-$statut_note = $_GET['statut_note'] ?? 'toutes';
-
-$notes = [];
-
-if ($search !== '') {
-
-    $sql = "
-        SELECT
-            np.id AS np_id,
-            np.numero_np,
-            np.type_np,
-            np.statut AS statut_np,
-            np.date_emission,
-            np.date_echeance,
-            np.montant_initial,
-            np.montant_paye,
-            np.solde_restant,
-            np.montant_total,
-            np.penalite_recouvrement,
-            np.compte_bancaire,
-
-            nd.numero_nd,
-            nt.numero_nt,
-
-            c.raison_sociale,
-            c.nom,
-            c.postnom,
-            c.prenom,
-            c.nif,
-            c.telephone,
-
-            IFNULL(SUM(p.montant_paye),0) AS total_paye_reel,
-            IFNULL(SUM(p.montant_converti_cdf),0) AS total_converti_cdf,
-            COUNT(p.id) AS nombre_paiements,
-            GROUP_CONCAT(
-                CONCAT(
-                    DATE_FORMAT(p.date_paiement,'%d/%m/%Y'),
-                    ' - ',
-                    FORMAT(p.montant_paye,2),
-                    ' ',
-                    p.devise,
-                    ' - Réf: ',
-                    IFNULL(p.reference_transaction,'-')
-                )
-                SEPARATOR ' | '
-            ) AS details_paiements
-
-        FROM notes_perception np
-        LEFT JOIN paiements p ON p.note_perception_id = np.id
-        LEFT JOIN notes_debit nd ON np.note_debit_id = nd.id
-        LEFT JOIN notes_taxation nt ON nd.note_taxation_id = nt.id
-        LEFT JOIN contribuables c ON nt.contribuable_id = c.id
-
-        WHERE (
-            c.raison_sociale LIKE ?
-            OR c.nom LIKE ?
-            OR c.postnom LIKE ?
-            OR c.prenom LIKE ?
-            OR c.nif LIKE ?
-            OR c.telephone LIKE ?
-        )
-    ";
-
-    $params = [];
-    $like = "%".$search."%";
-
-    for ($i = 0; $i < 6; $i++) {
-        $params[] = $like;
-    }
-
-    if ($date_debut !== '') {
-        $sql .= " AND DATE(np.date_emission) >= ?";
-        $params[] = $date_debut;
-    }
-
-    if ($date_fin !== '') {
-        $sql .= " AND DATE(np.date_emission) <= ?";
-        $params[] = $date_fin;
-    }
-
-    if ($statut_note === 'payees') {
-        $sql .= " AND np.statut = 'payee'";
-    } elseif ($statut_note === 'non_payees') {
-        $sql .= " AND np.statut IN ('en_attente','non_payee','defaillante')";
-    } elseif ($statut_note === 'partielles') {
-        $sql .= " AND np.statut = 'partiellement_payee'";
-    }
-
-    $sql .= "
-        GROUP BY np.id
-        ORDER BY np.date_emission DESC, np.id DESC
-    ";
-
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute($params);
-    $notes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+ $paySub="
+  SELECT note_perception_id,
+         SUM(CASE WHEN statut<>'annule' THEN montant_converti_cdf ELSE 0 END) total_paye,
+         COUNT(CASE WHEN statut<>'annule' THEN 1 END) nb_paiements,
+         GROUP_CONCAT(CASE WHEN statut<>'annule' THEN CONCAT(DATE_FORMAT(date_paiement,'%d/%m/%Y'),' — ',FORMAT(montant_paye,2),' ',devise,' — ',IFNULL(reference_transaction,'-')) END SEPARATOR ' | ') details
+  FROM paiements WHERE note_perception_id IS NOT NULL GROUP BY note_perception_id
+ ";
+ $sql="
+ SELECT np.*,nd.numero_nd,nt.numero_nt,
+        ".cpRapportNomContribuableSql("ct")." contribuable,
+        ct.nif,ct.telephone,pr.nom province,ce.nom centre,s.nom_service,
+        COALESCE(pp.total_paye,0) total_paye_reel,COALESCE(pp.nb_paiements,0) nb_paiements,pp.details
+ FROM notes_perception np
+ JOIN notes_debit nd ON np.note_debit_id=nd.id
+ JOIN notes_taxation nt ON nd.note_taxation_id=nt.id
+ JOIN contribuables ct ON nt.contribuable_id=ct.id
+ JOIN centres ce ON nt.centre_id=ce.id
+ JOIN provinces pr ON ce.province_id=pr.id
+ LEFT JOIN services_assiette s ON nt.service_id=s.id
+ LEFT JOIN directions d ON s.direction_id=d.id
+ LEFT JOIN ({$paySub}) pp ON pp.note_perception_id=np.id
+ {$whereSql}
+ ORDER BY COALESCE(np.date_emission,np.created_at) DESC,np.id DESC
+ ";
+ $stmt=$pdo->prepare($sql);$stmt->execute($params);$rows=$stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+$totalDu=$totalPaye=0;
+foreach($rows as $r){$totalDu+=(float)($r['montant_initial']?:$r['montant_total']);$totalPaye+=(float)$r['total_paye_reel'];}
+$solde=max(0,$totalDu-$totalPaye);
 
-function nomAssujettiRapport($r) {
-    if (!empty($r['raison_sociale'])) {
-        return $r['raison_sociale'];
-    }
-
-    return trim(($r['nom'] ?? '') . ' ' . ($r['postnom'] ?? '') . ' ' . ($r['prenom'] ?? ''));
-}
-
-$totalDu = 0;
-$totalPaye = 0;
-$totalSolde = 0;
-$totalConvertiCDF = 0;
-$nbPayees = 0;
-$nbNonPayees = 0;
-$nbPartielles = 0;
-
-foreach ($notes as $n) {
-    $montantDu = (float)($n['montant_initial'] ?: $n['montant_total']);
-    $paye = (float)($n['montant_paye'] ?: $n['total_paye_reel']);
-    $solde = (float)($n['solde_restant'] ?? 0);
-
-    $totalDu += $montantDu;
-    $totalPaye += $paye;
-    $totalSolde += $solde;
-    $totalConvertiCDF += (float)($n['total_converti_cdf'] ?? 0);
-
-    if (($n['statut_np'] ?? '') === 'payee') $nbPayees++;
-    elseif (($n['statut_np'] ?? '') === 'partiellement_payee') $nbPartielles++;
-    else $nbNonPayees++;
-}
-
-function badgeStatutNote($statut) {
-    $statut = strtolower((string)$statut);
-
-    if ($statut === 'payee') {
-        return "<span class='badge badge-green'>PAYÉE</span>";
-    }
-
-    if ($statut === 'partiellement_payee') {
-        return "<span class='badge badge-orange'>PARTIELLE</span>";
-    }
-
-    if ($statut === 'defaillante') {
-        return "<span class='badge badge-red'>DÉFAILLANTE</span>";
-    }
-
-    return "<span class='badge badge-gray'>" . htmlspecialchars(strtoupper($statut ?: 'NON PAYÉE')) . "</span>";
-}
+cpRapportPageStart("Rapport par assujetti","Toutes les notes d’un contribuable, payées ou non payées.");
 ?>
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="../../assets/css/admin.css">
-
-<style>
-.report-hero{
-    background:linear-gradient(135deg,#06152b,#0f3460);
-    color:white;
-    padding:24px;
-    border-radius:24px;
-    margin-bottom:20px;
-}
-.report-hero h2{margin:0;font-weight:1000}
-.report-hero p{margin:8px 0 0;color:#dbeafe;font-weight:800}
-
-.filter-grid{
-    display:grid;
-    grid-template-columns:2fr 1fr 1fr 1fr auto;
-    gap:12px;
-}
-.filter-grid input,
-.filter-grid select{
-    padding:12px;
-    border:1px solid #d1d5db;
-    border-radius:12px;
-    font-weight:800;
-}
-.filter-grid button{
-    background:#0f3460;
-    color:white;
-    border:none;
-    border-radius:12px;
-    padding:12px 18px;
-    font-weight:900;
-}
-
-.cards{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:14px;
-    margin-bottom:20px;
-}
-.cardx{
-    background:white;
-    border:1px solid #e5e7eb;
-    border-radius:18px;
-    padding:18px;
-    box-shadow:0 8px 20px rgba(0,0,0,.06);
-}
-.cardx small{
-    display:block;
-    color:#64748b;
-    font-weight:900;
-}
-.cardx strong{
-    display:block;
-    margin-top:8px;
-    color:#0f3460;
-    font-size:20px;
-}
-
-.badge{
-    display:inline-block;
-    padding:6px 10px;
-    border-radius:999px;
-    font-weight:900;
-    font-size:12px;
-}
-.badge-green{background:#dcfce7;color:#166534}
-.badge-orange{background:#ffedd5;color:#9a3412}
-.badge-red{background:#fee2e2;color:#991b1b}
-.badge-gray{background:#e5e7eb;color:#374151}
-
-.payment-details{
-    font-size:12px;
-    color:#475569;
-    max-width:280px;
-    line-height:1.5;
-}
-
-@media(max-width:1000px){
-    .filter-grid,.cards{grid-template-columns:1fr}
-}
-</style>
-<link rel="stylesheet" href="../../assets/css/rapports.css">
-</head>
-
-<body class="cp-rapports-page">
-<div class="admin-layout">
-
-<?php require_once "../../includes/sidebar.php"; ?>
-
-<main class="main-content">
-
-<?php require_once "../../includes/topbar.php"; ?>
-
-<div class="report-hero">
-    <h2>Rapport complet par Assujetti</h2>
-    <p>Recherche toutes les notes d’un assujetti : payées, non payées, partielles ou défaillantes.</p>
-</div>
-
-<div class="panel">
-    <form method="GET" class="filter-grid">
-        <input type="text" name="search"
-               placeholder="Nom, postnom, prénom, société, NIF ou téléphone"
-               value="<?= htmlspecialchars($search) ?>"
-               required>
-
-        <input type="date" name="date_debut" value="<?= htmlspecialchars($date_debut) ?>">
-        <input type="date" name="date_fin" value="<?= htmlspecialchars($date_fin) ?>">
-
-        <select name="statut_note">
-            <option value="toutes" <?= $statut_note==='toutes'?'selected':'' ?>>Toutes les notes</option>
-            <option value="payees" <?= $statut_note==='payees'?'selected':'' ?>>Notes payées</option>
-            <option value="non_payees" <?= $statut_note==='non_payees'?'selected':'' ?>>Notes non payées</option>
-            <option value="partielles" <?= $statut_note==='partielles'?'selected':'' ?>>Notes partiellement payées</option>
-        </select>
-
-        <button type="submit">Rechercher</button>
-    </form>
-</div>
-
-<?php if ($search !== ''): ?>
-
-<div class="cards">
-    <div class="cardx">
-        <small>Total dû</small>
-        <strong><?= number_format($totalDu,2,',',' ') ?> CDF</strong>
-    </div>
-
-    <div class="cardx">
-        <small>Total payé</small>
-        <strong><?= number_format($totalPaye,2,',',' ') ?> CDF</strong>
-    </div>
-
-    <div class="cardx">
-        <small>Solde restant</small>
-        <strong><?= number_format($totalSolde,2,',',' ') ?> CDF</strong>
-    </div>
-
-    <div class="cardx">
-        <small>Notes trouvées</small>
-        <strong><?= count($notes) ?></strong>
-    </div>
-</div>
-
-<div class="cards">
-    <div class="cardx">
-        <small>Notes payées</small>
-        <strong><?= $nbPayees ?></strong>
-    </div>
-
-    <div class="cardx">
-        <small>Notes partielles</small>
-        <strong><?= $nbPartielles ?></strong>
-    </div>
-
-    <div class="cardx">
-        <small>Notes non payées / défaillantes</small>
-        <strong><?= $nbNonPayees ?></strong>
-    </div>
-
-    <div class="cardx">
-        <small>Total converti CDF</small>
-        <strong><?= number_format($totalConvertiCDF,2,',',' ') ?> CDF</strong>
-    </div>
-</div>
-
-<div class="panel">
-    <h3>Résultat pour : <?= htmlspecialchars($search) ?></h3>
-
-    <table class="table-premium cp-report-table">
-        <tr>
-            <th>Date émission</th>
-            <th>Assujetti</th>
-            <th>NIF</th>
-            <th>NT</th>
-            <th>ND</th>
-            <th>NP / NPF</th>
-            <th>Montant dû</th>
-            <th>Montant payé</th>
-            <th>Solde</th>
-            <th>Statut</th>
-            <th>Paiements</th>
-            <th>Compte bancaire</th>
-        </tr>
-
-        <?php foreach($notes as $n): ?>
-            <?php
-                $montantDu = (float)($n['montant_initial'] ?: $n['montant_total']);
-                $paye = (float)($n['montant_paye'] ?: $n['total_paye_reel']);
-                $solde = (float)($n['solde_restant'] ?? 0);
-            ?>
-            <tr>
-                <td><?= htmlspecialchars($n['date_emission'] ?? '-') ?></td>
-                <td><strong><?= htmlspecialchars(nomAssujettiRapport($n)) ?></strong></td>
-                <td><?= htmlspecialchars($n['nif'] ?? '-') ?></td>
-                <td><?= htmlspecialchars($n['numero_nt'] ?? '-') ?></td>
-                <td><?= htmlspecialchars($n['numero_nd'] ?? '-') ?></td>
-                <td>
-                    <strong><?= htmlspecialchars($n['numero_np'] ?? '-') ?></strong>
-                    <?php if (!empty($n['type_np'])): ?>
-                        <br><small><?= strtoupper(htmlspecialchars($n['type_np'])) ?></small>
-                    <?php endif; ?>
-                </td>
-                <td><?= number_format($montantDu,2,',',' ') ?> CDF</td>
-                <td><strong><?= number_format($paye,2,',',' ') ?> CDF</strong></td>
-                <td><?= number_format($solde,2,',',' ') ?> CDF</td>
-                <td><?= badgeStatutNote($n['statut_np'] ?? '') ?></td>
-                <td class="payment-details">
-                    <?php if (!empty($n['details_paiements'])): ?>
-                        <?= htmlspecialchars($n['details_paiements']) ?>
-                    <?php else: ?>
-                        Aucun paiement enregistré
-                    <?php endif; ?>
-                </td>
-                <td><?= htmlspecialchars($n['compte_bancaire'] ?? '-') ?></td>
-            </tr>
-        <?php endforeach; ?>
-
-        <?php if(empty($notes)): ?>
-            <tr>
-                <td colspan="12">Aucune note trouvée pour cet assujetti.</td>
-            </tr>
-        <?php endif; ?>
-    </table>
-</div>
-
-<?php endif; ?>
-
-</main>
-</div>
-</body>
-</html>
+<section class="rp-panel">
+<form method="GET" class="rp-search-form">
+ <label class="grow">Assujetti / NIF / téléphone<input type="text" name="search" required value="<?=cpRapportH($search)?>" placeholder="Ex. Société, nom, NIF, téléphone"></label>
+ <label>Statut<select name="statut"><option value="tous" <?=$statut==='tous'?'selected':''?>>Toutes les notes</option><option value="payees" <?=$statut==='payees'?'selected':''?>>Payées</option><option value="non_payees" <?=$statut==='non_payees'?'selected':''?>>Non payées</option><option value="partielles" <?=$statut==='partielles'?'selected':''?>>Partielles</option></select></label>
+ <label>Du<input type="date" name="date_debut" value="<?=cpRapportH($f['date_debut'])?>"></label>
+ <label>Au<input type="date" name="date_fin" value="<?=cpRapportH($f['date_fin'])?>"></label>
+ <button>Rechercher</button>
+</form>
+</section>
+<?php if($search!==''):?>
+<section class="rp-kpis"><article><small>Notes trouvées</small><strong><?=count($rows)?></strong></article><article><small>Total dû</small><strong><?=cpRapportMoney($totalDu)?></strong></article><article><small>Total payé</small><strong><?=cpRapportMoney($totalPaye)?></strong></article><article><small>Solde</small><strong><?=cpRapportMoney($solde)?></strong></article></section>
+<section class="rp-panel"><div class="rp-table-wrap"><table class="rp-table"><thead><tr><th>Date</th><th>Assujetti</th><th>NT</th><th>ND</th><th>NP/NPF</th><th>Dû</th><th>Payé</th><th>Solde</th><th>Statut</th><th>Paiements</th></tr></thead><tbody>
+<?php foreach($rows as $r):$du=(float)($r['montant_initial']?:$r['montant_total']);$pa=(float)$r['total_paye_reel'];$so=max(0,$du-$pa);?>
+<tr><td><?=cpRapportDate($r['date_emission']?:$r['created_at'])?></td><td><b><?=cpRapportH($r['contribuable'])?></b><small>NIF: <?=cpRapportH($r['nif'])?></small></td><td><?=cpRapportH($r['numero_nt'])?></td><td><?=cpRapportH($r['numero_nd'])?></td><td><?=cpRapportH($r['numero_np'])?></td><td><?=cpRapportMoney($du)?></td><td><?=cpRapportMoney($pa)?></td><td><?=cpRapportMoney($so)?></td><td><?=cpRapportStatusBadge($r['statut'])?></td><td class="rp-details"><?=cpRapportH($r['details']?:'Aucun paiement')?></td></tr>
+<?php endforeach;?>
+<?php if(!$rows):?><tr><td colspan="10" class="rp-empty">Aucune note trouvée.</td></tr><?php endif;?>
+</tbody></table></div></section>
+<?php endif;?>
+<?php cpRapportPageEnd(); ?>
