@@ -39,6 +39,7 @@ $stmt = $pdo->prepare("
         np.*,
         nd.numero_nd,
         nt.numero_nt,
+        nt.centre_id AS centre_id_taxation,
         c.raison_sociale,
         c.nom,
         c.postnom,
@@ -151,10 +152,73 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         die("Cette NP a déjà fait l'objet d'un fractionnement. Impossible de la fractionner une deuxième fois.");
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Centre / province de référence
+    |--------------------------------------------------------------------------
+    | On ne dépend pas uniquement de la session Railway.
+    | La NP provient d'une ND puis d'une NT qui possède déjà son centre.
+    */
+    $centre_id = (int)($np['centre_id_taxation'] ?? 0);
+
+    if ($centre_id <= 0) {
+        $centre_id = (int)($_SESSION['centre_id'] ?? 0);
+    }
+
+    if ($centre_id <= 0) {
+        die("Centre de référence introuvable pour l'avis de fractionnement.");
+    }
+
+    $stmtCentre = $pdo->prepare("
+        SELECT province_id
+        FROM centres
+        WHERE id = ?
+        LIMIT 1
+    ");
+    $stmtCentre->execute([$centre_id]);
+    $centreInfo = $stmtCentre->fetch(PDO::FETCH_ASSOC);
+
+    $province_id = (int)($centreInfo['province_id'] ?? 0);
+
+    if ($province_id <= 0) {
+        die("Province liée au centre introuvable.");
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Utilisateur responsable
+    |--------------------------------------------------------------------------
+    */
+    $user_id = (int)($_SESSION['user_id'] ?? 0);
+
+    if ($user_id <= 0) {
+        $emailSession = trim((string)($_SESSION['email'] ?? $_SESSION['user_email'] ?? ''));
+
+        if ($emailSession !== '') {
+            $stmtUser = $pdo->prepare("
+                SELECT id
+                FROM users
+                WHERE email = ?
+                LIMIT 1
+            ");
+            $stmtUser->execute([$emailSession]);
+            $userInfo = $stmtUser->fetch(PDO::FETCH_ASSOC);
+            $user_id = (int)($userInfo['id'] ?? 0);
+
+            if ($user_id > 0) {
+                $_SESSION['user_id'] = $user_id;
+            }
+        }
+    }
+
+    if ($user_id <= 0) {
+        die("Utilisateur responsable introuvable. Veuillez vous reconnecter.");
+    }
+
     $numero_avis = genererNumero(
         'AVF',
-        $_SESSION['province_id'],
-        $_SESSION['centre_id'],
+        $province_id,
+        $centre_id,
         $pdo
     );
 
@@ -169,8 +233,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'autorite_type' => $autorite_type,
             'autorite_nom' => $autorite_nom,
             'annotation' => $annotation,
-            'user_directeur_recouvrement_id' => $_SESSION['user_id'],
+            'user_directeur_recouvrement_id' => $user_id,
+            'user_recouvrement_id' => $user_id,
             'montant_total' => $np['solde_restant'],
+            'nombre_fractions' => $nombre_tranches,
             'nombre_tranches' => $nombre_tranches,
             'statut' => 'accorde',
             'date_avis' => date('Y-m-d'),
@@ -199,7 +265,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         auditLog(
             $pdo,
-            $_SESSION['user_id'] ?? null,
+            $user_id,
             "Création avis de fractionnement",
             "Ordonnancement",
             $numero_avis,
