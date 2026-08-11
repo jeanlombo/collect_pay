@@ -37,12 +37,12 @@ if (!function_exists('cpCleanOutputBeforePdf')) {
     }
 }
 
-require_once "../config/database.php";
-require_once "../config/security.php";
-require_once "../config/app.php";
-require_once "../lib/fpdf/fpdf.php";
-require_once "../lib/phpqrcode/qrlib.php";
-require_once "../core/secure_qr_engine.php";
+require_once __DIR__ . "/../../config/database.php";
+require_once __DIR__ . "/../../config/security.php";
+require_once __DIR__ . "/../../config/app.php";
+require_once __DIR__ . "/../../lib/fpdf/fpdf.php";
+require_once __DIR__ . "/../../lib/phpqrcode/qrlib.php";
+require_once __DIR__ . "/../../core/secure_qr_engine.php";
 
 checkAuth();
 
