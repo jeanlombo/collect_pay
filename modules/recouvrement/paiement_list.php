@@ -51,7 +51,8 @@ function badgePaiement($statut) {
 <head>
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
 <style>
 .badge{
@@ -85,9 +86,10 @@ function badgePaiement($statut) {
 }
 .top-actions{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 </style>
+<link rel="stylesheet" href="../../assets/css/recouvrement.css">
 </head>
 
-<body>
+<body class="cp-recouvrement-page">
 <div class="admin-layout">
 
 <?php require_once "../../includes/sidebar.php"; ?>
@@ -95,12 +97,12 @@ function badgePaiement($statut) {
 <main class="main-content">
 <?php require_once "../../includes/topbar.php"; ?>
 
-<div class="panel">
+<div class="panel cp-rec-panel">
     <div class="top-actions">
         <h2>Liste des paiements</h2>
 
         <!-- Le paiement doit partir d'une NP/NPF pour éviter l'erreur Numéro NP obligatoire -->
-        <a href="/collect_pay/modules/ordonnancement/np_list.php" class="btn-gold">
+        <a href="../ordonnancement/np_list.php" class="btn-gold">
             + Nouveau paiement depuis une NP / NPF
         </a>
     </div>
@@ -109,7 +111,7 @@ function badgePaiement($statut) {
         Pour enregistrer un paiement, choisissez d'abord la NP/NPF concernée puis cliquez sur <strong>Payer</strong>.
     </p>
 
-    <table class="table-premium">
+    <table class="table-premium cp-rec-table">
         <tr>
             <th>Date</th>
             <th>NP / NPF</th>
@@ -140,13 +142,13 @@ function badgePaiement($statut) {
                 <td><?= htmlspecialchars($p['nom_comptable'] ?? '-') ?></td>
                 <td>
                     <div class="action-buttons">
-                        <a href="/collect_pay/modules/recouvrement/paiement_view.php?id=<?= (int)$p['id'] ?>"
+                        <a href="paiement_view.php?id=<?= (int)$p['id'] ?>"
                            class="btn-small">
                             Voir
                         </a>
 
                         <?php if (!empty($p['reference_transaction'])): ?>
-                            <a href="/collect_pay/modules/recouvrement/paiement_view.php?reference=<?= urlencode($p['reference_transaction']) ?>"
+                            <a href="paiement_view.php?reference=<?= urlencode($p['reference_transaction']) ?>"
                                class="btn-small">
                                 Réf.
                             </a>

@@ -12,6 +12,34 @@ require_once "../../core/numero_generator.php";
 require_once "../../core/secure_qr_engine.php";
 
 checkAuth();
+
+if (!function_exists('cpRecouvrementCurrentUserId')) {
+    function cpRecouvrementCurrentUserId(PDO $pdo): int
+    {
+        $id = (int)(cpRecouvrementCurrentUserId($pdo) ?? 0);
+
+        if ($id > 0) {
+            return $id;
+        }
+
+        $email = trim((string)($_SESSION['email'] ?? $_SESSION['user_email'] ?? ''));
+
+        if ($email !== '') {
+            $stmtUser = $pdo->prepare("SELECT id FROM users WHERE email = ? LIMIT 1");
+            $stmtUser->execute([$email]);
+            $rowUser = $stmtUser->fetch(PDO::FETCH_ASSOC);
+            $id = (int)($rowUser['id'] ?? 0);
+
+            if ($id > 0) {
+                $_SESSION['user_id'] = $id;
+                return $id;
+            }
+        }
+
+        return 0;
+    }
+}
+
 requirePermission('quittances', 'create');
 
 $apurement_id = isset($_GET['apurement_id']) ? (int)$_GET['apurement_id'] : 0;
@@ -37,7 +65,7 @@ ensureQuittanceSignatureColumns($pdo);
 $stmt = $pdo->prepare("
     SELECT ap.*, np.numero_np, np.type_np, np.np_mere_id, np.statut AS statut_np,
            np.solde_restant AS solde_np, np.montant_initial, np.montant_paye,
-           nd.numero_nd, nt.numero_nt,
+           nd.numero_nd, nt.numero_nt, nt.centre_id AS centre_id_taxation,
            c.raison_sociale, c.nom, c.postnom, c.prenom, c.nif
     FROM apurements ap
     JOIN notes_perception np ON ap.reference_id = np.id
@@ -79,7 +107,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($nomReceptionniste === '') die("Nom du réceptionniste obligatoire.");
 
     try {
-        $numero_qt = genererNumero('QT', $_SESSION['province_id'] ?? null, $_SESSION['centre_id'] ?? null, $pdo);
+        $centre_id = (int)($apurement['centre_id_taxation'] ?? 0);
+
+        if ($centre_id <= 0) {
+            die("Centre de taxation introuvable pour la quittance.");
+        }
+
+        $stmtCentre = $pdo->prepare("
+            SELECT province_id
+            FROM centres
+            WHERE id = ?
+            LIMIT 1
+        ");
+        $stmtCentre->execute([$centre_id]);
+        $centreInfo = $stmtCentre->fetch(PDO::FETCH_ASSOC);
+
+        $province_id = (int)($centreInfo['province_id'] ?? 0);
+
+        if ($province_id <= 0) {
+            die("Province liée au centre introuvable.");
+        }
+
+        $numero_qt = genererNumero('QT', $province_id, $centre_id, $pdo);
         $montant = (float)$apurement['montant_paye'];
 
         $token = getOrCreateDocumentToken($pdo, 'QUITTANCE', $numero_qt, $montant);
@@ -101,7 +150,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $montant,
             $token,
             $qr_data,
-            $_SESSION['user_id'] ?? null,
+            cpRecouvrementCurrentUserId($pdo),
             (float)($apurement['penalite_validee'] ?? 0),
             $nomReceptionniste,
             $fonctionReceptionniste,
@@ -109,7 +158,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
 
         if (function_exists('auditLog')) {
-            auditLog($pdo, $_SESSION['user_id'] ?? null, "Quittance générée", "Recouvrement", $numero_qt, "Quittance générée pour apurement #".$apurement_id);
+            auditLog($pdo, cpRecouvrementCurrentUserId($pdo), "Quittance générée", "Recouvrement", $numero_qt, "Quittance générée pour apurement #".$apurement_id);
         }
 
         header("Location: quittance_view.php?numero=" . urlencode($numero_qt));
@@ -132,7 +181,8 @@ $page_title = "Générer quittance";
 <head>
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 <style>
 .qt-hero{background:linear-gradient(135deg,#064e3b,#0f766e);color:#fff;padding:24px;border-radius:24px;margin-bottom:20px}
 .qt-hero h2{margin:0;font-weight:1000}.qt-hero p{margin:7px 0 0;color:#ccfbf1;font-weight:800}
@@ -144,8 +194,9 @@ textarea{min-height:100px}
 .btn-gray{display:inline-block;background:#e5e7eb;color:#111827;text-decoration:none;padding:13px 18px;border-radius:14px;font-weight:1000;margin-top:18px}
 @media(max-width:900px){.grid{grid-template-columns:1fr}}
 </style>
+<link rel="stylesheet" href="../../assets/css/recouvrement.css">
 </head>
-<body>
+<body class="cp-recouvrement-page">
 <div class="admin-layout">
 <?php require_once "../../includes/sidebar.php"; ?>
 <main class="main-content">
@@ -156,9 +207,9 @@ textarea{min-height:100px}
     <p>Apurement total validé — la quittance sera signée par le comptable public et le réceptionniste.</p>
 </div>
 
-<div class="panel">
+<div class="panel cp-rec-panel">
     <h3>Informations de l’apurement</h3>
-    <table class="table-premium">
+    <table class="table-premium cp-rec-table">
         <tr><th>NP / NPF</th><td><?= htmlspecialchars($apurement['numero_np']) ?></td></tr>
         <tr><th>ND / NT</th><td><?= htmlspecialchars($apurement['numero_nd'].' / '.$apurement['numero_nt']) ?></td></tr>
         <tr><th>Contribuable</th><td><?= htmlspecialchars(nomQg($apurement)) ?></td></tr>
@@ -166,7 +217,7 @@ textarea{min-height:100px}
     </table>
 </div>
 
-<div class="panel">
+<div class="panel cp-rec-panel">
     <h3>Signature réceptionniste / bénéficiaire</h3>
     <form method="POST">
         <div class="grid">

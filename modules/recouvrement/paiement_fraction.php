@@ -1,7 +1,6 @@
 <?php
-require_once("../../config/database.php");
-require_once("../../config/security.php");
-require_once("../../core/penalite_engine.php");
+require_once "../../config/database.php";
+require_once "../../config/security.php";
 
 checkAuth();
 requireRole([
@@ -11,43 +10,40 @@ requireRole([
     'CAISSIER'
 ]);
 
-$numero_fraction = $_GET['numero_fraction'] ?? null;
-if (!$numero_fraction) die("Fraction manquante");
+$numero_fraction = trim((string)($_GET['numero_fraction'] ?? ''));
 
-$stmt = $pdo->prepare("SELECT * FROM notes_perception_fractions WHERE numero_fraction=?");
-$stmt->execute([$numero_fraction]);
-$fraction = $stmt->fetch();
+if ($numero_fraction === '') {
+    die("Fraction manquante.");
+}
 
-if (!$fraction) die("Fraction introuvable");
-
-$jours_retard = floor((strtotime(date('Y-m-d')) - strtotime($fraction['date_echeance'])) / 86400);
-
-$penalite = calculerPenaliteProgressive(
-    $fraction['montant_fraction'],
-    $jours_retard,
-    'recouvrement',
-    $pdo
-);
-
+/*
+|--------------------------------------------------------------------------
+| Compatibilité avec l'ancien système de fractions
+|--------------------------------------------------------------------------
+| L'ancien fichier insérait des colonnes qui n'existent plus dans la table
+| paiements actuelle (penalite_appliquee, user_encaisseur_id) et enregistrait
+| un paiement sans mode de paiement.
+|
+| On ne crée donc plus de paiement automatique incomplet.
+| Si la fraction existe aussi comme NPF moderne dans notes_perception,
+| elle est envoyée vers le formulaire de paiement complet.
+*/
 $stmt = $pdo->prepare("
-    INSERT INTO paiements
-    (fraction_id, montant_paye, penalite_appliquee, date_paiement, user_encaisseur_id)
-    VALUES (?, ?, ?, CURDATE(), ?)
+    SELECT numero_np
+    FROM notes_perception
+    WHERE numero_np = ?
+    LIMIT 1
 ");
+$stmt->execute([$numero_fraction]);
+$npf = $stmt->fetch(PDO::FETCH_ASSOC);
 
-$stmt->execute([
-    $fraction['id'],
-    $fraction['montant_fraction'],
-    $penalite,
-    $_SESSION['user_id']
-]);
+if ($npf) {
+    header("Location: paiement_create.php?numero=" . urlencode($npf['numero_np']));
+    exit;
+}
 
-$pdo->prepare("
-    UPDATE notes_perception_fractions
-    SET statut='payee'
-    WHERE id=?
-")->execute([$fraction['id']]);
-
-header("Location: apurement.php?type=FRACTION&id=".$fraction['id']);
-exit;
-?>
+die(
+    "Cette fraction appartient à l'ancien mécanisme de fractionnement. " .
+    "Utilisez la NPF correspondante depuis Ordonnancement afin d'enregistrer " .
+    "un paiement complet avec mode de paiement et référence transactionnelle."
+);

@@ -6,6 +6,34 @@ require_once "../../core/penalite_engine.php";
 
 checkAuth();
 
+if (!function_exists('cpRecouvrementCurrentUserId')) {
+    function cpRecouvrementCurrentUserId(PDO $pdo): int
+    {
+        $id = (int)(cpRecouvrementCurrentUserId($pdo) ?? 0);
+
+        if ($id > 0) {
+            return $id;
+        }
+
+        $email = trim((string)($_SESSION['email'] ?? $_SESSION['user_email'] ?? ''));
+
+        if ($email !== '') {
+            $stmtUser = $pdo->prepare("SELECT id FROM users WHERE email = ? LIMIT 1");
+            $stmtUser->execute([$email]);
+            $rowUser = $stmtUser->fetch(PDO::FETCH_ASSOC);
+            $id = (int)($rowUser['id'] ?? 0);
+
+            if ($id > 0) {
+                $_SESSION['user_id'] = $id;
+                return $id;
+            }
+        }
+
+        return 0;
+    }
+}
+
+
 
 $page_title = "Émission AMR";
 
@@ -159,7 +187,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $montant_total,
             $jours_retard,
             $motif,
-            $_SESSION['user_id'] ?? null
+            cpRecouvrementCurrentUserId($pdo)
         ]);
 
         /*
@@ -231,7 +259,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
 <style>
 .hero-amr{
@@ -295,9 +324,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     .grid-3{grid-template-columns:1fr}
 }
 </style>
+<link rel="stylesheet" href="../../assets/css/recouvrement.css">
 </head>
 
-<body>
+<body class="cp-recouvrement-page">
 <div class="admin-layout">
 
 <?php require_once "../../includes/sidebar.php"; ?>
@@ -331,10 +361,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 </div>
 
-<div class="panel">
+<div class="panel cp-rec-panel">
     <h3>Informations de la note concernée</h3>
 
-    <table class="table-premium">
+    <table class="table-premium cp-rec-table">
         <tr>
             <th>Numéro AMR</th>
             <td><strong><?= htmlspecialchars($numero_amr) ?></strong></td>
@@ -374,7 +404,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </table>
 </div>
 
-<div class="panel">
+<div class="panel cp-rec-panel">
     <h3>Confirmation émission AMR</h3>
 
     <form method="POST">
@@ -395,7 +425,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 Émettre l’AMR
             </button>
 
-            <a href="/collect_pay/modules/ordonnancement/np_list.php" class="btn btn-secondary">
+            <a href="../ordonnancement/np_list.php" class="btn btn-secondary">
                 Retour
             </a>
         </div>

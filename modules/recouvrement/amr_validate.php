@@ -4,6 +4,34 @@ require_once "../../config/security.php";
 
 checkAuth();
 
+if (!function_exists('cpRecouvrementCurrentUserId')) {
+    function cpRecouvrementCurrentUserId(PDO $pdo): int
+    {
+        $id = (int)(cpRecouvrementCurrentUserId($pdo) ?? 0);
+
+        if ($id > 0) {
+            return $id;
+        }
+
+        $email = trim((string)($_SESSION['email'] ?? $_SESSION['user_email'] ?? ''));
+
+        if ($email !== '') {
+            $stmtUser = $pdo->prepare("SELECT id FROM users WHERE email = ? LIMIT 1");
+            $stmtUser->execute([$email]);
+            $rowUser = $stmtUser->fetch(PDO::FETCH_ASSOC);
+            $id = (int)($rowUser['id'] ?? 0);
+
+            if ($id > 0) {
+                $_SESSION['user_id'] = $id;
+                return $id;
+            }
+        }
+
+        return 0;
+    }
+}
+
+
 requireRole([
     'SUPER_ADMIN',
     'CHEF_RECOUVREMENT',
@@ -56,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->execute([
         $decision,
         $motif,
-        $_SESSION['user_id'] ?? null,
+        cpRecouvrementCurrentUserId($pdo),
         $id
     ]);
 
@@ -70,7 +98,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
 <style>
 .hero-amr{
@@ -105,9 +134,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     background:#16a34a;
 }
 </style>
+<link rel="stylesheet" href="../../assets/css/recouvrement.css">
 </head>
 
-<body>
+<body class="cp-recouvrement-page">
 <div class="admin-layout">
 
 <?php require_once "../../includes/sidebar.php"; ?>
@@ -120,12 +150,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <p>Validation ou rejet de l’Avis de Mise en Recouvrement.</p>
 </div>
 
-<div class="panel">
+<div class="panel cp-rec-panel">
     <div class="warning-box">
         La validation de cet AMR autorisera la reprise du paiement de la NP / NPF échue.
     </div>
 
-    <table class="table-premium">
+    <table class="table-premium cp-rec-table">
         <tr>
             <th>Numéro AMR</th>
             <td><strong><?= htmlspecialchars($amr['numero_amr']) ?></strong></td>

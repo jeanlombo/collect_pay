@@ -102,7 +102,8 @@ $page_title = "Quittance";
 <head>
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
 <style>
 .doc-header{
@@ -131,9 +132,10 @@ $page_title = "Quittance";
     margin-bottom:18px;
 }
 </style>
+<link rel="stylesheet" href="../../assets/css/recouvrement.css">
 </head>
 
-<body>
+<body class="cp-recouvrement-page">
 <div class="admin-layout">
 
 <?php require_once "../../includes/sidebar.php"; ?>
@@ -153,10 +155,10 @@ $page_title = "Quittance";
     Cette quittance confirme l’acquittement de la NP / NPF après apurement.
 </div>
 
-<div class="panel">
+<div class="panel cp-rec-panel">
     <h3>I. Contribuable</h3>
 
-    <table class="table-premium">
+    <table class="table-premium cp-rec-table">
         <tr><th>Nom / Raison sociale</th><td><?= htmlspecialchars(nomQv($q)) ?></td></tr>
         <tr><th>Type</th><td><?= strtoupper(htmlspecialchars($q['type_personne'] ?? '-')) ?></td></tr>
         <tr><th>NIF</th><td><?= htmlspecialchars($q['nif'] ?? '-') ?></td></tr>
@@ -166,10 +168,10 @@ $page_title = "Quittance";
     </table>
 </div>
 
-<div class="panel">
+<div class="panel cp-rec-panel">
     <h3>II. Références</h3>
 
-    <table class="table-premium">
+    <table class="table-premium cp-rec-table">
         <tr><th>Note de Taxation</th><td><?= htmlspecialchars($q['numero_nt'] ?? '-') ?></td></tr>
         <tr><th>Note de Débit</th><td><?= htmlspecialchars($q['numero_nd'] ?? '-') ?></td></tr>
         <tr><th>NP / NPF</th><td><?= htmlspecialchars($q['numero_np'] ?? '-') ?></td></tr>
@@ -179,10 +181,10 @@ $page_title = "Quittance";
     </table>
 </div>
 
-<div class="panel">
+<div class="panel cp-rec-panel">
     <h3>III. Paiements</h3>
 
-    <table class="table-premium">
+    <table class="table-premium cp-rec-table">
         <tr>
             <th>Date</th>
             <th>Mode</th>
@@ -217,10 +219,10 @@ $page_title = "Quittance";
     </table>
 </div>
 
-<div class="panel">
+<div class="panel cp-rec-panel">
     <h3>IV. Montant acquitté</h3>
 
-    <table class="table-premium">
+    <table class="table-premium cp-rec-table">
         <tr><th>Montant dû</th><td><?= moneyQv($q['montant_du'] ?? 0) ?></td></tr>
         <tr><th>Montant payé</th><td><?= moneyQv($q['montant_paye'] ?? 0) ?></td></tr>
         <tr><th>Solde restant</th><td><?= moneyQv($q['solde_restant'] ?? 0) ?></td></tr>
@@ -229,7 +231,7 @@ $page_title = "Quittance";
 </div>
 
 <div class="actions">
-    <a href="/collect_pay/modules/recouvrement/quittance_list.php" class="btn-primary-custom">
+    <a href="quittance_list.php" class="btn-primary-custom">
         Retour liste
     </a>
 

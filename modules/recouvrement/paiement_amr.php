@@ -141,7 +141,8 @@ $isPaid = in_array(($amr['statut_np'] ?? ''), ['payee', 'payé', 'paye'], true)
 <head>
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
 <style>
 .amr-pay-hero{
@@ -241,9 +242,10 @@ $isPaid = in_array(($amr['statut_np'] ?? ''), ['payee', 'payé', 'paye'], true)
     }
 }
 </style>
+<link rel="stylesheet" href="../../assets/css/recouvrement.css">
 </head>
 
-<body>
+<body class="cp-recouvrement-page">
 <div class="admin-layout">
 <?php require_once "../../includes/sidebar.php"; ?>
 
@@ -265,7 +267,7 @@ $isPaid = in_array(($amr['statut_np'] ?? ''), ['payee', 'payé', 'paye'], true)
     </div>
 <?php endif; ?>
 
-<div class="panel">
+<div class="panel cp-rec-panel">
     <h3>Détails de l’AMR</h3>
 
     <div class="info-grid">

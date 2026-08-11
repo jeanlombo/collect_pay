@@ -10,6 +10,34 @@ require_once "../../core/numero_generator.php";
 require_once "../../core/secure_qr_engine.php";
 
 checkAuth();
+
+if (!function_exists('cpRecouvrementCurrentUserId')) {
+    function cpRecouvrementCurrentUserId(PDO $pdo): int
+    {
+        $id = (int)(cpRecouvrementCurrentUserId($pdo) ?? 0);
+
+        if ($id > 0) {
+            return $id;
+        }
+
+        $email = trim((string)($_SESSION['email'] ?? $_SESSION['user_email'] ?? ''));
+
+        if ($email !== '') {
+            $stmtUser = $pdo->prepare("SELECT id FROM users WHERE email = ? LIMIT 1");
+            $stmtUser->execute([$email]);
+            $rowUser = $stmtUser->fetch(PDO::FETCH_ASSOC);
+            $id = (int)($rowUser['id'] ?? 0);
+
+            if ($id > 0) {
+                $_SESSION['user_id'] = $id;
+                return $id;
+            }
+        }
+
+        return 0;
+    }
+}
+
 requirePermission('quittances', 'create');
 
 $np_mere_id = isset($_GET['np_mere_id']) ? (int)$_GET['np_mere_id'] : 0;
@@ -61,10 +89,10 @@ $ap = $stmt->fetch(PDO::FETCH_ASSOC);
 if ($ap) {
     $apurement_id = (int)$ap['id'];
     $stmt = $pdo->prepare("UPDATE apurements SET montant_du=?, montant_paye=?, solde_restant=0, statut='total', date_apurement=CURDATE(), user_apurement_id=? WHERE id=?");
-    $stmt->execute([(float)$mere['montant_initial'],$totalPaye,$_SESSION['user_id']??null,$apurement_id]);
+    $stmt->execute([(float)$mere['montant_initial'],$totalPaye,cpRecouvrementCurrentUserId($pdo)??null,$apurement_id]);
 } else {
     $stmt = $pdo->prepare("INSERT INTO apurements(reference_type,reference_id,montant_du,montant_paye,penalite_validee,solde_restant,statut,date_apurement,user_apurement_id) VALUES('NP',?,?,?,0,0,'total',CURDATE(),?)");
-    $stmt->execute([$np_mere_id,(float)$mere['montant_initial'],$totalPaye,$_SESSION['user_id']??null]);
+    $stmt->execute([$np_mere_id,(float)$mere['montant_initial'],$totalPaye,cpRecouvrementCurrentUserId($pdo)??null]);
     $apurement_id = (int)$pdo->lastInsertId();
 }
 

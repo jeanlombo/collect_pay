@@ -4,6 +4,34 @@ require_once "../../config/security.php";
 require_once "../../core/functions.php";
 
 checkAuth();
+
+if (!function_exists('cpRecouvrementCurrentUserId')) {
+    function cpRecouvrementCurrentUserId(PDO $pdo): int
+    {
+        $id = (int)(cpRecouvrementCurrentUserId($pdo) ?? 0);
+
+        if ($id > 0) {
+            return $id;
+        }
+
+        $email = trim((string)($_SESSION['email'] ?? $_SESSION['user_email'] ?? ''));
+
+        if ($email !== '') {
+            $stmtUser = $pdo->prepare("SELECT id FROM users WHERE email = ? LIMIT 1");
+            $stmtUser->execute([$email]);
+            $rowUser = $stmtUser->fetch(PDO::FETCH_ASSOC);
+            $id = (int)($rowUser['id'] ?? 0);
+
+            if ($id > 0) {
+                $_SESSION['user_id'] = $id;
+                return $id;
+            }
+        }
+
+        return 0;
+    }
+}
+
 requireRole([
     'SUPER_ADMIN',
     'RECOUVREMENT',
@@ -393,7 +421,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'titulaire_mobile_money' => $titulaire_mobile_money,
             'observation' => $observation,
             'statut' => $statutPaiement,
-            'user_comptable_id' => $_SESSION['user_id'] ?? null,
+            'user_comptable_id' => cpRecouvrementCurrentUserId($pdo),
             'created_at' => date('Y-m-d H:i:s')
         ];
 
@@ -492,7 +520,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $penalite_amr,
                 $nouveau_solde,
                 $statutApurement,
-                $_SESSION['user_id'] ?? null,
+                cpRecouvrementCurrentUserId($pdo),
                 $apurementExistant['id']
             ]);
         } else {
@@ -505,14 +533,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $penalite_amr,
                 $nouveau_solde,
                 $statutApurement,
-                $_SESSION['user_id'] ?? null
+                cpRecouvrementCurrentUserId($pdo)
             ]);
         }
 
         if (function_exists('auditLog')) {
             auditLog(
                 $pdo,
-                $_SESSION['user_id'] ?? null,
+                cpRecouvrementCurrentUserId($pdo),
                 "Paiement enregistré",
                 "Recouvrement",
                 $np['numero_np'],
@@ -539,7 +567,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
 <style>
 .hero-luxoria{
@@ -566,9 +595,10 @@ label{font-weight:900;color:#0f3460;display:block;margin-bottom:6px}
 .small-muted{color:#64748b;font-size:12px}
 @media(max-width:900px){.grid-2,.grid-3{grid-template-columns:1fr}}
 </style>
+<link rel="stylesheet" href="../../assets/css/recouvrement.css">
 </head>
 
-<body>
+<body class="cp-recouvrement-page">
 <div class="admin-layout">
 
 <?php require_once "../../includes/sidebar.php"; ?>
@@ -581,10 +611,10 @@ label{font-weight:900;color:#0f3460;display:block;margin-bottom:6px}
     <p>Confirmation sécurisée d’un paiement déjà effectué auprès du canal autorisé.</p>
 </div>
 
-<div class="panel">
+<div class="panel cp-rec-panel">
     <h3>I. Note concernée</h3>
 
-    <table class="table-premium">
+    <table class="table-premium cp-rec-table">
         <tr><th>Numéro</th><td><strong><?= htmlspecialchars($np['numero_np']) ?></strong></td></tr>
         <tr><th>Type</th><td><?= strtoupper(htmlspecialchars($np['type_np'])) ?></td></tr>
         <?php if (!empty($np['numero_np_mere'])): ?>
@@ -604,7 +634,7 @@ label{font-weight:900;color:#0f3460;display:block;margin-bottom:6px}
     </table>
 </div>
 
-<div class="panel">
+<div class="panel cp-rec-panel">
     <h3>II. Comptes bancaires autorisés par l’ordonnateur</h3>
 
     <div class="info-box">
@@ -625,7 +655,7 @@ label{font-weight:900;color:#0f3460;display:block;margin-bottom:6px}
     <?php endforeach; ?>
 </div>
 
-<div class="panel">
+<div class="panel cp-rec-panel">
     <h3>III. Enregistrer un paiement</h3>
 
     <div class="warning-box">

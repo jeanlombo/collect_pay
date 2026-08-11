@@ -121,7 +121,8 @@ function badgeApList($statut): string {
 <head>
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 <style>
 .hero-ap{background:linear-gradient(135deg,#064e3b,#0f766e);color:white;padding:24px;border-radius:24px;margin-bottom:20px}
 .hero-ap h2{margin:0;font-weight:1000}.hero-ap p{margin:7px 0 0;color:#ccfbf1;font-weight:800}
@@ -134,8 +135,9 @@ function badgeApList($statut): string {
 .btn-view{background:#e5e7eb;color:#111827}.btn-qt{background:#0f766e;color:white}.btn-pdf{background:#fbbf24;color:#111827}
 @media(max-width:900px){.filter-form{grid-template-columns:1fr}}
 </style>
+<link rel="stylesheet" href="../../assets/css/recouvrement.css">
 </head>
-<body>
+<body class="cp-recouvrement-page">
 <div class="admin-layout">
 <?php require_once "../../includes/sidebar.php"; ?>
 <main class="main-content">
@@ -146,7 +148,7 @@ function badgeApList($statut): string {
     <p>Le comptable public génère la quittance uniquement après apurement total.</p>
 </div>
 
-<div class="panel">
+<div class="panel cp-rec-panel">
     <form method="GET" class="filter-form">
         <input type="text" name="search" placeholder="Rechercher NP, ND, NT, quittance, contribuable, NIF" value="<?= htmlspecialchars($search) ?>">
         <select name="statut">
@@ -158,8 +160,8 @@ function badgeApList($statut): string {
     </form>
 </div>
 
-<div class="panel">
-<table class="table-premium">
+<div class="panel cp-rec-panel">
+<table class="table-premium cp-rec-table">
 <tr>
     <th>Date apurement</th>
     <th>NP / NPF</th>

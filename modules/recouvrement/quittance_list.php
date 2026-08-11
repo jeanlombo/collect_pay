@@ -34,7 +34,8 @@ function formatDateQuittance($date) {
 <head>
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
 <style>
 .hero{
@@ -77,9 +78,10 @@ function formatDateQuittance($date) {
     flex-wrap:wrap;
 }
 </style>
+<link rel="stylesheet" href="../../assets/css/recouvrement.css">
 </head>
 
-<body>
+<body class="cp-recouvrement-page">
 <div class="admin-layout">
 
 <?php require_once "../../includes/sidebar.php"; ?>
@@ -92,7 +94,7 @@ function formatDateQuittance($date) {
     <p>Consultation des quittances informatisées générées après apurement.</p>
 </div>
 
-<div class="panel">
+<div class="panel cp-rec-panel">
 
     <?php if (isset($_GET['success'])): ?>
         <div class="success-box">
@@ -100,7 +102,7 @@ function formatDateQuittance($date) {
         </div>
     <?php endif; ?>
 
-    <table class="table-premium">
+    <table class="table-premium cp-rec-table">
         <tr>
             <th>Numéro quittance</th>
             <th>NP / NPF</th>

@@ -96,7 +96,8 @@ $canValidateAMR = function_exists('canDo') ? canDo('amr', 'create') : false;
 <head>
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
 <style>
 .hero-amr{
@@ -161,9 +162,10 @@ $canValidateAMR = function_exists('canDo') ? canDo('amr', 'create') : false;
     color:white;
 }
 </style>
+<link rel="stylesheet" href="../../assets/css/recouvrement.css">
 </head>
 
-<body>
+<body class="cp-recouvrement-page">
 <div class="admin-layout">
 
 <?php require_once "../../includes/sidebar.php"; ?>
@@ -177,24 +179,24 @@ $canValidateAMR = function_exists('canDo') ? canDo('amr', 'create') : false;
 </div>
 
 <?php if (isset($_GET['success'])): ?>
-    <div class="panel" style="background:#dcfce7;color:#166534;font-weight:900;">
+    <div class="panel cp-rec-panel" style="background:#dcfce7;color:#166534;font-weight:900;">
         AMR émis avec succès.
     </div>
 <?php endif; ?>
 
 <?php if (isset($_GET['existing'])): ?>
-    <div class="panel" style="background:#ffedd5;color:#9a3412;font-weight:900;">
+    <div class="panel cp-rec-panel" style="background:#ffedd5;color:#9a3412;font-weight:900;">
         Un AMR existe déjà pour cette NP / NPF.
     </div>
 <?php endif; ?>
 
 <?php if (isset($_GET['validated'])): ?>
-    <div class="panel" style="background:#dcfce7;color:#166534;font-weight:900;">
+    <div class="panel cp-rec-panel" style="background:#dcfce7;color:#166534;font-weight:900;">
         AMR validé avec succès.
     </div>
 <?php endif; ?>
 
-<div class="panel">
+<div class="panel cp-rec-panel">
     <h3>Filtres</h3>
 
     <div class="filters">
@@ -204,7 +206,7 @@ $canValidateAMR = function_exists('canDo') ? canDo('amr', 'create') : false;
         <a href="amr_list.php?statut=rejete">Rejetés</a>
     </div>
 
-    <table class="table-premium">
+    <table class="table-premium cp-rec-table">
         <tr>
             <th>Date émission</th>
             <th>N° AMR</th>
@@ -243,7 +245,7 @@ $canValidateAMR = function_exists('canDo') ? canDo('amr', 'create') : false;
 
                         <?php if ($canPayAMR && (($a['statut'] ?? '') === 'valide' || ($a['statut'] ?? '') === 'emis')): ?>
                             <a class="btn-action btn-pay"
-                               href="/collect_pay/modules/recouvrement/paiement_amr.php?numero=<?= urlencode($a['numero_amr']) ?>">
+                               href="paiement_amr.php?numero=<?= urlencode($a['numero_amr']) ?>">
                                 Payer
                             </a>
                         <?php endif; ?>
@@ -268,7 +270,7 @@ $canValidateAMR = function_exists('canDo') ? canDo('amr', 'create') : false;
 </div>
 <?php if (function_exists('canDo') && (canDo('amr','pay') || canDo('apurement','create'))): ?>
     <a class="btn-action btn-pay"
-       href="/collect_pay/modules/recouvrement/paiement_amr.php?numero=<?= urlencode($a['numero_amr']) ?>">
+       href="paiement_amr.php?numero=<?= urlencode($a['numero_amr']) ?>">
         Apurer / Payer
     </a>
 <?php endif; ?>

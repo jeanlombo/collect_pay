@@ -3,6 +3,34 @@ require_once "../../config/database.php";
 require_once "../../config/security.php";
 
 checkAuth();
+
+if (!function_exists('cpRecouvrementCurrentUserId')) {
+    function cpRecouvrementCurrentUserId(PDO $pdo): int
+    {
+        $id = (int)(cpRecouvrementCurrentUserId($pdo) ?? 0);
+
+        if ($id > 0) {
+            return $id;
+        }
+
+        $email = trim((string)($_SESSION['email'] ?? $_SESSION['user_email'] ?? ''));
+
+        if ($email !== '') {
+            $stmtUser = $pdo->prepare("SELECT id FROM users WHERE email = ? LIMIT 1");
+            $stmtUser->execute([$email]);
+            $rowUser = $stmtUser->fetch(PDO::FETCH_ASSOC);
+            $id = (int)($rowUser['id'] ?? 0);
+
+            if ($id > 0) {
+                $_SESSION['user_id'] = $id;
+                return $id;
+            }
+        }
+
+        return 0;
+    }
+}
+
 requireRole(['SUPER_ADMIN','RECOUVREMENT','CHEF_RECOUVREMENT','CAISSIER','APUREUR']);
 
 $numero = $_GET['numero'] ?? null;
@@ -30,11 +58,11 @@ $exist = $stmt->fetch();
 
 if ($exist) {
     $stmt = $pdo->prepare("\n        UPDATE apurements\n        SET montant_du = ?, montant_paye = ?, solde_restant = ?, statut = ?, date_apurement = CURDATE(), user_apurement_id = ?\n        WHERE id = ?\n    ");
-    $stmt->execute([$montantDu, $montantPaye, $solde, $statut, $_SESSION['user_id'] ?? null, $exist['id']]);
+    $stmt->execute([$montantDu, $montantPaye, $solde, $statut, cpRecouvrementCurrentUserId($pdo), $exist['id']]);
     $apurement_id = (int)$exist['id'];
 } else {
     $stmt = $pdo->prepare("\n        INSERT INTO apurements\n        (reference_type, reference_id, montant_du, montant_paye, penalite_validee, solde_restant, statut, date_apurement, user_apurement_id)\n        VALUES (?, ?, ?, ?, 0, ?, ?, CURDATE(), ?)\n    ");
-    $stmt->execute([$referenceType, $np['id'], $montantDu, $montantPaye, $solde, $statut, $_SESSION['user_id'] ?? null]);
+    $stmt->execute([$referenceType, $np['id'], $montantDu, $montantPaye, $solde, $statut, cpRecouvrementCurrentUserId($pdo)]);
     $apurement_id = (int)$pdo->lastInsertId();
 }
 

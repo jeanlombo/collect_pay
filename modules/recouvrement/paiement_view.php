@@ -240,7 +240,8 @@ $modeLabel = [
 <head>
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
 <style>
 .hero{
@@ -268,9 +269,10 @@ $modeLabel = [
 .note-info{background:#f8fafc;border:1px solid #e5e7eb;border-radius:16px;padding:14px;margin-top:12px;color:#334155}
 @media(max-width:900px){.grid-2{grid-template-columns:1fr}}
 </style>
+<link rel="stylesheet" href="../../assets/css/recouvrement.css">
 </head>
 
-<body>
+<body class="cp-recouvrement-page">
 <div class="admin-layout">
 
 <?php require_once "../../includes/sidebar.php"; ?>
@@ -284,10 +286,10 @@ $modeLabel = [
 </div>
 
 <div class="grid-2">
-    <div class="panel">
+    <div class="panel cp-rec-panel">
         <h3>I. Paiement enregistré</h3>
 
-        <table class="table-premium">
+        <table class="table-premium cp-rec-table">
             <tr><th>Date paiement</th><td><?= htmlspecialchars(datePV($p['date_paiement'] ?? $p['created_at'])) ?></td></tr>
             <tr><th>Montant payé</th><td><strong><?= moneySourcePV($p['montant_paye'], $p['devise']) ?></strong></td></tr>
             <tr><th>Taux appliqué</th><td><?= number_format((float)$p['taux_change'], 4, ',', ' ') ?></td></tr>
@@ -299,10 +301,10 @@ $modeLabel = [
         </table>
     </div>
 
-    <div class="panel">
+    <div class="panel cp-rec-panel">
         <h3>II. Note concernée</h3>
 
-        <table class="table-premium">
+        <table class="table-premium cp-rec-table">
             <tr><th>NP / NPF</th><td><strong><?= htmlspecialchars($p['numero_np']) ?></strong></td></tr>
             <tr><th>Type</th><td><?= strtoupper(htmlspecialchars($p['type_np'])) ?></td></tr>
             <?php if (!empty($p['numero_np_mere'])): ?>
@@ -318,10 +320,10 @@ $modeLabel = [
     </div>
 </div>
 
-<div class="panel">
+<div class="panel cp-rec-panel">
     <h3>III. Assujetti</h3>
 
-    <table class="table-premium">
+    <table class="table-premium cp-rec-table">
         <tr><th>Type</th><td><?= strtoupper(htmlspecialchars($p['type_personne'] ?? '-')) ?></td></tr>
         <tr><th>Nom / Raison sociale</th><td><strong><?= htmlspecialchars(nomContribuablePV($p)) ?></strong></td></tr>
         <tr><th>NIF</th><td><?= htmlspecialchars($p['nif'] ?? '-') ?></td></tr>
@@ -331,10 +333,10 @@ $modeLabel = [
     </table>
 </div>
 
-<div class="panel">
+<div class="panel cp-rec-panel">
     <h3>IV. Canal de paiement</h3>
 
-    <table class="table-premium">
+    <table class="table-premium cp-rec-table">
         <tr><th>Banque créditée</th><td><?= htmlspecialchars($p['banque'] ?? '-') ?></td></tr>
         <tr><th>Compte crédité</th><td><?= htmlspecialchars($p['numero_compte'] ?? $p['compte_credite'] ?? '-') ?></td></tr>
         <tr><th>Intitulé compte</th><td><?= htmlspecialchars($p['intitule_compte'] ?? '-') ?></td></tr>
@@ -346,10 +348,10 @@ $modeLabel = [
     </table>
 </div>
 
-<div class="panel">
+<div class="panel cp-rec-panel">
     <h3>V. Historique des paiements de cette note</h3>
 
-    <table class="table-premium">
+    <table class="table-premium cp-rec-table">
         <tr>
             <th>Date</th>
             <th>Montant source</th>
@@ -378,7 +380,7 @@ $modeLabel = [
     </table>
 </div>
 
-<div class="panel">
+<div class="panel cp-rec-panel">
     <h3>VI. Attestation, apurement et quittance</h3>
 
     <div class="note-info">
