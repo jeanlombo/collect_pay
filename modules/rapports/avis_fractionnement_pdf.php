@@ -197,11 +197,12 @@ class AvisFractionnementPDF extends FPDF
 
     function Header()
     {
-        if (file_exists("../assets/images/logo_province.png")) {
-            $this->Image("../assets/images/logo_province.png", 10, 8, 24);
-        }
 
-        $this->DrawQRCode($GLOBALS['qrMatrix'] ?? [], 174.8, 8.8, 0.63);
+        $logoProvince = __DIR__ . '/../../assets/images/logo_province.png';
+        if (is_file($logoProvince)) {
+            $this->Image($logoProvince, 10, 8, 24);
+        }
+$this->DrawQRCode($GLOBALS['qrMatrix'] ?? [], 174.8, 8.8, 0.63);
 
         $this->SetFont('Arial', '', 5);
         $this->SetXY(171, 34);

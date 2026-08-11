@@ -382,8 +382,12 @@ class NPProPDF extends FPDF
     }
     function Header()
     {
-        if (file_exists('../assets/images/logo_province.png')) $this->Image('../assets/images/logo_province.png', 12, 8, 22);
-        $this->DrawQRCode($GLOBALS['qrMatrix'] ?? [], 164, 8, 0.88);
+
+        $logoProvince = __DIR__ . '/../../assets/images/logo_province.png';
+        if (is_file($logoProvince)) {
+            $this->Image($logoProvince, 12, 8, 22);
+        }
+$this->DrawQRCode($GLOBALS['qrMatrix'] ?? [], 164, 8, 0.88);
         $this->SetFont('Arial','',5);
         $this->SetXY(160, 41);
         $this->Cell(42,3,pdfTxt('QR Code sécurisé'),0,0,'C');

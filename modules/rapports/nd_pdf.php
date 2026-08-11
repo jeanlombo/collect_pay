@@ -241,16 +241,13 @@ class NDPDF extends FPDF
 
     function Header()
     {
+
+
         $logoProvince = __DIR__ . '/../../assets/images/logo_province.png';
         if (is_file($logoProvince)) {
-            $this->Image($logoProvince, 12, 8, 22);
+            $this->Image($logoProvince, 10, 8, 24);
         }
-
-        if (file_exists("../assets/images/logo_province.png")) {
-            $this->Image("../assets/images/logo_province.png", 10, 8, 24);
-        }
-
-        $qrMatrix = $GLOBALS['qrMatrix'] ?? [];
+$qrMatrix = $GLOBALS['qrMatrix'] ?? [];
         $qrX = 162;
         $qrY = 8;
         $qrCellSize = 0.85;

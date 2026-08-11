@@ -219,11 +219,12 @@ class AttestationPaiementPDF extends FPDF
 
     function Header()
     {
-        if (file_exists("../assets/images/logo_province.png")) {
-            $this->Image("../assets/images/logo_province.png", 10, 8, 24);
-        }
 
-        // QR Code lisible, même gabarit que les autres documents.
+        $logoProvince = __DIR__ . '/../../assets/images/logo_province.png';
+        if (is_file($logoProvince)) {
+            $this->Image($logoProvince, 10, 8, 24);
+        }
+// QR Code lisible, même gabarit que les autres documents.
         $this->DrawQRCode($GLOBALS['qrMatrix'] ?? [], 166, 8, 0.63);
 
         $this->SetFont('Arial', '', 5);

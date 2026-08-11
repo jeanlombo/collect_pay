@@ -150,8 +150,12 @@ class QuittanceLuxPDF extends FPDF
         }
     }
     function Header(){
-        if(file_exists("../assets/images/logo_province.png")) $this->Image("../assets/images/logo_province.png",10,8,24);
-        $this->DrawQRCode($GLOBALS['qrMatrix'] ?? [], 168, 7, 0.72);
+
+        $logoProvince = __DIR__ . '/../../assets/images/logo_province.png';
+        if (is_file($logoProvince)) {
+            $this->Image($logoProvince, 10, 8, 24);
+        }
+$this->DrawQRCode($GLOBALS['qrMatrix'] ?? [], 168, 7, 0.72);
         $this->SetY(9);
         $this->SetFont('Arial','',10);
         $this->Cell(0,5,pdfTxt('PROVINCE DE LA TSHOPO'),0,1,'C');

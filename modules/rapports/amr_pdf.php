@@ -157,11 +157,12 @@ class AMRPDF extends FPDF
 
     function Header()
     {
-        if (file_exists("../assets/images/logo_province.png")) {
-            $this->Image("../assets/images/logo_province.png", 10, 8, 24);
-        }
 
-        $this->DrawQRCode(
+        $logoProvince = __DIR__ . '/../../assets/images/logo_province.png';
+        if (is_file($logoProvince)) {
+            $this->Image($logoProvince, 10, 8, 24);
+        }
+$this->DrawQRCode(
             $GLOBALS['qrMatrix'] ?? [],
             172,
             8,
