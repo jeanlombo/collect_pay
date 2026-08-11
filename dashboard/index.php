@@ -251,110 +251,333 @@ try {
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
+/* =========================================================
+   DASHBOARD EXECUTIF — MISE EN PAGE UNIQUEMENT
+   Aucun calcul, aucune requête SQL modifiée.
+========================================================= */
+
+.main-content{
+    background:linear-gradient(180deg,#f7fafc 0%,#eef3f7 100%);
+    min-height:100vh;
+}
+
+/* Largeur cohérente de tout le contenu */
+.exec-hero,
+.exec-kpis,
+.exec-panels,
+.exec-panels-3{
+    width:min(1480px,calc(100% - 28px));
+    margin-left:auto;
+    margin-right:auto;
+    box-sizing:border-box;
+}
+
+/* HERO */
 .exec-hero{
-    background:linear-gradient(135deg,#020617,#0f3460,#1d4ed8);
+    background:linear-gradient(135deg,#07192d 0%,#0f3b67 45%,#1768b0 100%);
     color:#fff;
-    padding:28px;
-    border-radius:28px;
-    margin-bottom:22px;
-    box-shadow:0 20px 50px rgba(15,52,96,.25);
-}
-.exec-hero h2{margin:0;font-size:28px;font-weight:950}
-.exec-hero p{margin:8px 0 0;color:#dbeafe;font-weight:700}
-.exec-kpis{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:16px;
-    margin-bottom:22px;
-}
-.exec-card{
-    background:#fff;
-    border:1px solid #e5e7eb;
+    padding:24px 28px;
     border-radius:22px;
-    padding:20px;
-    box-shadow:0 12px 28px rgba(15,23,42,.08);
+    margin-top:18px;
+    margin-bottom:16px;
+    box-shadow:0 14px 34px rgba(15,52,96,.18);
 }
-.exec-card span{
-    color:#64748b;
-    font-weight:900;
-    display:block;
-    margin-bottom:8px;
+.exec-hero h2{
+    margin:0;
+    font-size:27px;
+    font-weight:950;
+    letter-spacing:-.3px;
+}
+.exec-hero p{
+    margin:7px 0 0;
+    color:#dbeafe;
+    font-weight:700;
     font-size:13px;
 }
-.exec-card h2{
-    margin:0;
-    color:#06152b;
-    font-size:22px;
-    font-weight:950;
+
+/* KPI */
+.exec-kpis{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:13px;
+    margin-bottom:16px;
 }
-.exec-card small{color:#64748b;font-weight:800}
-.b1{border-left:6px solid #2563eb}
-.b2{border-left:6px solid #16a34a}
-.b3{border-left:6px solid #f59e0b}
-.b4{border-left:6px solid #dc2626}
-.b5{border-left:6px solid #7c3aed}
-.b6{border-left:6px solid #0f172a}
+.exec-card{
+    min-width:0;
+    min-height:112px;
+    background:#fff;
+    border:1px solid #e1e8ef;
+    border-radius:17px;
+    padding:16px 17px;
+    box-shadow:0 7px 20px rgba(15,23,42,.055);
+}
+.exec-card span{
+    color:#66798d;
+    font-weight:900;
+    display:block;
+    margin-bottom:7px;
+    font-size:11.5px;
+    line-height:1.3;
+}
+.exec-card h2{
+    margin:0 0 3px;
+    color:#102b43;
+    font-size:20px;
+    line-height:1.18;
+    font-weight:950;
+    overflow-wrap:anywhere;
+}
+.exec-card small{
+    color:#8191a0;
+    font-weight:750;
+    font-size:10.5px;
+}
+.b1{border-left:5px solid #2563eb}
+.b2{border-left:5px solid #16a34a}
+.b3{border-left:5px solid #f59e0b}
+.b4{border-left:5px solid #dc2626}
+.b5{border-left:5px solid #7c3aed}
+.b6{border-left:5px solid #0f172a}
+
+/* PANELS
+   align-items:start empêche qu'un panneau s'étire à la hauteur de son voisin. */
 .exec-panels{
     display:grid;
-    grid-template-columns:1.2fr .8fr;
-    gap:18px;
-    margin-bottom:22px;
+    grid-template-columns:minmax(0,1.35fr) minmax(340px,.65fr);
+    gap:14px;
+    margin-bottom:14px;
+    align-items:start;
 }
 .exec-panels-3{
     display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:18px;
-    margin-bottom:22px;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:14px;
+    margin-bottom:14px;
+    align-items:start;
 }
+
+/* On neutralise les marges/hauteurs héritées de .panel sans toucher admin.css */
+.exec-panels > .panel,
+.exec-panels-3 > .panel{
+    width:100%;
+    min-width:0;
+    height:auto !important;
+    min-height:0 !important;
+    margin:0 !important;
+    padding:18px !important;
+    box-sizing:border-box;
+    border:1px solid #e1e8ef;
+    border-radius:18px;
+    background:#fff;
+    box-shadow:0 7px 22px rgba(15,23,42,.05);
+}
+.exec-panels > .panel h3,
+.exec-panels-3 > .panel h3{
+    margin:0 0 13px;
+    color:#17334b;
+    font-size:16px;
+    font-weight:950;
+}
+
+/* CONTENEURS DE GRAPHIQUES
+   C'est la correction principale des grands espaces vides. */
+.chart-box{
+    position:relative;
+    width:100%;
+    height:285px;
+    min-height:285px;
+}
+.chart-box.chart-small{
+    height:245px;
+    min-height:245px;
+}
+.chart-box canvas{
+    display:block !important;
+    width:100% !important;
+    height:100% !important;
+    max-height:100% !important;
+}
+
+/* Si aucune donnée, on ne dessine pas un graphique vide énorme */
+.chart-empty{
+    height:100%;
+    min-height:150px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    border:1px dashed #cbd7e2;
+    border-radius:14px;
+    background:#f8fbfd;
+    color:#708397;
+    padding:20px;
+}
+.chart-empty strong{
+    color:#294a65;
+    margin-bottom:5px;
+}
+.chart-empty span{
+    font-size:12px;
+}
+
+/* ALERTES */
 .alert-exec{
     background:#fff7ed;
     border:1px solid #fed7aa;
     color:#9a3412;
-    padding:14px;
-    border-radius:16px;
-    font-weight:900;
-    margin-bottom:10px;
+    padding:11px 12px;
+    border-radius:12px;
+    font-weight:850;
+    font-size:12px;
+    line-height:1.4;
+    margin-bottom:8px;
 }
 .alert-green{
     background:#dcfce7;
     border-color:#bbf7d0;
     color:#166534;
 }
+
 .badge{
-    padding:7px 12px;
+    padding:5px 9px;
     border-radius:999px;
     font-weight:900;
-    font-size:12px;
+    font-size:10px;
 }
 .badge-red{background:#fee2e2;color:#991b1b}
 .badge-blue{background:#dbeafe;color:#1e40af}
-.amount{font-weight:950;color:#0f3460}
+.amount{
+    font-weight:950;
+    color:#0f4c7a;
+    white-space:nowrap;
+}
+
+/* CARTE SYNTHETIQUE */
 .map-tshopo{
-    background:linear-gradient(135deg,#f8fafc,#e0f2fe);
-    border:1px solid #dbeafe;
-    border-radius:22px;
-    padding:20px;
+    margin-top:12px;
+    background:linear-gradient(135deg,#f8fafc,#edf7fc);
+    border:1px solid #dce9f2;
+    border-radius:15px;
+    padding:14px;
+}
+.map-tshopo h3{
+    margin:0 0 10px !important;
+    font-size:14px !important;
 }
 .map-grid{
     display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:10px;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:8px;
 }
 .map-item{
+    min-width:0;
     background:#fff;
-    border-radius:16px;
-    padding:14px;
-    border:1px solid #e5e7eb;
-    font-weight:900;
+    border-radius:12px;
+    padding:11px;
+    border:1px solid #e3eaf0;
+    font-weight:850;
+    font-size:11.5px;
+    overflow-wrap:anywhere;
 }
-.map-item small{display:block;color:#64748b;margin-top:6px}
-@media(max-width:1100px){
-    .exec-kpis{grid-template-columns:repeat(2,1fr)}
-    .exec-panels,.exec-panels-3{grid-template-columns:1fr}
+.map-item small{
+    display:block;
+    color:#64748b;
+    margin-top:5px;
+    font-size:10px;
 }
-@media(max-width:700px){
-    .exec-kpis{grid-template-columns:1fr}
-    .map-grid{grid-template-columns:1fr}
+
+/* TABLEAUX */
+.exec-panels .table-premium,
+.exec-panels-3 .table-premium{
+    width:100%;
+    margin:0;
+    border-collapse:separate;
+    border-spacing:0;
+    border:1px solid #e1e8ef;
+    border-radius:13px;
+    overflow:hidden;
+}
+.exec-panels .table-premium th,
+.exec-panels-3 .table-premium th{
+    background:#edf4f8;
+    color:#35536b;
+    padding:10px 9px;
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:.02em;
+    white-space:nowrap;
+}
+.exec-panels .table-premium td,
+.exec-panels-3 .table-premium td{
+    padding:10px 9px;
+    border-top:1px solid #edf1f4;
+    vertical-align:middle;
+    font-size:11.5px;
+}
+.exec-panels .table-premium tr:hover td,
+.exec-panels-3 .table-premium tr:hover td{
+    background:#fafcfd;
+}
+.table-scroll{
+    width:100%;
+    overflow-x:auto;
+}
+
+/* Deux tableaux du bas : proportions plus naturelles */
+.exec-panels.exec-bottom{
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+}
+
+/* RESPONSIVE */
+@media(max-width:1250px){
+    .exec-kpis{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+    .exec-panels{
+        grid-template-columns:minmax(0,1fr);
+    }
+    .exec-panels-3{
+        grid-template-columns:minmax(0,1fr);
+    }
+    .map-grid{
+        grid-template-columns:repeat(3,minmax(0,1fr));
+    }
+}
+@media(max-width:760px){
+    .exec-hero,
+    .exec-kpis,
+    .exec-panels,
+    .exec-panels-3{
+        width:calc(100% - 16px);
+    }
+    .exec-hero{
+        padding:19px;
+        border-radius:17px;
+    }
+    .exec-hero h2{
+        font-size:22px;
+    }
+    .exec-kpis{
+        grid-template-columns:1fr;
+        gap:9px;
+    }
+    .exec-card{
+        min-height:96px;
+    }
+    .chart-box,
+    .chart-box.chart-small{
+        height:230px;
+        min-height:230px;
+    }
+    .map-grid{
+        grid-template-columns:1fr;
+    }
+    .exec-panels > .panel,
+    .exec-panels-3 > .panel{
+        padding:13px !important;
+        border-radius:15px;
+    }
 }
 </style>
 </head>
@@ -425,7 +648,18 @@ try {
 <div class="exec-panels">
     <div class="panel">
         <h3>Évolution mensuelle des recettes</h3>
-        <canvas id="chartMois" height="120"></canvas>
+        <?php if(!empty($dataMois)): ?>
+            <div class="chart-box">
+                <canvas id="chartMois"></canvas>
+            </div>
+        <?php else: ?>
+            <div class="chart-box">
+                <div class="chart-empty">
+                    <strong>Aucune recette mensuelle disponible</strong>
+                    <span>Le graphique apparaîtra automatiquement dès qu’il y aura des paiements.</span>
+                </div>
+            </div>
+        <?php endif; ?>
     </div>
 
     <div class="panel">
@@ -468,18 +702,41 @@ try {
 <div class="exec-panels-3">
     <div class="panel">
         <h3>Recettes par centre</h3>
-        <canvas id="chartCentres" height="150"></canvas>
+        <?php if(!empty($centresData)): ?>
+            <div class="chart-box chart-small">
+                <canvas id="chartCentres"></canvas>
+            </div>
+        <?php else: ?>
+            <div class="chart-box chart-small">
+                <div class="chart-empty">
+                    <strong>Aucune recette par centre</strong>
+                    <span>Aucune donnée de centre n’est disponible pour le moment.</span>
+                </div>
+            </div>
+        <?php endif; ?>
     </div>
 
     <div class="panel">
         <h3>Recettes par direction</h3>
-        <canvas id="chartDirections" height="150"></canvas>
+        <?php if(!empty($directionsData)): ?>
+            <div class="chart-box chart-small">
+                <canvas id="chartDirections"></canvas>
+            </div>
+        <?php else: ?>
+            <div class="chart-box chart-small">
+                <div class="chart-empty">
+                    <strong>Aucune recette par direction</strong>
+                    <span>Aucune donnée de direction n’est disponible pour le moment.</span>
+                </div>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
 
-<div class="exec-panels">
+<div class="exec-panels exec-bottom">
     <div class="panel">
         <h3>Top 10 contribuables</h3>
+        <div class="table-scroll">
         <table class="table-premium">
             <tr>
                 <th>Contribuable</th>
@@ -499,10 +756,12 @@ try {
                 <tr><td colspan="3">Aucun paiement enregistré.</td></tr>
             <?php endif; ?>
         </table>
+        </div>
     </div>
 
     <div class="panel">
         <h3>NP / NPF échues</h3>
+        <div class="table-scroll">
         <table class="table-premium">
             <tr>
                 <th>NP</th>
@@ -524,6 +783,7 @@ try {
                 <tr><td colspan="4">Aucune NP échue.</td></tr>
             <?php endif; ?>
         </table>
+        </div>
     </div>
 </div>
 
@@ -540,43 +800,148 @@ const centresData = <?= json_encode($centresData, JSON_UNESCAPED_UNICODE) ?>;
 const directionsLabels = <?= json_encode($directionsLabels, JSON_UNESCAPED_UNICODE) ?>;
 const directionsData = <?= json_encode($directionsData, JSON_UNESCAPED_UNICODE) ?>;
 
-new Chart(document.getElementById('chartMois'), {
-    type: 'line',
-    data: {
-        labels: moisLabels,
-        datasets: [{
-            label: 'Recettes CDF',
-            data: moisData,
-            tension: 0.35,
-            fill: true
-        }]
-    },
-    options: { responsive:true, scales:{ y:{ beginAtZero:true } } }
-});
+const formatCDF = (value) => {
+    return new Intl.NumberFormat('fr-FR', {
+        maximumFractionDigits: 0
+    }).format(value) + ' CDF';
+};
 
-new Chart(document.getElementById('chartCentres'), {
-    type: 'bar',
-    data: {
-        labels: centresLabels,
-        datasets: [{
-            label: 'Recettes par centre',
-            data: centresData
-        }]
-    },
-    options: { responsive:true, scales:{ y:{ beginAtZero:true } } }
-});
+const chartMoisEl = document.getElementById('chartMois');
+if (chartMoisEl && moisData.length > 0) {
+    new Chart(chartMoisEl, {
+        type: 'line',
+        data: {
+            labels: moisLabels,
+            datasets: [{
+                label: 'Recettes CDF',
+                data: moisData,
+                tension: 0.32,
+                fill: true,
+                pointRadius: 3,
+                pointHoverRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: {
+                        boxWidth: 14,
+                        usePointStyle: true
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => ' ' + formatCDF(ctx.parsed.y || 0)
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: (value) => new Intl.NumberFormat('fr-FR', {
+                            notation: 'compact',
+                            maximumFractionDigits: 1
+                        }).format(value)
+                    }
+                }
+            }
+        }
+    });
+}
 
-new Chart(document.getElementById('chartDirections'), {
-    type: 'doughnut',
-    data: {
-        labels: directionsLabels,
-        datasets: [{
-            label: 'Recettes par direction',
-            data: directionsData
-        }]
-    },
-    options: { responsive:true }
-});
+const chartCentresEl = document.getElementById('chartCentres');
+if (chartCentresEl && centresData.length > 0) {
+    new Chart(chartCentresEl, {
+        type: 'bar',
+        data: {
+            labels: centresLabels,
+            datasets: [{
+                label: 'Recettes par centre',
+                data: centresData,
+                borderRadius: 7,
+                maxBarThickness: 42
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => ' ' + formatCDF(ctx.parsed.y || 0)
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: {
+                        maxRotation: 35,
+                        minRotation: 0
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: (value) => new Intl.NumberFormat('fr-FR', {
+                            notation: 'compact',
+                            maximumFractionDigits: 1
+                        }).format(value)
+                    }
+                }
+            }
+        }
+    });
+}
+
+const chartDirectionsEl = document.getElementById('chartDirections');
+if (chartDirectionsEl && directionsData.length > 0) {
+    new Chart(chartDirectionsEl, {
+        type: 'doughnut',
+        data: {
+            labels: directionsLabels,
+            datasets: [{
+                label: 'Recettes par direction',
+                data: directionsData,
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '60%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 12,
+                        usePointStyle: true,
+                        padding: 12
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => ' ' + ctx.label + ' : ' + formatCDF(ctx.parsed || 0)
+                    }
+                }
+            }
+        }
+    });
+}
 </script>
 
 </body>
