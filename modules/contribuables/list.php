@@ -63,7 +63,8 @@ function nomContribuable($c) {
 <head>
     <meta charset="UTF-8">
     <title><?= $page_title ?> | cOllect_Pay</title>
-    <link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+    <link rel="stylesheet" href="../../assets/css/admin.css">
+    <link rel="stylesheet" href="../../assets/css/contribuables.css">
 </head>
 <body>
 

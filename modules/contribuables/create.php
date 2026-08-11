@@ -86,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-    <link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+    <link rel="stylesheet" href="../../assets/css/admin.css">
 
     <style>
         .grid-2 {
@@ -120,6 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin-bottom: 18px;
         }
     </style>
+    <link rel="stylesheet" href="../../assets/css/contribuables.css">
 </head>
 
 <body>

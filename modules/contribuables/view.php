@@ -107,7 +107,7 @@ $page_title = "Fiche Contribuable";
 <head>
     <meta charset="UTF-8">
     <title><?= $page_title ?> | cOllect_Pay</title>
-    <link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+    <link rel="stylesheet" href="../../assets/css/admin.css">
 
     <style>
         .profile-grid {
@@ -178,6 +178,7 @@ $page_title = "Fiche Contribuable";
             color: #111827;
         }
     </style>
+    <link rel="stylesheet" href="../../assets/css/contribuables.css">
 </head>
 <body>
 
@@ -191,9 +192,9 @@ $page_title = "Fiche Contribuable";
 
             <div class="profile-card">
                 <?php if (!empty($contribuable['photo'])): ?>
-                    <img src="/collect_pay/assets/uploads/contribuables/<?= htmlspecialchars($contribuable['photo']) ?>">
+                    <img src="../../assets/uploads/contribuables/<?= htmlspecialchars($contribuable['photo']) ?>">
                 <?php else: ?>
-                    <img src="/collect_pay/assets/images/default-user.png">
+                    <img src="../../assets/images/default-user.png">
                 <?php endif; ?>
 
                 <h3><?= htmlspecialchars($nomContribuable) ?></h3>

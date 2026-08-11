@@ -1,0 +1,306 @@
+/* =========================================================
+   CollectPay - Module Contribuables
+   Couche VISUELLE uniquement : aucune logique metier.
+   ========================================================= */
+
+:root {
+    --ctr-navy: #06152b;
+    --ctr-blue: #0f3460;
+    --ctr-blue-2: #1d4ed8;
+    --ctr-gold: #f6b21a;
+    --ctr-bg: #f3f6fb;
+    --ctr-card: #ffffff;
+    --ctr-text: #111827;
+    --ctr-muted: #64748b;
+    --ctr-border: #dbe4ef;
+    --ctr-soft-blue: #eef5ff;
+    --ctr-success: #15803d;
+}
+
+body {
+    background:
+        radial-gradient(circle at 12% 3%, rgba(15,52,96,.07), transparent 24%),
+        radial-gradient(circle at 95% 8%, rgba(246,178,26,.10), transparent 22%),
+        var(--ctr-bg) !important;
+}
+
+.main-content {
+    padding: 22px 28px 34px !important;
+}
+
+.topbar {
+    max-width: 1480px;
+    margin: 18px auto 22px !important;
+    border: 1px solid rgba(219,228,239,.9);
+    border-radius: 18px !important;
+    padding: 18px 22px !important;
+    box-shadow: 0 10px 28px rgba(15,23,42,.07) !important;
+}
+
+.topbar .page-title {
+    font-size: clamp(20px, 2vw, 28px) !important;
+    letter-spacing: -.35px;
+}
+
+.topbar .welcome-text {
+    font-size: 13px;
+}
+
+.main-content > .panel,
+.profile-grid,
+.kpi-grid {
+    max-width: 1480px;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+.panel {
+    border: 1px solid rgba(219,228,239,.92);
+    border-radius: 20px !important;
+    padding: 24px !important;
+    box-shadow: 0 12px 32px rgba(15,23,42,.065) !important;
+}
+
+.panel h3 {
+    margin: 0 0 18px;
+    color: var(--ctr-navy);
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: -.2px;
+}
+
+/* FORMULAIRES */
+.field-group {
+    margin-bottom: 0 !important;
+}
+
+.field-group label,
+.panel form > label {
+    display: block;
+    margin: 0 0 7px;
+    color: #183a64 !important;
+    font-size: 13px;
+    font-weight: 800 !important;
+}
+
+.grid-2 {
+    gap: 18px 20px !important;
+    margin-bottom: 18px;
+}
+
+.panel form {
+    gap: 18px !important;
+}
+
+.panel form input,
+.panel form select,
+.panel form textarea {
+    min-height: 46px;
+    padding: 11px 14px !important;
+    border: 1px solid #cfd9e6 !important;
+    border-radius: 11px !important;
+    background: #fff !important;
+    color: var(--ctr-text) !important;
+    font-size: 14px !important;
+    outline: none;
+    box-shadow: 0 1px 2px rgba(15,23,42,.02);
+    transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+
+.panel form textarea {
+    min-height: 105px;
+    resize: vertical;
+}
+
+.panel form input:focus,
+.panel form select:focus,
+.panel form textarea:focus {
+    border-color: #4f7fb9 !important;
+    box-shadow: 0 0 0 4px rgba(15,52,96,.09) !important;
+}
+
+.panel form input::placeholder,
+.panel form textarea::placeholder {
+    color: #94a3b8;
+}
+
+.info-box {
+    border-radius: 12px !important;
+}
+
+.panel > .info-box {
+    background: linear-gradient(135deg,#eff6ff,#f8fbff) !important;
+    border: 1px solid #cfe0f5 !important;
+    color: #1e3a8a !important;
+    padding: 13px 15px !important;
+    margin-bottom: 20px !important;
+    font-size: 13px;
+}
+
+.panel form button,
+.btn,
+.btn-premium {
+    min-height: 44px;
+    padding: 11px 18px !important;
+    border-radius: 11px !important;
+    font-weight: 850 !important;
+    box-shadow: 0 8px 18px rgba(15,52,96,.14);
+    transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+.panel form button:hover,
+.btn:hover,
+.btn-premium:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 22px rgba(15,52,96,.18);
+}
+
+/* LISTE */
+.table-premium {
+    overflow: hidden;
+    border-radius: 14px;
+    border-collapse: separate !important;
+    border-spacing: 0;
+    border: 1px solid var(--ctr-border);
+    background: #fff;
+}
+
+.table-premium th {
+    background: linear-gradient(180deg,#0b2342,#06152b) !important;
+    padding: 13px 14px !important;
+    font-size: 12px;
+    letter-spacing: .15px;
+    white-space: nowrap;
+}
+
+.table-premium td {
+    padding: 13px 14px !important;
+    font-size: 13px;
+    vertical-align: middle;
+    border-bottom: 1px solid #edf1f6 !important;
+}
+
+.table-premium tr:last-child td {
+    border-bottom: none !important;
+}
+
+.table-premium tr:nth-child(even) td {
+    background: #fbfdff;
+}
+
+.table-premium tr:hover td {
+    background: #f2f7fd;
+}
+
+.table-premium a {
+    color: var(--ctr-blue);
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.table-premium a:hover {
+    text-decoration: underline;
+}
+
+/* FICHE CONTRIBUABLE */
+.profile-grid {
+    grid-template-columns: 300px minmax(0,1fr) !important;
+    gap: 22px !important;
+}
+
+.profile-card {
+    border: 1px solid var(--ctr-border);
+    border-radius: 20px !important;
+    box-shadow: 0 12px 32px rgba(15,23,42,.065) !important;
+}
+
+.profile-card img {
+    width: 126px !important;
+    height: 126px !important;
+    border: 4px solid #fff !important;
+    outline: 4px solid rgba(15,52,96,.12);
+    box-shadow: 0 10px 24px rgba(15,23,42,.12);
+}
+
+.profile-card h3 {
+    margin: 8px 0 5px;
+    color: var(--ctr-navy);
+    font-size: 20px;
+}
+
+.profile-card p {
+    color: var(--ctr-muted);
+    font-size: 13px;
+}
+
+.info-grid {
+    gap: 12px !important;
+}
+
+.info-grid .info-box {
+    background: #f8fbff !important;
+    border: 1px solid #e1e9f2 !important;
+    padding: 14px 15px !important;
+}
+
+.info-grid .info-box span {
+    color: #718096 !important;
+    font-size: 11px !important;
+    letter-spacing: .25px;
+    text-transform: uppercase;
+}
+
+.info-grid .info-box strong {
+    display: block;
+    margin-top: 5px;
+    color: var(--ctr-text) !important;
+    font-size: 14px;
+}
+
+.kpi-card {
+    border: 1px solid var(--ctr-border);
+    border-left: 4px solid var(--ctr-blue) !important;
+    border-radius: 18px !important;
+    padding: 19px 20px !important;
+    box-shadow: 0 10px 26px rgba(15,23,42,.055) !important;
+}
+
+.kpi-card span {
+    font-size: 12px;
+}
+
+.kpi-card h2 {
+    font-size: 24px;
+}
+
+/* Evite que les tableaux cassent la page sur petit ecran */
+.panel:has(.table-premium) {
+    overflow-x: auto;
+}
+
+@media (max-width: 980px) {
+    .main-content { padding: 16px !important; }
+    .profile-grid { grid-template-columns: 1fr !important; }
+    .profile-card { max-width: none; }
+}
+
+@media (max-width: 720px) {
+    .grid-2,
+    .info-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .panel {
+        padding: 18px !important;
+        border-radius: 16px !important;
+    }
+
+    .topbar {
+        margin-top: 12px !important;
+        padding: 15px 17px !important;
+    }
+
+    .table-premium {
+        min-width: 820px;
+    }
+}
