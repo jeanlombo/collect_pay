@@ -1,8 +1,8 @@
 <?php
-require_once "../../auth/check_auth.php";
+require_once "../../config/security.php";
 
 checkAuth();
-requirePermission('administration', 'backup');
+requireRole(['SUPER_ADMIN']);
 
 $page_title = "Sauvegardes";
 ?>
@@ -11,9 +11,11 @@ $page_title = "Sauvegardes";
 <head>
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../assets/css/admin.css">
+<link rel="stylesheet" href="../../assets/css/administration.css">
 </head>
-<body>
+<body class="cp-administration-page">
 
 <div class="admin-layout">
 <?php require_once "../../includes/sidebar.php"; ?>
@@ -21,7 +23,7 @@ $page_title = "Sauvegardes";
 <main class="main-content">
 <?php require_once "../../includes/topbar.php"; ?>
 
-<div class="panel">
+<div class="panel cp-administration-panel">
     <h2>Sauvegardes</h2>
     <p>
         Module réservé à la gestion des sauvegardes du système cOllect_Pay.
@@ -34,7 +36,7 @@ $page_title = "Sauvegardes";
 
     <br>
 
-    <a href="/collect_pay/dashboard/index.php"
+    <a href="../../dashboard/index.php"
        style="display:inline-block;background:#0f3460;color:white;padding:12px 16px;border-radius:12px;text-decoration:none;font-weight:900;">
         Retour au tableau de bord
     </a>

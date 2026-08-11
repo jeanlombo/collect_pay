@@ -4,6 +4,7 @@ require_once "../../config/security.php";
 require_once "../../core/functions.php";
 
 checkAuth();
+requireRole(['SUPER_ADMIN','ADMIN','PARAMETRAGE']);
 
 $page_title = "Paramétrage du système";
 
@@ -44,7 +45,8 @@ $ready = (
 <head>
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
 <style>
 .param-grid{
@@ -113,9 +115,10 @@ $ready = (
     }
 }
 </style>
+<link rel="stylesheet" href="../../assets/css/parametrage.css">
 </head>
 
-<body>
+<body class="cp-parametrage-page">
 <div class="admin-layout">
 
 <?php require_once "../../includes/sidebar.php"; ?>
@@ -145,70 +148,70 @@ $ready = (
         <h3>Provinces</h3>
         <div class="mini-stat"><?= $totalProvinces ?></div>
         <p>Configurer les provinces et leurs codes officiels.</p>
-        <a href="/collect_pay/modules/parametrage/provinces.php">Configurer</a>
+        <a href="provinces.php">Configurer</a>
     </div>
 
     <div class="param-card">
         <h3>Centres fiscaux</h3>
         <div class="mini-stat"><?= $totalCentres ?></div>
         <p>Créer les centres rattachés aux provinces.</p>
-        <a href="/collect_pay/modules/parametrage/centres.php">Configurer</a>
+        <a href="centres.php">Configurer</a>
     </div>
 
     <div class="param-card">
         <h3>Directions</h3>
         <div class="mini-stat"><?= $totalDirections ?></div>
         <p>Créer les directions responsables des recettes.</p>
-        <a href="/collect_pay/modules/parametrage/directions.php">Configurer</a>
+        <a href="directions.php">Configurer</a>
     </div>
 
     <div class="param-card">
         <h3>Services d’assiette</h3>
         <div class="mini-stat"><?= $totalServices ?></div>
         <p>Associer chaque service à une direction et à un centre.</p>
-        <a href="/collect_pay/modules/parametrage/services.php">Configurer</a>
+        <a href="services.php">Configurer</a>
     </div>
 
     <div class="param-card">
         <h3>Nomenclature fiscale</h3>
         <div class="mini-stat"><?= $totalArticles ?></div>
         <p>Configurer les articles budgétaires, actes générateurs, taux, périodicités et modes de calcul.</p>
-        <a href="/collect_pay/modules/parametrage/nomenclature.php">Configurer</a>
+        <a href="nomenclature.php">Configurer</a>
     </div>
 
     <div class="param-card">
         <h3>Taux particuliers par Province</h3>
         <div class="mini-stat"><?= $totalTauxProvince ?></div>
         <p>Optionnel pour IRL/RL. Utilisé seulement lorsqu’un acte varie selon la province.</p>
-        <a href="/collect_pay/modules/parametrage/nomenclature.php">Configurer</a>
+        <a href="nomenclature.php">Configurer</a>
     </div>
 
     <div class="param-card">
         <h3>Périodicités</h3>
         <div class="mini-stat">6</div>
         <p>Voir les types de périodicités utilisés dans la nomenclature.</p>
-        <a href="/collect_pay/modules/parametrage/periodicites.php">Voir</a>
+        <a href="periodicites.php">Voir</a>
     </div>
 
     <div class="param-card">
         <h3>Taux de change</h3>
         <div class="mini-stat"><?= $totalTauxChange ?></div>
         <p>Verrouiller le taux officiel USD/CDF utilisé dans les calculs.</p>
-        <a href="/collect_pay/modules/parametrage/taux_change.php">Configurer</a>
+        <a href="taux_change.php">Configurer</a>
     </div>
 
     <div class="param-card">
         <h3>Comptes bancaires</h3>
         <div class="mini-stat"><?= $totalComptes ?></div>
         <p>Configurer les banques, comptes CDF/USD et affectations.</p>
-        <a href="/collect_pay/modules/parametrage/comptes_bancaires.php">Configurer</a>
+        <a href="comptes_bancaires.php">Configurer</a>
     </div>
 
     <div class="param-card">
         <h3>Modes de paiement</h3>
         <div class="mini-stat"><?= $totalModesPaiement ?></div>
         <p>Mobile Money, carte bancaire, virement bancaire, caisse.</p>
-        <a href="/collect_pay/modules/parametrage/modes_paiement.php">Configurer</a>
+        <a href="modes_paiement.php">Configurer</a>
     </div>
 
 </div>

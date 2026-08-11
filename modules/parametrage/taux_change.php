@@ -4,6 +4,27 @@ require_once "../../config/security.php";
 require_once "../../core/functions.php";
 
 checkAuth();
+requireRole(['SUPER_ADMIN','ADMIN','PARAMETRAGE']);
+
+
+function cpParamUserId(PDO $pdo): ?int
+{
+    $id = (int)($_SESSION['user_id'] ?? 0);
+    if ($id > 0) return $id;
+
+    $email = trim((string)($_SESSION['email'] ?? $_SESSION['user_email'] ?? ''));
+    if ($email !== '') {
+        $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ? LIMIT 1");
+        $stmt->execute([$email]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $id = (int)($row['id'] ?? 0);
+        if ($id > 0) {
+            $_SESSION['user_id'] = $id;
+            return $id;
+        }
+    }
+    return null;
+}
 
 $page_title = "Taux de change officiel";
 $message = "";
@@ -33,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $devise,
         $taux,
         $date_application,
-        $_SESSION['user_id']
+        cpParamUserId($pdo)
     ]);
 
     $message = "Taux de change officiel mis à jour avec succès.";
@@ -61,7 +82,8 @@ $historique = $pdo->query("
 <head>
     <meta charset="UTF-8">
     <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-    <link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
     <style>
         .grid-3 {
@@ -104,9 +126,10 @@ $historique = $pdo->query("
             font-weight: 900;
         }
     </style>
+<link rel="stylesheet" href="../../assets/css/parametrage.css">
 </head>
 
-<body>
+<body class="cp-parametrage-page">
 
 <div class="admin-layout">
 
@@ -116,7 +139,7 @@ $historique = $pdo->query("
 
         <?php require_once "../../includes/topbar.php"; ?>
 
-        <div class="panel">
+        <div class="panel cp-parametrage-panel">
             <h3>Définir le taux de change officiel</h3>
 
             <?php if ($message): ?>
@@ -150,10 +173,10 @@ $historique = $pdo->query("
             </form>
         </div>
 
-        <div class="panel">
+        <div class="panel cp-parametrage-panel">
             <h3>Taux actif actuel</h3>
 
-            <table class="table-premium">
+            <table class="table-premium cp-parametrage-table">
                 <tr>
                     <th>Devise</th>
                     <th>Taux</th>
@@ -180,10 +203,10 @@ $historique = $pdo->query("
             </table>
         </div>
 
-        <div class="panel">
+        <div class="panel cp-parametrage-panel">
             <h3>Historique des taux</h3>
 
-            <table class="table-premium">
+            <table class="table-premium cp-parametrage-table">
                 <tr>
                     <th>Devise</th>
                     <th>Taux</th>

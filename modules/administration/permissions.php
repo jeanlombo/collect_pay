@@ -13,18 +13,31 @@ $message = "";
 
 $roles = $pdo->query("SELECT * FROM roles ORDER BY nom_role")->fetchAll();
 
-$modules = [
-    'parametrage', 'contribuables', 'constatation', 'liquidation',
-    'controle', 'ordonnancement', 'recouvrement', 'apurement', 'paiement', 'quittance', 'penalites',
-    'inspection', 'rapports', 'administration'
-];
+$modules = $pdo->query("
+    SELECT DISTINCT LOWER(module) AS module
+    FROM permissions
+    WHERE module IS NOT NULL AND module <> ''
+    ORDER BY module
+")->fetchAll(PDO::FETCH_COLUMN);
 
-$actions = ['voir', 'creer', 'modifier', 'supprimer', 'valider', 'imprimer', 'exporter'];
+$actions = $pdo->query("
+    SELECT DISTINCT action
+    FROM permissions
+    WHERE action IS NOT NULL AND action <> ''
+    ORDER BY action
+")->fetchAll(PDO::FETCH_COLUMN);
+
+if (!$modules) {
+    $modules = ['administration','parametrage','contribuables','constatation','liquidation','controle','ordonnancement','recouvrement','penalites','inspection','corrections','rapports'];
+}
+if (!$actions) {
+    $actions = ['view','add','edit','delete','validate','print','export'];
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $role_id = $_POST['role_id'];
-    $module = $_POST['module'];
-    $action = $_POST['action'];
+    $role_id = (int)($_POST['role_id'] ?? 0);
+    $module = trim((string)($_POST['module'] ?? ''));
+    $action = trim((string)($_POST['action'] ?? ''));
     $autorise = isset($_POST['autorise']) ? 1 : 0;
 
     $stmt = $pdo->prepare("
@@ -49,15 +62,17 @@ $permissions = $pdo->query("
 <head>
     <meta charset="UTF-8">
     <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-    <link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../assets/css/admin.css">
+<link rel="stylesheet" href="../../assets/css/administration.css">
 </head>
-<body>
+<body class="cp-administration-page">
 <div class="admin-layout">
     <?php require_once "../../includes/sidebar.php"; ?>
     <main class="main-content">
         <?php require_once "../../includes/topbar.php"; ?>
 
-        <div class="panel">
+        <div class="panel cp-administration-panel">
             <h3>Ajouter une permission</h3>
 
             <?php if ($message): ?>
@@ -93,9 +108,9 @@ $permissions = $pdo->query("
             </form>
         </div>
 
-        <div class="panel">
+        <div class="panel cp-administration-panel">
             <h3>Liste des permissions</h3>
-            <table class="table-premium">
+            <table class="table-premium cp-administration-table">
                 <tr>
                     <th>Rôle</th>
                     <th>Module</th>

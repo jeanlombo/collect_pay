@@ -4,6 +4,7 @@ require_once "../../config/security.php";
 require_once "../../core/functions.php";
 
 checkAuth();
+requireRole(['SUPER_ADMIN','ADMIN','PARAMETRAGE']);
 
 $page_title = "Modes de paiement";
 $message = "";
@@ -39,7 +40,8 @@ $modes = $pdo->query("
 <head>
     <meta charset="UTF-8">
     <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-    <link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
     <style>
         .grid-2 {
@@ -73,8 +75,9 @@ $modes = $pdo->query("
             font-weight: 900;
         }
     </style>
+<link rel="stylesheet" href="../../assets/css/parametrage.css">
 </head>
-<body>
+<body class="cp-parametrage-page">
 
 <div class="admin-layout">
 
@@ -84,7 +87,7 @@ $modes = $pdo->query("
 
         <?php require_once "../../includes/topbar.php"; ?>
 
-        <div class="panel">
+        <div class="panel cp-parametrage-panel">
             <h3>Configurer les modes de paiement</h3>
 
             <?php if ($message): ?>
@@ -101,10 +104,10 @@ $modes = $pdo->query("
             </form>
         </div>
 
-        <div class="panel">
+        <div class="panel cp-parametrage-panel">
             <h3>Liste des modes de paiement</h3>
 
-            <table class="table-premium">
+            <table class="table-premium cp-parametrage-table">
                 <tr>
                     <th>ID</th>
                     <th>Code</th>

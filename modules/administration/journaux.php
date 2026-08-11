@@ -45,16 +45,18 @@ $logs = $stmt->fetchAll();
 <head>
     <meta charset="UTF-8">
     <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-    <link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../assets/css/admin.css">
+<link rel="stylesheet" href="../../assets/css/administration.css">
 </head>
-<body>
+<body class="cp-administration-page">
 <div class="admin-layout">
     <?php require_once "../../includes/sidebar.php"; ?>
 
     <main class="main-content">
         <?php require_once "../../includes/topbar.php"; ?>
 
-        <div class="panel">
+        <div class="panel cp-administration-panel">
             <h3>Journaux système</h3>
 
             <form method="GET" style="display:grid;grid-template-columns:1fr auto;gap:12px;">
@@ -64,8 +66,8 @@ $logs = $stmt->fetchAll();
             </form>
         </div>
 
-        <div class="panel">
-            <table class="table-premium">
+        <div class="panel cp-administration-panel">
+            <table class="table-premium cp-administration-table">
                 <tr>
                     <th>Date</th>
                     <th>Utilisateur</th>

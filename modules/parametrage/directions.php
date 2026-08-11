@@ -23,20 +23,11 @@ function cpColumnExistsDirection(PDO $pdo, string $table, string $column): bool
 $hasVisibleTaxation = cpColumnExistsDirection($pdo, 'directions', 'visible_taxation');
 $hasVisiblePwa = cpColumnExistsDirection($pdo, 'directions', 'visible_pwa');
 
-try {
-    if (!$hasVisibleTaxation) {
-        $pdo->exec("ALTER TABLE directions ADD COLUMN visible_taxation TINYINT(1) NOT NULL DEFAULT 1");
-        $hasVisibleTaxation = true;
-    }
-
-    if (!$hasVisiblePwa) {
-        $pdo->exec("ALTER TABLE directions ADD COLUMN visible_pwa TINYINT(1) NOT NULL DEFAULT 0");
-        $hasVisiblePwa = true;
-    }
-} catch (Exception $e) {
-    $error = "Colonnes visibilité non créées automatiquement : " . $e->getMessage();
-}
-
+/*
+ * Les migrations SQL ne doivent pas être exécutées depuis une page Web.
+ * Les colonnes sont seulement détectées ici pour rester compatible avec
+ * différentes versions de la base.
+ */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $action = $_POST['action'] ?? 'create';
@@ -177,7 +168,8 @@ foreach ($directions as $d) {
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
 <style>
 .page-grid{
@@ -319,9 +311,10 @@ foreach ($directions as $d) {
     .form-grid{grid-template-columns:1fr}
 }
 </style>
+<link rel="stylesheet" href="../../assets/css/parametrage.css">
 </head>
 
-<body>
+<body class="cp-parametrage-page">
 
 <div class="admin-layout">
     <?php require_once "../../includes/sidebar.php"; ?>
@@ -346,7 +339,7 @@ foreach ($directions as $d) {
             </div>
         </div>
 
-        <div class="panel">
+        <div class="panel cp-parametrage-panel">
             <h3>Ajouter une Direction / Ministère</h3>
 
             <?php if ($message): ?>
@@ -381,7 +374,7 @@ foreach ($directions as $d) {
             </form>
         </div>
 
-        <div class="panel">
+        <div class="panel cp-parametrage-panel">
             <div class="toolbar">
                 <div>
                     <h3>Gestion des Directions / Ministères</h3>
@@ -407,7 +400,7 @@ foreach ($directions as $d) {
             <form method="POST">
                 <input type="hidden" name="action" value="bulk_update">
 
-                <table class="table-premium">
+                <table class="table-premium cp-parametrage-table">
                     <tr>
                         <th>ID</th>
                         <th>Code</th>

@@ -4,6 +4,7 @@ require_once "../../config/security.php";
 require_once "../../core/functions.php";
 
 checkAuth();
+requireRole(['SUPER_ADMIN','ADMIN','PARAMETRAGE']);
 
 $page_title = "Comptes bancaires";
 $message = "";
@@ -49,16 +50,18 @@ $comptes = $pdo->query("
 <head>
     <meta charset="UTF-8">
     <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-    <link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../assets/css/admin.css">
+<link rel="stylesheet" href="../../assets/css/parametrage.css">
 </head>
-<body>
+<body class="cp-parametrage-page">
 <div class="admin-layout">
     <?php require_once "../../includes/sidebar.php"; ?>
 
     <main class="main-content">
         <?php require_once "../../includes/topbar.php"; ?>
 
-        <div class="panel">
+        <div class="panel cp-parametrage-panel">
             <h3>Ajouter un compte bancaire</h3>
 
             <?php if ($message): ?>
@@ -96,10 +99,10 @@ $comptes = $pdo->query("
             </form>
         </div>
 
-        <div class="panel">
+        <div class="panel cp-parametrage-panel">
             <h3>Liste des comptes bancaires</h3>
 
-            <table class="table-premium">
+            <table class="table-premium cp-parametrage-table">
                 <tr>
                     <th>Banque</th>
                     <th>Compte</th>

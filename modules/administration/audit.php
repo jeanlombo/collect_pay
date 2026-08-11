@@ -3,7 +3,8 @@ require_once "../../config/database.php";
 require_once "../../config/security.php";
 require_once "../../core/functions.php";
 
-checkAuth();    
+checkAuth();
+requireRole(['SUPER_ADMIN']);    
 
 $page_title = "Audit système";
 
@@ -33,9 +34,11 @@ $qrLogs = $pdo->query("
 <head>
     <meta charset="UTF-8">
     <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-    <link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../assets/css/admin.css">
+<link rel="stylesheet" href="../../assets/css/administration.css">
 </head>
-<body>
+<body class="cp-administration-page">
 <div class="admin-layout">
     <?php require_once "../../includes/sidebar.php"; ?>
 
@@ -64,10 +67,10 @@ $qrLogs = $pdo->query("
             </div>
         </div>
 
-        <div class="panel">
+        <div class="panel cp-administration-panel">
             <h3>Alertes système</h3>
 
-            <table class="table-premium">
+            <table class="table-premium cp-administration-table">
                 <tr>
                     <th>Date</th>
                     <th>Type</th>
@@ -92,10 +95,10 @@ $qrLogs = $pdo->query("
             </table>
         </div>
 
-        <div class="panel">
+        <div class="panel cp-administration-panel">
             <h3>Historique vérifications QR</h3>
 
-            <table class="table-premium">
+            <table class="table-premium cp-administration-table">
                 <tr>
                     <th>Date</th>
                     <th>Document</th>

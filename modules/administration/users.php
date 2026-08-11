@@ -25,9 +25,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email']);
     $telephone = trim($_POST['telephone']);
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-    $role_id = $_POST['role_id'];
-    $province_id = $_POST['province_id'];
-    $centre_id = $_POST['centre_id'] ?: null;
+    $role_id = (int)($_POST['role_id'] ?? 0);
+    $province_id = !empty($_POST['province_id']) ? (int)$_POST['province_id'] : null;
+    $centre_id = !empty($_POST['centre_id']) ? (int)$_POST['centre_id'] : null;
     $niveau = $_POST['niveau'];
 
     $stmt = $pdo->prepare("
@@ -36,18 +36,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     ");
 
-    $stmt->execute([
-        $nom,
-        $email,
-        $telephone,
-        $password,
-        $role_id,
-        $province_id,
-        $centre_id,
-        $niveau
-    ]);
-
-    $message = "Utilisateur créé avec succès.";
+    try {
+        $stmt->execute([
+            $nom,
+            $email,
+            $telephone,
+            $password,
+            $role_id,
+            $province_id,
+            $centre_id,
+            $niveau
+        ]);
+        $message = "Utilisateur créé avec succès.";
+    } catch (PDOException $e) {
+        $message = "Impossible de créer l'utilisateur. Vérifiez notamment que l'adresse e-mail n'est pas déjà utilisée.";
+    }
 }
 
 $users = $pdo->query("
@@ -67,16 +70,18 @@ $page_title = "Gestion des Utilisateurs";
 <head>
     <meta charset="UTF-8">
     <title><?= $page_title ?></title>
-    <link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../assets/css/admin.css">
+<link rel="stylesheet" href="../../assets/css/administration.css">
 </head>
-<body>
+<body class="cp-administration-page">
 <div class="admin-layout">
     <?php require_once "../../includes/sidebar.php"; ?>
 
     <main class="main-content">
         <?php require_once "../../includes/topbar.php"; ?>
 
-        <div class="panel">
+        <div class="panel cp-administration-panel">
             <h3>Créer un Utilisateur</h3>
 
             <?php if ($message): ?>
@@ -96,7 +101,7 @@ $page_title = "Gestion des Utilisateurs";
                     <?php endforeach; ?>
                 </select>
 
-                <select name="province_id" required>
+                <select name="province_id">
                     <option value="">-- Province --</option>
                     <?php foreach ($provinces as $p): ?>
                         <option value="<?= $p['id'] ?>"><?= htmlspecialchars($p['nom']) ?></option>
@@ -122,10 +127,10 @@ $page_title = "Gestion des Utilisateurs";
             </form>
         </div>
 
-        <div class="panel">
+        <div class="panel cp-administration-panel">
             <h3>Liste des Utilisateurs</h3>
 
-            <table class="table-premium">
+            <table class="table-premium cp-administration-table">
                 <tr>
                     <th>Nom</th>
                     <th>Email</th>

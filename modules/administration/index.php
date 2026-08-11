@@ -15,10 +15,12 @@ $page_title = "Administration";
 <head>
 <meta charset="UTF-8">
 <title>Administration | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../assets/css/admin.css">
+<link rel="stylesheet" href="../../assets/css/administration.css">
 </head>
 
-<body>
+<body class="cp-administration-page">
 
 <div class="admin-layout">
 

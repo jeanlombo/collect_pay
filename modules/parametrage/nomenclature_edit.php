@@ -243,9 +243,10 @@ label{
     font-weight:1000;
 }
 </style>
+<link rel="stylesheet" href="../../assets/css/parametrage.css">
 </head>
 
-<body>
+<body class="cp-parametrage-page">
 
 <?php
 $sidebar = __DIR__ . "/../../includes/sidebar.php";

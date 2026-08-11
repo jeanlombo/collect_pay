@@ -4,6 +4,7 @@ require_once "../../config/security.php";
 require_once "../../core/functions.php";
 
 checkAuth();
+requireRole(['SUPER_ADMIN','ADMIN','PARAMETRAGE']);
 
 $page_title = "Nomenclature fiscale";
 $message = "";
@@ -215,7 +216,8 @@ if (!function_exists('formatTauxNomenclature')) {
 <head>
     <meta charset="UTF-8">
     <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-    <link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
     <style>
         .grid-2 { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
@@ -245,9 +247,10 @@ if (!function_exists('formatTauxNomenclature')) {
 .text-center{text-align:center;}
 </style>
 
+<link rel="stylesheet" href="../../assets/css/parametrage.css">
 </head>
 
-<body>
+<body class="cp-parametrage-page">
 <div class="admin-layout">
 
 <?php require_once "../../includes/sidebar.php"; ?>
@@ -255,7 +258,7 @@ if (!function_exists('formatTauxNomenclature')) {
 <main class="main-content">
 <?php require_once "../../includes/topbar.php"; ?>
 
-<div class="panel">
+<div class="panel cp-parametrage-panel">
     <h2>Nomenclature fiscale</h2>
     <p>
         Configuration réelle :
@@ -271,7 +274,7 @@ if (!function_exists('formatTauxNomenclature')) {
     <?php endif; ?>
 </div>
 
-<div class="panel">
+<div class="panel cp-parametrage-panel">
     <h3>Ajouter un acte taxable dans la nomenclature</h3>
 
     <form method="POST">
@@ -438,10 +441,10 @@ if (!function_exists('formatTauxNomenclature')) {
     </form>
 </div>
 
-<div class="panel">
+<div class="panel cp-parametrage-panel">
     <h3>Liste de la nomenclature configurée</h3>
 
-    <table class="table-premium">
+    <table class="table-premium cp-parametrage-table">
         <tr>
             <th>Direction</th>
             <th>Service</th>
