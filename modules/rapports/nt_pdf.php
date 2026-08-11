@@ -37,11 +37,11 @@ if (!function_exists('cpCleanOutputBeforePdf')) {
     }
 }
 
-require_once __DIR__ . "/../../config/database.php";
-require_once __DIR__ . "/../../config/security.php";
-require_once __DIR__ . "/../../lib/fpdf/fpdf.php";
-require_once __DIR__ . "/../../lib/phpqrcode/qrlib.php";
-require_once __DIR__ . "/../../core/secure_qr_engine.php";
+require_once "../config/database.php";
+require_once "../config/security.php";
+require_once "../lib/fpdf/fpdf.php";
+require_once "../lib/phpqrcode/qrlib.php";
+require_once "../core/secure_qr_engine.php";
 
 checkAuth();
 
@@ -498,8 +498,9 @@ class CollectPayNTPDF extends FPDF
 
     public function Header()
     {
-        if (file_exists('../assets/images/logo_province.png')) {
-            $this->Image('../assets/images/logo_province.png', 12, 8, 22);
+        $logoProvince = __DIR__ . '/../../assets/images/logo_province.png';
+        if (is_file($logoProvince)) {
+            $this->Image($logoProvince, 12, 8, 22);
         }
 
         $qrMatrix = $GLOBALS['qrMatrix'] ?? [];
