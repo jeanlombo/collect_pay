@@ -9,7 +9,7 @@ checkAuth();
 if (!function_exists('cpRecouvrementCurrentUserId')) {
     function cpRecouvrementCurrentUserId(PDO $pdo): int
     {
-        $id = (int)(cpRecouvrementCurrentUserId($pdo) ?? 0);
+        $id = (int)($_SESSION['user_id'] ?? 0);
 
         if ($id > 0) {
             return $id;
