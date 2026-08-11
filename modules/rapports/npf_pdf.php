@@ -180,12 +180,24 @@ function detailCalculTextNPF($json)
 
 $montantQR = (float)($npf['solde_restant'] ?? $npf['montant_initial'] ?? 0);
 
+/*
+|--------------------------------------------------------------------------
+| QR sécurisé NPF
+|--------------------------------------------------------------------------
+| Même moteur chiffré que les autres documents officiels.
+| Le contenu brut ne doit pas être lisible par un lecteur QR classique.
+| Il est destiné au lecteur sécurisé CollectPay / PWA.
+*/
 $qrContent = buildEncryptedQrContent(
     $pdo,
     'NPF',
     $npf['numero_np'],
     $montantQR
 );
+
+if (empty($qrContent)) {
+    die("Erreur génération QR sécurisé NPF.");
+}
 
 $GLOBALS['qrMatrix'] = QRcode::text(
     $qrContent,
@@ -197,7 +209,7 @@ $GLOBALS['qrMatrix'] = QRcode::text(
 
 class NPFPDF extends FPDF
 {
-    function DrawQRCode($matrix, $x, $y, $size = 0.38)
+    function DrawQRCode($matrix, $x, $y, $size = 0.90)
     {
         if (!is_array($matrix)) return;
 
@@ -225,16 +237,16 @@ class NPFPDF extends FPDF
         if (is_file($logoProvince)) {
             $this->Image($logoProvince, 10, 8, 24);
         }
-$this->DrawQRCode(
+        $this->DrawQRCode(
             $GLOBALS['qrMatrix'] ?? [],
-            172,
+            164,
             8,
-            0.38
+            0.88
         );
 
         $this->SetFont('Arial', '', 5);
-        $this->SetXY(165, 34);
-        $this->Cell(35, 3, pdfTxt('Vérification sécurisée'), 0, 0, 'C');
+        $this->SetXY(163, 35);
+        $this->Cell(38, 3, pdfTxt('QR sécurisé - Lecture PWA'), 0, 0, 'C');
 
         $this->SetY(8);
         $this->SetFont('Arial', 'B', 11);
