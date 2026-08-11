@@ -677,7 +677,7 @@ $page_title = "Note de Taxation";
             <a
                 class="btn-premium"
                 target="_blank"
-                href="../../reports/nt_pdf.php?numero=<?= urlencode($nt['numero_nt']) ?>"
+                href="../rapports/nt_pdf.php?numero=<?= urlencode($nt['numero_nt']) ?>"
             >
                 🖨️ Imprimer la NT
             </a>
@@ -1118,7 +1118,7 @@ $page_title = "Note de Taxation";
         <a
             class="btn-premium"
             target="_blank"
-            href="../../reports/nt_pdf.php?numero=<?= urlencode($nt['numero_nt']) ?>"
+            href="../rapports/nt_pdf.php?numero=<?= urlencode($nt['numero_nt']) ?>"
         >
             🖨️ Imprimer la NT
         </a>

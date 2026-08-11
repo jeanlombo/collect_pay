@@ -235,7 +235,7 @@ $page_title = "Quittance";
 
     <?php if ($canPrint): ?>
         <a target="_blank"
-           href="/collect_pay/reports/quittance_pdf.php?numero=<?= urlencode($q['numero_quittance']) ?>"
+           href="../rapports/quittance_pdf.php?numero=<?= urlencode($q['numero_quittance']) ?>"
            class="btn-green-custom">
             Imprimer PDF
         </a>

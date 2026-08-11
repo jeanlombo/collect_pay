@@ -236,7 +236,7 @@ $canValidateAMR = function_exists('canDo') ? canDo('amr', 'create') : false;
                         <?php if ($canPrintAMR): ?>
                             <a class="btn-action btn-pdf"
                                target="_blank"
-                               href="/collect_pay/reports/amr_pdf.php?numero=<?= urlencode($a['numero_amr']) ?>">
+                               href="../rapports/amr_pdf.php?numero=<?= urlencode($a['numero_amr']) ?>">
                                 PDF
                             </a>
                         <?php endif; ?>

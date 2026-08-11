@@ -388,7 +388,7 @@ $modeLabel = [
     <div class="action-row">
         <a class="btn-action btn-attestation"
            target="_blank"
-           href="/collect_pay/reports/attestation_paiement_pdf.php?numero=<?= urlencode($p['numero_np']) ?>">
+           href="../rapports/attestation_paiement_pdf.php?numero=<?= urlencode($p['numero_np']) ?>">
             Imprimer Attestation
         </a>
 
@@ -413,7 +413,7 @@ $modeLabel = [
 
                 <a class="btn-action btn-quittance"
                    target="_blank"
-                   href="/collect_pay/reports/quittance_pdf.php?numero=<?= urlencode($quittance['numero_quittance']) ?>">
+                   href="../rapports/quittance_pdf.php?numero=<?= urlencode($quittance['numero_quittance']) ?>">
                     Imprimer quittance
                 </a>
             <?php else: ?>

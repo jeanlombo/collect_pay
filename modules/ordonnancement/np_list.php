@@ -306,13 +306,13 @@ function noteEstEchue($n)
                         <?php if (($n['type_np'] ?? '') === 'fractionnee'): ?>
                             <a class="btn-pdf"
                                target="_blank"
-                               href="/collect_pay/reports/npf_pdf.php?numero=<?= urlencode($n['numero_np']) ?>">
+                               href="../rapports/npf_pdf.php?numero=<?= urlencode($n['numero_np']) ?>">
                                 PDF
                             </a>
                         <?php else: ?>
                             <a class="btn-pdf"
                                target="_blank"
-                               href="/collect_pay/reports/np_pdf.php?numero=<?= urlencode($n['numero_np']) ?>">
+                               href="../rapports/np_pdf.php?numero=<?= urlencode($n['numero_np']) ?>">
                                 PDF
                             </a>
                         <?php endif; ?>

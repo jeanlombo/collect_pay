@@ -231,7 +231,7 @@ function badgeFraction($statut)
                     </a>
 
                     <a class="btn-luxoria gold"
-                       href="/collect_pay/reports/npf_pdf.php?numero=<?= urlencode($f['numero_np']) ?>"
+                       href="../rapports/npf_pdf.php?numero=<?= urlencode($f['numero_np']) ?>"
                        target="_blank">
                         PDF
                     </a>

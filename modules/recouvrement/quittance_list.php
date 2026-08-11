@@ -125,7 +125,7 @@ function formatDateQuittance($date) {
                             Voir
                         </a>
 
-                        <a class="btn-action btn-pdf" target="_blank" href="/collect_pay/reports/quittance_pdf.php?numero=<?= urlencode($q['numero_quittance']) ?>">
+                        <a class="btn-action btn-pdf" target="_blank" href="../rapports/quittance_pdf.php?numero=<?= urlencode($q['numero_quittance']) ?>">
                             PDF
                         </a>
                     </div>

@@ -320,7 +320,7 @@ $isPaid = in_array(($amr['statut_np'] ?? ''), ['payee', 'payé', 'paye'], true)
             <?= htmlspecialchars($paiementLabel) ?>
         </a>
 
-        <a class="btn-pdf" target="_blank" href="/collect_pay/reports/amr_pdf.php?numero=<?= urlencode($amr['numero_amr'] ?? '') ?>">
+        <a class="btn-pdf" target="_blank" href="../rapports/amr_pdf.php?numero=<?= urlencode($amr['numero_amr'] ?? '') ?>">
             PDF AMR
         </a>
 

@@ -195,7 +195,7 @@ function badgeApList($statut): string {
     <td>
         <?php if (!empty($r['numero_quittance'])): ?>
             <a class="btn-action btn-view" href="quittance_view.php?numero=<?= urlencode($r['numero_quittance']) ?>">Voir</a>
-            <a class="btn-action btn-pdf" target="_blank" href="/collect_pay/reports/quittance_pdf.php?numero=<?= urlencode($r['numero_quittance']) ?>">PDF</a>
+            <a class="btn-action btn-pdf" target="_blank" href="../rapports/quittance_pdf.php?numero=<?= urlencode($r['numero_quittance']) ?>">PDF</a>
         <?php elseif (($r['statut'] ?? '') === 'total' && function_exists('canDo') && canDo('quittances','create')): ?>
             <a class="btn-action btn-qt" href="quittance_generate.php?apurement_id=<?= (int)$r['id'] ?>">Générer quittance</a>
         <?php else: ?>

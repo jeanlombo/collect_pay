@@ -277,7 +277,7 @@ $page_title = "Note de Débit";
 <div class="panel">
     <a href="nd_list.php" class="btn">Retour liste</a>
 
-    <a href="/collect_pay/reports/nd_pdf.php?numero=<?= urlencode($nd['numero_nd']) ?>"
+    <a href="../rapports/nd_pdf.php?numero=<?= urlencode($nd['numero_nd']) ?>"
        target="_blank"
        class="btn">
         Imprimer ND

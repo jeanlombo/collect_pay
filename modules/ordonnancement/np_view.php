@@ -401,7 +401,7 @@ $statutLabel = strtoupper(str_replace('_', ' ', $np['statut'] ?? 'en_attente'));
                         </a>
                     <?php endif; ?>
 
-                    <a href="/collect_pay/reports/npf_pdf.php?numero=<?= urlencode($f['numero_np']) ?>"
+                    <a href="../rapports/npf_pdf.php?numero=<?= urlencode($f['numero_np']) ?>"
                        target="_blank"
                        class="btn-outline-custom">
                         PDF
@@ -426,13 +426,13 @@ $statutLabel = strtoupper(str_replace('_', ' ', $np['statut'] ?? 'en_attente'));
         <a href="np_list.php" class="btn-primary-custom">Retour liste</a>
 
         <?php if (($np['type_np'] ?? '') === 'fractionnee'): ?>
-            <a href="/collect_pay/reports/npf_pdf.php?numero=<?= urlencode($np['numero_np']) ?>"
+            <a href="../rapports/npf_pdf.php?numero=<?= urlencode($np['numero_np']) ?>"
                target="_blank"
                class="btn-outline-custom">
                 Imprimer NPF
             </a>
         <?php else: ?>
-            <a href="/collect_pay/reports/np_pdf.php?numero=<?= urlencode($np['numero_np']) ?>"
+            <a href="../rapports/np_pdf.php?numero=<?= urlencode($np['numero_np']) ?>"
                target="_blank"
                class="btn-outline-custom">
                 Imprimer NP
