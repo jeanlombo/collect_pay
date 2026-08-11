@@ -3,7 +3,6 @@ require_once "../../config/database.php";
 require_once "../../config/security.php";
 require_once "../../core/secure_qr_engine.php";
 checkAuth();
-requirePermission('inspection', 'scan');
 requireRole([
     'SUPER_ADMIN',
     'INSPECTEUR',

@@ -3,8 +3,6 @@ require_once "../../config/database.php";
 require_once "../../config/security.php";
 
 checkAuth();
-requirePermission('inspection', 'revoke');
-
 $page_title = "Documents révoqués";
 
 $stmt = $pdo->prepare("

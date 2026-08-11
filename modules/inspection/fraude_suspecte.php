@@ -3,8 +3,6 @@ require_once "../../config/database.php";
 require_once "../../config/security.php";
 
 checkAuth();
-requirePermission('inspection', 'fraud');
-
 $page_title = "Fraudes suspectes";
 
 $stmt = $pdo->prepare("

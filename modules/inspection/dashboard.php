@@ -3,7 +3,6 @@ require_once "../../config/database.php";
 require_once "../../config/security.php";
 
 checkAuth();
-requirePermission('inspection', 'view');
 requireRole([
     'SUPER_ADMIN',
     'INSPECTEUR',

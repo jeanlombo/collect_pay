@@ -13,8 +13,7 @@ checkAuth();
 
 if (function_exists('canDo')) {
     if (!canDo('inspection', 'verify') && !canDo('inspection', 'view')) {
-        requirePermission('inspection', 'verify');
-    }
+}
 }
 
 $page_title = "Journal des vérifications";
