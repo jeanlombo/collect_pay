@@ -49,17 +49,19 @@ function getOrCreateDocumentToken($pdo, $type_document, $numero_document, $monta
             numero_document,
             token,
             signature_hash,
+            hash_signature,
             montant,
             statut,
             created_at
         )
-        VALUES (?, ?, ?, ?, ?, 'actif', NOW())
+        VALUES (?, ?, ?, ?, ?, ?, 'actif', NOW())
     ");
 
     $stmt->execute([
         $type_document,
         $numero_document,
         $token,
+        $signature,
         $signature,
         $montant
     ]);
