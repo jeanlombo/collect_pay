@@ -108,227 +108,535 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <style>
 *{
-    margin:0;
-    padding:0;
     box-sizing:border-box;
 }
 
+:root{
+    --cp-navy:#06182b;
+    --cp-navy-2:#0b2b4b;
+    --cp-blue:#0f5688;
+    --cp-gold:#f5c518;
+    --cp-gold-2:#ffd84a;
+    --cp-white:#ffffff;
+    --cp-soft:#f5f8fb;
+    --cp-border:#dbe5ef;
+    --cp-text:#17324a;
+    --cp-muted:#6f8092;
+}
+
+html,body{
+    min-height:100%;
+}
+
 body{
+    margin:0;
     min-height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    font-family:'Segoe UI',Arial,sans-serif;
+    font-family:"Segoe UI",Arial,sans-serif;
+    color:var(--cp-text);
     background:
-        linear-gradient(rgba(3,12,32,.78), rgba(3,12,32,.82)),
+        radial-gradient(circle at 8% 10%,rgba(245,197,24,.13),transparent 27%),
+        radial-gradient(circle at 92% 85%,rgba(42,126,185,.20),transparent 30%),
+        linear-gradient(135deg,#04111f 0%,#092847 48%,#0e466f 100%);
+    padding:28px;
+}
+
+.login-shell{
+    width:min(1180px,100%);
+    min-height:690px;
+    margin:auto;
+    display:grid;
+    grid-template-columns:1.08fr .92fr;
+    background:#fff;
+    border-radius:30px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,.18);
+    box-shadow:0 32px 90px rgba(0,0,0,.34);
+}
+
+/* ================================
+   IDENTITÉ
+================================ */
+.brand-side{
+    position:relative;
+    padding:52px 54px 44px;
+    color:#fff;
+    overflow:hidden;
+    background:
+        linear-gradient(145deg,rgba(3,18,34,.92),rgba(7,46,78,.93)),
         url("assets/images/bg-login.jpg");
     background-size:cover;
     background-position:center;
-    padding:22px;
-    overflow-x:hidden;
 }
 
-.auth-card{
-    width:100%;
-    max-width:470px;
-    background:rgba(255,255,255,.13);
-    backdrop-filter:blur(22px);
-    -webkit-backdrop-filter:blur(22px);
-    border:1px solid rgba(255,255,255,.22);
-    border-radius:32px;
-    padding:38px 38px 30px;
-    box-shadow:0 30px 80px rgba(0,0,0,.42);
-    color:white;
-    animation:fadeIn .7s ease;
+.brand-side::before{
+    content:"";
+    position:absolute;
+    width:350px;
+    height:350px;
+    border-radius:50%;
+    background:rgba(245,197,24,.12);
+    top:-170px;
+    right:-140px;
+}
+
+.brand-side::after{
+    content:"";
+    position:absolute;
+    width:310px;
+    height:310px;
+    border-radius:50%;
+    border:1px solid rgba(255,255,255,.09);
+    bottom:-150px;
+    left:-130px;
+}
+
+.brand-inner{
     position:relative;
+    z-index:2;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+}
+
+.institution-row{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    margin-bottom:54px;
+}
+
+.institution-logo{
+    width:82px;
+    height:82px;
+    flex:0 0 82px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#fff;
+    border-radius:21px;
+    padding:8px;
+    box-shadow:0 15px 36px rgba(0,0,0,.22);
     overflow:hidden;
 }
 
-.auth-card::before{
-    content:"";
-    position:absolute;
-    top:-80px;
-    right:-80px;
-    width:190px;
-    height:190px;
-    background:rgba(255,215,0,.18);
-    border-radius:50%;
-    filter:blur(6px);
-}
-
-.auth-card::after{
-    content:"";
-    position:absolute;
-    bottom:-90px;
-    left:-90px;
-    width:190px;
-    height:190px;
-    background:rgba(59,130,246,.18);
-    border-radius:50%;
-    filter:blur(8px);
-}
-
-.auth-content{
-    position:relative;
-    z-index:2;
-}
-
-@keyframes fadeIn{
-    from{opacity:0;transform:translateY(35px)}
-    to{opacity:1;transform:translateY(0)}
-}
-
-.header-logos{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    gap:14px;
-    margin-bottom:18px;
-}
-
-.header-logos img{
-    width:58px;
-    height:58px;
+.institution-logo img{
+    width:100%;
+    height:100%;
     object-fit:contain;
-    background:rgba(255,255,255,.92);
-    padding:5px;
-    border-radius:14px;
-    box-shadow:0 10px 25px rgba(0,0,0,.22);
 }
 
-.brand-title{
-    text-align:center;
-    margin-bottom:24px;
-}
-
-.brand-title h1{
-    font-size:36px;
+.logo-fallback{
+    font-size:27px;
     font-weight:1000;
-    color:#FFD700;
-    letter-spacing:-1px;
-    margin:0;
-    text-shadow:0 8px 25px rgba(0,0,0,.3);
+    color:var(--cp-navy);
 }
 
-.brand-title p{
-    color:#e0f2fe;
-    font-size:14.5px;
-    line-height:1.35;
-    margin:8px 0 0;
-    font-weight:700;
+.institution-copy small{
+    display:block;
+    color:#bcd2e5;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    font-size:10px;
+    margin-bottom:5px;
 }
 
-.badge-secure{
-    display:inline-block;
-    margin-top:12px;
-    padding:7px 14px;
+.institution-copy strong{
+    font-size:17px;
+    line-height:1.25;
+}
+
+.brand-badge{
+    width:max-content;
+    max-width:100%;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:8px 13px;
     border-radius:999px;
-    background:rgba(255,255,255,.16);
-    color:white;
-    font-size:12px;
+    border:1px solid rgba(255,255,255,.16);
+    background:rgba(255,255,255,.08);
+    color:#d9e9f6;
+    font-size:11px;
     font-weight:900;
-    border:1px solid rgba(255,255,255,.22);
+    letter-spacing:.04em;
+    text-transform:uppercase;
+    backdrop-filter:blur(8px);
+}
+
+.brand-name{
+    margin:18px 0 0;
+    font-size:56px;
+    line-height:.98;
+    letter-spacing:-2.7px;
+    font-weight:1000;
+}
+
+.brand-name span{
+    color:var(--cp-gold);
+}
+
+.brand-description{
+    margin:18px 0 0;
+    max-width:520px;
+    font-size:16px;
+    line-height:1.62;
+    color:#dceaf5;
+    font-weight:650;
+}
+
+.feature-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin-top:30px;
+}
+
+.feature{
+    min-height:82px;
+    padding:15px 16px;
+    border-radius:17px;
+    border:1px solid rgba(255,255,255,.13);
+    background:rgba(255,255,255,.075);
+    backdrop-filter:blur(8px);
+}
+
+.feature i{
+    color:var(--cp-gold);
+    font-size:17px;
+    margin-bottom:9px;
+}
+
+.feature strong{
+    display:block;
+    color:#fff;
+    font-size:13px;
+    margin-bottom:3px;
+}
+
+.feature span{
+    color:#bcd1e2;
+    font-size:11.5px;
+    line-height:1.35;
+}
+
+.brand-foot{
+    margin-top:auto;
+    padding-top:28px;
+    color:#a8c0d4;
+    font-size:11.5px;
+    display:flex;
+    align-items:center;
+    gap:9px;
+}
+
+/* ================================
+   CONNEXION
+================================ */
+.auth-side{
+    background:
+        linear-gradient(180deg,#ffffff 0%,#f8fbfd 100%);
+    padding:44px 48px;
+    display:flex;
+    align-items:center;
+}
+
+.auth-wrap{
+    width:100%;
+    max-width:450px;
+    margin:0 auto;
+}
+
+.mobile-brand{
+    display:none;
+}
+
+.login-eyebrow{
+    display:inline-flex;
+    gap:7px;
+    align-items:center;
+    color:#1d648f;
+    background:#eaf5fc;
+    border:1px solid #d2e8f6;
+    border-radius:999px;
+    padding:7px 11px;
+    font-size:10.5px;
+    font-weight:900;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+}
+
+.auth-title{
+    margin:14px 0 7px;
+    color:#102f4b;
+    font-weight:1000;
+    font-size:31px;
+    letter-spacing:-.8px;
+}
+
+.auth-subtitle{
+    margin:0 0 25px;
+    color:var(--cp-muted);
+    font-size:14px;
+    line-height:1.55;
+}
+
+.alert{
+    border:0;
+    border-radius:14px;
+    font-weight:750;
+    font-size:13px;
+    padding:12px 14px;
 }
 
 .form-label{
-    color:#fff;
+    color:#264760;
+    font-size:12px;
     font-weight:900;
-    margin-bottom:8px;
+    margin:0 0 7px;
+}
+
+.field-wrap{
+    position:relative;
+    margin-bottom:17px;
+}
+
+.field-icon{
+    position:absolute;
+    left:15px;
+    top:50%;
+    transform:translateY(-50%);
+    color:#7b91a4;
+    z-index:2;
+}
+
+.form-control.cp-field{
+    width:100%;
+    min-height:52px;
+    padding:12px 46px;
+    border:1px solid #cedce8;
+    border-radius:14px;
+    background:#fff;
+    color:#1d364b;
     font-size:14px;
+    box-shadow:0 5px 16px rgba(21,64,96,.035);
+    transition:.2s ease;
 }
 
-.input-group{
-    margin-bottom:18px;
-    box-shadow:0 12px 30px rgba(0,0,0,.18);
-    border-radius:15px;
+.form-control.cp-field:focus{
+    border-color:#4b98ca;
+    box-shadow:0 0 0 4px rgba(40,132,193,.10);
+    background:#fff;
 }
 
-.input-group-text{
-    background:#FFD700;
-    border:none;
-    color:#0f172a;
-    font-weight:900;
-    width:50px;
+.password-toggle{
+    position:absolute;
+    top:50%;
+    right:10px;
+    transform:translateY(-50%);
+    border:0;
+    width:34px;
+    height:34px;
+    border-radius:9px;
+    background:#edf3f7;
+    color:#4b6477;
+    display:flex;
+    align-items:center;
     justify-content:center;
-    border-radius:15px 0 0 15px;
-}
-
-.form-control{
-    border:none;
-    padding:14px 15px;
-    font-size:15px;
-    border-radius:0 15px 15px 0;
-}
-
-.form-control:focus{
-    box-shadow:none;
+    cursor:pointer;
 }
 
 .btn-login{
     width:100%;
-    padding:14px;
-    border:none;
-    border-radius:16px;
-    background:linear-gradient(135deg,#FFD700,#facc15);
-    color:#0f172a;
-    font-size:17px;
+    min-height:52px;
+    border:0;
+    border-radius:14px;
+    background:linear-gradient(135deg,#f0ba09,#ffd444);
+    color:#10283b;
+    font-size:14px;
     font-weight:1000;
-    transition:.3s;
-    box-shadow:0 12px 28px rgba(255,215,0,.35);
+    box-shadow:0 12px 27px rgba(226,171,0,.22);
+    transition:.2s ease;
 }
 
 .btn-login:hover{
-    transform:translateY(-3px);
-    box-shadow:0 18px 38px rgba(255,215,0,.48);
+    transform:translateY(-1px);
+    box-shadow:0 16px 32px rgba(226,171,0,.28);
 }
 
-.btn-vitrine{
-    display:block;
-    width:100%;
-    text-align:center;
-    margin-top:14px;
-    padding:13px;
-    border-radius:16px;
-    text-decoration:none;
-    background:rgba(255,255,255,.08);
-    border:2px solid rgba(255,255,255,.72);
-    color:white;
-    font-weight:1000;
-    transition:.3s;
-}
-
-.btn-vitrine:hover{
-    background:white;
-    color:#0f3460;
-    transform:translateY(-2px);
-}
-
-.footer-text{
-    margin-top:22px;
-    text-align:center;
-    font-size:12.5px;
-    color:#dbeafe;
+.security-note{
+    margin:16px 0 0;
+    display:flex;
+    gap:9px;
+    align-items:flex-start;
+    padding:11px 12px;
+    background:#f1f7fb;
+    color:#557085;
+    border:1px solid #dbe8f1;
+    border-radius:12px;
+    font-size:11.5px;
     line-height:1.45;
 }
 
-.alert{
-    border-radius:16px;
-    font-weight:800;
+.security-note i{
+    color:#1b779f;
+    margin-top:2px;
 }
 
-@media(max-width:520px){
-    .auth-card{
-        padding:30px 22px 24px;
-        border-radius:26px;
+/* ================================
+   VÉRIFICATION + VITRINE
+================================ */
+.public-actions{
+    margin-top:19px;
+    padding-top:18px;
+    border-top:1px solid #e3eaf0;
+}
+
+.public-actions-title{
+    color:#6b7f91;
+    font-size:10.5px;
+    text-transform:uppercase;
+    font-weight:900;
+    letter-spacing:.065em;
+    margin-bottom:10px;
+}
+
+.login-verification-slot .verif-box{
+    margin:0 0 10px!important;
+    text-align:left!important;
+}
+
+.login-verification-slot .verif-small-text{
+    display:none!important;
+}
+
+.login-verification-slot .verif-btn-open{
+    width:100%!important;
+    min-height:48px!important;
+    border-radius:13px!important;
+    padding:11px 14px!important;
+    background:linear-gradient(135deg,#0e3658,#145d8b)!important;
+    box-shadow:none!important;
+    font-size:13px!important;
+}
+
+.btn-vitrine{
+    min-height:48px;
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:9px;
+    border-radius:13px;
+    border:1px solid #c9d9e5;
+    background:#fff;
+    color:#284b64;
+    text-decoration:none;
+    font-size:13px;
+    font-weight:900;
+    transition:.2s ease;
+}
+
+.btn-vitrine:hover{
+    background:#f5f9fc;
+    color:#123b58;
+    border-color:#9fbed3;
+}
+
+.footer-text{
+    margin-top:19px;
+    text-align:center;
+    color:#8695a3;
+    font-size:10.5px;
+    line-height:1.5;
+}
+
+/* Widget déjà existant : on garde sa logique */
+.verif-modal-bg{
+    backdrop-filter:blur(5px);
+}
+
+/* ================================
+   RESPONSIVE
+================================ */
+@media(max-width:960px){
+    body{
+        padding:16px;
     }
 
-    .brand-title h1{
-        font-size:31px;
+    .login-shell{
+        grid-template-columns:1fr;
+        min-height:auto;
+        max-width:650px;
     }
 
-    .header-logos img{
-        width:52px;
-        height:52px;
+    .brand-side{
+        padding:30px 32px;
+    }
+
+    .institution-row{
+        margin-bottom:24px;
+    }
+
+    .feature-grid,
+    .brand-foot{
+        display:none;
+    }
+
+    .brand-name{
+        font-size:40px;
+    }
+
+    .brand-description{
+        font-size:14px;
+    }
+
+    .auth-side{
+        padding:34px 32px;
+    }
+}
+
+@media(max-width:560px){
+    body{
+        padding:0;
+        background:#f6f9fc;
+    }
+
+    .login-shell{
+        border-radius:0;
+        min-height:100vh;
+        box-shadow:none;
+    }
+
+    .brand-side{
+        padding:25px 22px 28px;
+    }
+
+    .institution-logo{
+        width:62px;
+        height:62px;
+        flex-basis:62px;
+        border-radius:16px;
+    }
+
+    .institution-copy strong{
+        font-size:14px;
+    }
+
+    .brand-name{
+        font-size:35px;
+    }
+
+    .brand-description{
+        margin-top:12px;
+    }
+
+    .auth-side{
+        padding:28px 22px 32px;
+    }
+
+    .auth-title{
+        font-size:27px;
     }
 }
 </style>
@@ -336,90 +644,196 @@ body{
 
 <body>
 
-<div class="auth-card">
-    <div class="auth-content">
+<div class="login-shell">
 
-        <div class="header-logos">
-            <?php if (file_exists("assets/images/logo.png")): ?>
-                <img src="assets/images/logo.png" alt="Logo cOllect_Pay">
-            <?php endif; ?>
+    <!-- IDENTITÉ INSTITUTIONNELLE -->
+    <section class="brand-side">
+        <div class="brand-inner">
+
+            <div class="institution-row">
+                <div class="institution-logo">
+                    <?php if (file_exists(__DIR__ . "/assets/images/logo.png")): ?>
+                        <img src="assets/images/logo.png" alt="Logo officiel">
+                    <?php else: ?>
+                        <span class="logo-fallback">CP</span>
+                    <?php endif; ?>
+                </div>
+
+                <div class="institution-copy">
+                    <small>Plateforme officielle</small>
+                    <strong>Guichet Unique Digital<br>des Recettes Publiques</strong>
+                </div>
+            </div>
+
+            <div>
+                <span class="brand-badge">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    Plateforme fiscale sécurisée
+                </span>
+
+                <h1 class="brand-name">
+                    cOllect_<span>Pay</span>
+                </h1>
+
+                <p class="brand-description">
+                    Système intégré de canalisation, de mobilisation,
+                    de sécurisation et de maximisation des recettes publiques.
+                </p>
+
+                <div class="feature-grid">
+                    <div class="feature">
+                        <i class="fa-solid fa-file-circle-check"></i>
+                        <strong>Documents sécurisés</strong>
+                        <span>NT, ND, NP, NPF, AMR et quittances vérifiables.</span>
+                    </div>
+
+                    <div class="feature">
+                        <i class="fa-solid fa-qrcode"></i>
+                        <strong>Contrôle QR</strong>
+                        <span>Vérification et traçabilité anti-fraude.</span>
+                    </div>
+
+                    <div class="feature">
+                        <i class="fa-solid fa-building-columns"></i>
+                        <strong>Recettes centralisées</strong>
+                        <span>Suivi des paiements et apurements en temps réel.</span>
+                    </div>
+
+                    <div class="feature">
+                        <i class="fa-solid fa-chart-line"></i>
+                        <strong>Pilotage décisionnel</strong>
+                        <span>Rapports fiscaux et statistiques consolidées.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="brand-foot">
+                <i class="fa-solid fa-lock"></i>
+                Accès réservé aux utilisateurs autorisés.
+            </div>
         </div>
-        <div class="auth-content">
-            <p>
-                <?php require_once __DIR__ . "/verification_widget.php"; ?>
-            </p>
+    </section>
 
-        <div class="brand-title">
-            <h1>cOllect_Pay</h1>
+    <!-- CONNEXION -->
+    <section class="auth-side">
+        <div class="auth-wrap">
 
-            <p>
-                Guichet Unique de Canalisation et Maximisation des Recettes Publiques
-            </p>
-
-            <span class="badge-secure">
-                <i class="fa fa-shield-halved"></i>
+            <span class="login-eyebrow">
+                <i class="fa-solid fa-user-shield"></i>
                 Accès sécurisé
             </span>
-        </div>
 
-        <?php if (!empty($error)): ?>
-            <div class="alert alert-danger">
-                <i class="fa fa-triangle-exclamation"></i>
-                <?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?>
-            </div>
-        <?php endif; ?>
+            <h2 class="auth-title">Connexion à votre espace</h2>
+            <p class="auth-subtitle">
+                Saisissez vos identifiants pour accéder au Guichet Unique CollectPay.
+            </p>
 
-        <form method="POST">
+            <?php if (!empty($error)): ?>
+                <div class="alert alert-danger">
+                    <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                    <?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?>
+                </div>
+            <?php endif; ?>
 
-            <label class="form-label">Adresse e-mail</label>
-            <div class="input-group">
-                <span class="input-group-text">
-                    <i class="fa fa-envelope"></i>
+            <form method="POST" autocomplete="on">
+
+                <label class="form-label">Adresse e-mail</label>
+                <div class="field-wrap">
+                    <i class="fa-solid fa-envelope field-icon"></i>
+                    <input
+                        type="email"
+                        name="email"
+                        class="form-control cp-field"
+                        placeholder="Votre adresse e-mail"
+                        autocomplete="email"
+                        required
+                        autofocus
+                    >
+                </div>
+
+                <label class="form-label">Mot de passe</label>
+                <div class="field-wrap">
+                    <i class="fa-solid fa-lock field-icon"></i>
+                    <input
+                        type="password"
+                        name="password"
+                        id="password"
+                        class="form-control cp-field"
+                        placeholder="Votre mot de passe"
+                        autocomplete="current-password"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        class="password-toggle"
+                        onclick="togglePassword()"
+                        aria-label="Afficher ou masquer le mot de passe"
+                    >
+                        <i class="fa-solid fa-eye" id="passwordEye"></i>
+                    </button>
+                </div>
+
+                <button class="btn-login" type="submit">
+                    <i class="fa-solid fa-right-to-bracket me-1"></i>
+                    Se connecter
+                </button>
+
+            </form>
+
+            <div class="security-note">
+                <i class="fa-solid fa-shield-check"></i>
+                <span>
+                    Connexion protégée. Les accès et opérations sont contrôlés
+                    selon le rôle de l’utilisateur.
                 </span>
-                <input
-                    type="email"
-                    name="email"
-                    class="form-control"
-                    placeholder="Votre adresse e-mail"
-                    required
-                >
             </div>
 
-            <label class="form-label">Mot de passe</label>
-            <div class="input-group">
-                <span class="input-group-text">
-                    <i class="fa fa-lock"></i>
-                </span>
-                <input
-                    type="password"
-                    name="password"
-                    class="form-control"
-                    placeholder="Votre mot de passe"
-                    required
-                >
+            <div class="public-actions">
+                <div class="public-actions-title">
+                    Services publics
+                </div>
+
+                <!-- Le formulaire existant est conservé -->
+                <div class="login-verification-slot">
+                    <?php require_once __DIR__ . "/verification_widget.php"; ?>
+                </div>
+
+                <!-- Le lien existant vers la vitrine est conservé -->
+                <a href="index.php" class="btn-vitrine">
+                    <i class="fa-solid fa-house"></i>
+                    Retour à la Vitrine
+                </a>
             </div>
 
-            <button class="btn-login" type="submit">
-                <i class="fa fa-right-to-bracket"></i>
-                Se connecter
-            </button>
+            <div class="footer-text">
+                © <?= date('Y') ?> cOllect_Pay — Tous droits réservés.<br>
+                Plateforme Intégrée de Gestion des Recettes Publiques
+            </div>
 
-        </form>
-
-        <a href="index.php" class="btn-vitrine">
-            <i class="fa fa-house"></i>
-            Retour à la Vitrine
-        </a>
-
-        <div class="footer-text">
-            © <?= date('Y') ?> cOllect_Pay — Tous droits réservés.
-            <br>
-            Plateforme Intégrée de Gestion des Recettes Publiques
         </div>
+    </section>
 
-    </div>
 </div>
 
+<script>
+function togglePassword(){
+    const input = document.getElementById('password');
+    const icon = document.getElementById('passwordEye');
+
+    if(!input){
+        return;
+    }
+
+    const visible = input.type === 'text';
+    input.type = visible ? 'password' : 'text';
+
+    if(icon){
+        icon.classList.toggle('fa-eye', visible);
+        icon.classList.toggle('fa-eye-slash', !visible);
+    }
+}
+</script>
 
 </body>
 </html>
