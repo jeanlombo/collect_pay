@@ -556,6 +556,288 @@ body{
     backdrop-filter:blur(5px);
 }
 
+
+/* ================================
+   ANIMATIONS PREMIUM V2
+================================ */
+body::before,
+body::after{
+    content:"";
+    position:fixed;
+    border-radius:50%;
+    pointer-events:none;
+    filter:blur(10px);
+    z-index:0;
+}
+body::before{
+    width:280px;
+    height:280px;
+    left:-90px;
+    top:16%;
+    background:rgba(245,197,24,.08);
+    animation:cpBodyOrbA 8s ease-in-out infinite;
+}
+body::after{
+    width:360px;
+    height:360px;
+    right:-120px;
+    bottom:-80px;
+    background:rgba(36,145,214,.10);
+    animation:cpBodyOrbB 10s ease-in-out infinite;
+}
+@keyframes cpBodyOrbA{
+    0%,100%{transform:translate3d(0,0,0) scale(1)}
+    50%{transform:translate3d(35px,-22px,0) scale(1.12)}
+}
+@keyframes cpBodyOrbB{
+    0%,100%{transform:translate3d(0,0,0) scale(1)}
+    50%{transform:translate3d(-28px,-35px,0) scale(1.08)}
+}
+
+.login-shell{
+    position:relative;
+    z-index:1;
+    animation:cpShellIn .85s cubic-bezier(.2,.8,.2,1) both;
+}
+@keyframes cpShellIn{
+    from{opacity:0;transform:translateY(22px) scale(.985)}
+    to{opacity:1;transform:none}
+}
+
+/* subtle animated grid on the institutional panel */
+.brand-side::marker{display:none}
+.brand-inner::before{
+    content:"";
+    position:absolute;
+    inset:-55px;
+    z-index:-1;
+    opacity:.14;
+    background-image:
+        linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px);
+    background-size:42px 42px;
+    mask-image:linear-gradient(to bottom,rgba(0,0,0,.85),transparent 88%);
+    animation:cpGridDrift 18s linear infinite;
+}
+@keyframes cpGridDrift{
+    from{transform:translate3d(0,0,0)}
+    to{transform:translate3d(42px,42px,0)}
+}
+
+.institution-row{
+    animation:cpSlideRight .75s .08s both;
+}
+.brand-badge{
+    animation:cpSlideRight .75s .16s both;
+}
+.brand-name{
+    animation:cpSlideRight .8s .24s both;
+}
+.brand-description{
+    animation:cpSlideRight .8s .32s both;
+}
+.feature-grid{
+    animation:cpSlideRight .8s .40s both;
+}
+.brand-foot{
+    animation:cpFadeIn .9s .52s both;
+}
+@keyframes cpSlideRight{
+    from{opacity:0;transform:translateX(-24px)}
+    to{opacity:1;transform:none}
+}
+@keyframes cpFadeIn{
+    from{opacity:0}
+    to{opacity:1}
+}
+
+/* logo pulse */
+.institution-logo{
+    position:relative;
+    animation:cpLogoFloat 4.5s ease-in-out infinite;
+}
+.institution-logo::after{
+    content:"";
+    position:absolute;
+    inset:-7px;
+    border-radius:26px;
+    border:1px solid rgba(245,197,24,.32);
+    opacity:.45;
+    animation:cpLogoPulse 2.6s ease-out infinite;
+}
+@keyframes cpLogoFloat{
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-6px)}
+}
+@keyframes cpLogoPulse{
+    0%{transform:scale(.96);opacity:.55}
+    70%{transform:scale(1.14);opacity:0}
+    100%{transform:scale(1.14);opacity:0}
+}
+
+/* animated gold highlight on application name */
+.brand-name span{
+    position:relative;
+    display:inline-block;
+    background:linear-gradient(90deg,#f5c518 0%,#fff1a6 48%,#f5c518 100%);
+    background-size:220% 100%;
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    animation:cpGoldSweep 3.8s linear infinite;
+}
+@keyframes cpGoldSweep{
+    from{background-position:220% 0}
+    to{background-position:-40% 0}
+}
+
+/* cards come alive */
+.feature{
+    transition:transform .28s ease,background .28s ease,border-color .28s ease,box-shadow .28s ease;
+}
+.feature:hover{
+    transform:translateY(-5px);
+    background:rgba(255,255,255,.11);
+    border-color:rgba(245,197,24,.30);
+    box-shadow:0 12px 30px rgba(0,0,0,.12);
+}
+.feature i{
+    transition:transform .25s ease;
+}
+.feature:hover i{
+    transform:scale(1.14) rotate(-5deg);
+}
+
+/* auth panel entrance */
+.login-eyebrow{
+    animation:cpSlideLeft .65s .16s both;
+}
+.auth-title{
+    animation:cpSlideLeft .7s .23s both;
+}
+.auth-subtitle{
+    animation:cpSlideLeft .7s .30s both;
+}
+.auth-wrap form{
+    animation:cpSlideLeft .75s .38s both;
+}
+.security-note{
+    animation:cpSlideLeft .75s .46s both;
+}
+.public-actions{
+    animation:cpSlideLeft .75s .54s both;
+}
+.footer-text{
+    animation:cpFadeIn .8s .66s both;
+}
+@keyframes cpSlideLeft{
+    from{opacity:0;transform:translateX(24px)}
+    to{opacity:1;transform:none}
+}
+
+/* field micro-interactions */
+.field-wrap{
+    transition:transform .22s ease;
+}
+.field-wrap:focus-within{
+    transform:translateY(-2px);
+}
+.field-wrap:focus-within .field-icon{
+    color:#176ca5;
+    transform:translateY(-50%) scale(1.08);
+}
+.field-icon{
+    transition:color .2s ease,transform .2s ease;
+}
+
+/* login button animated sheen */
+.btn-login{
+    position:relative;
+    overflow:hidden;
+}
+.btn-login::before{
+    content:"";
+    position:absolute;
+    top:-35%;
+    left:-35%;
+    width:34%;
+    height:170%;
+    transform:rotate(18deg);
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);
+    animation:cpButtonSheen 3.4s ease-in-out infinite;
+}
+@keyframes cpButtonSheen{
+    0%,58%{left:-40%}
+    82%,100%{left:120%}
+}
+.btn-login:active{
+    transform:translateY(0) scale(.99);
+}
+
+/* verification and vitrine buttons */
+.login-verification-slot .verif-btn-open,
+.btn-vitrine{
+    position:relative;
+    overflow:hidden;
+    transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;
+}
+.login-verification-slot .verif-btn-open:hover,
+.btn-vitrine:hover{
+    transform:translateY(-2px);
+}
+.login-verification-slot .verif-btn-open::after,
+.btn-vitrine::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(120deg,transparent 0%,rgba(255,255,255,.16) 50%,transparent 100%);
+    transform:translateX(-120%);
+    transition:transform .55s ease;
+}
+.login-verification-slot .verif-btn-open:hover::after,
+.btn-vitrine:hover::after{
+    transform:translateX(120%);
+}
+
+/* animated secure status */
+.security-note i{
+    animation:cpShieldPulse 2.2s ease-in-out infinite;
+}
+@keyframes cpShieldPulse{
+    0%,100%{transform:scale(1)}
+    50%{transform:scale(1.13)}
+}
+
+/* decorative moving lines on brand panel */
+.brand-side .cp-line{
+    position:absolute;
+    height:1px;
+    width:45%;
+    background:linear-gradient(90deg,transparent,rgba(93,202,255,.30),transparent);
+    z-index:1;
+    animation:cpLineMove 6s linear infinite;
+}
+.brand-side .cp-line.one{top:28%;left:-20%}
+.brand-side .cp-line.two{top:64%;right:-24%;animation-delay:-3s}
+@keyframes cpLineMove{
+    0%{transform:translateX(0) rotate(-10deg);opacity:0}
+    20%{opacity:.7}
+    80%{opacity:.7}
+    100%{transform:translateX(190%) rotate(-10deg);opacity:0}
+}
+
+/* respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce){
+    *,
+    *::before,
+    *::after{
+        animation-duration:.001ms!important;
+        animation-iteration-count:1!important;
+        scroll-behavior:auto!important;
+        transition-duration:.001ms!important;
+    }
+}
+
 /* ================================
    RESPONSIVE
 ================================ */
@@ -648,6 +930,8 @@ body{
 
     <!-- IDENTITÉ INSTITUTIONNELLE -->
     <section class="brand-side">
+        <span class="cp-line one"></span>
+        <span class="cp-line two"></span>
         <div class="brand-inner">
 
             <div class="institution-row">
