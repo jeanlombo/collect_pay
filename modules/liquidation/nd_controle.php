@@ -114,7 +114,7 @@ $page_title = "Contrôle / Vérification ND";
 <head>
     <meta charset="UTF-8">
     <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-    <link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+    <link rel="stylesheet" href="../../assets/css/admin.css">
 
     <style>
         .verify-box {
@@ -210,8 +210,9 @@ $page_title = "Contrôle / Vérification ND";
             }
         }
     </style>
+<link rel="stylesheet" href="../../assets/css/liquidation.css">
 </head>
-<body>
+<body class="cp-liquidation-page cp-nd-controle">
 
 <div class="admin-layout">
 
@@ -221,7 +222,7 @@ $page_title = "Contrôle / Vérification ND";
 
         <?php require_once "../../includes/topbar.php"; ?>
 
-        <div class="verify-box">
+        <div class="verify-box cp-liquidation-panel">
 
             <div class="verify-header">
                 <h2>Contrôle / Vérification de la Note de Débit</h2>

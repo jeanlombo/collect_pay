@@ -173,9 +173,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-    <link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+    <link rel="stylesheet" href="../../assets/css/admin.css">
+<link rel="stylesheet" href="../../assets/css/liquidation.css">
 </head>
-<body>
+<body class="cp-liquidation-page cp-nd-create">
 
 <div class="admin-layout">
     <?php require_once "../../includes/sidebar.php"; ?>
@@ -183,14 +184,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <main class="main-content">
         <?php require_once "../../includes/topbar.php"; ?>
 
-        <div class="panel">
+        <div class="panel cp-liquidation-panel">
             <h3>Liquidation — Génération de la Note de Débit</h3>
 
             <p><strong>NT :</strong> <?= htmlspecialchars($nt['numero_nt']) ?></p>
             <p><strong>Contribuable :</strong> <?= htmlspecialchars(nomContribuableNDCreate($nt)) ?></p>
             <p><strong>NIF :</strong> <?= htmlspecialchars($nt['nif'] ?? '-') ?></p>
 
-            <table class="table-premium">
+            <div class="cp-table-wrap"><table class="table-premium">
                 <tr>
                     <th>Principal dû</th>
                     <td><?= number_format($principal_cdf, 2, ',', ' ') ?> CDF</td>
@@ -219,7 +220,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <th>Total général à liquider</th>
                     <td><strong><?= number_format($total_general, 2, ',', ' ') ?> CDF</strong></td>
                 </tr>
-            </table>
+            </table></div>
 
             <br>
 

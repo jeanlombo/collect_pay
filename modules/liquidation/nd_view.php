@@ -142,10 +142,11 @@ $page_title = "Note de Débit";
 <head>
     <meta charset="UTF-8">
     <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-    <link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+    <link rel="stylesheet" href="../../assets/css/admin.css">
+<link rel="stylesheet" href="../../assets/css/liquidation.css">
 </head>
 
-<body>
+<body class="cp-liquidation-page cp-nd-view">
 <div class="admin-layout">
 
 <?php require_once "../../includes/sidebar.php"; ?>
@@ -153,12 +154,12 @@ $page_title = "Note de Débit";
 <main class="main-content">
 <?php require_once "../../includes/topbar.php"; ?>
 
-<div class="panel">
+<div class="panel cp-liquidation-panel">
     <h2>NOTE DE DÉBIT N° <?= htmlspecialchars($nd['numero_nd']) ?></h2>
     <p><strong>Statut :</strong> <?= strtoupper(htmlspecialchars($nd['statut'])) ?></p>
 </div>
 
-<div class="panel">
+<div class="panel cp-liquidation-panel">
     <h3>I. Contribuable</h3>
 
     <p>
@@ -171,7 +172,7 @@ $page_title = "Note de Débit";
     </p>
 </div>
 
-<div class="panel">
+<div class="panel cp-liquidation-panel">
     <h3>II. Référence NT</h3>
 
     <p>
@@ -183,10 +184,10 @@ $page_title = "Note de Débit";
     </p>
 </div>
 
-<div class="panel">
+<div class="panel cp-liquidation-panel">
     <h3>III. Détails liquidés</h3>
 
-    <table class="table-premium">
+    <div class="cp-table-wrap"><table class="table-premium">
         <tr>
             <th>Code</th>
             <th>Secteur</th>
@@ -226,13 +227,13 @@ $page_title = "Note de Débit";
                 <td colspan="10">Aucun détail trouvé.</td>
             </tr>
         <?php endif; ?>
-    </table>
+    </table></div>
 </div>
 
-<div class="panel">
+<div class="panel cp-liquidation-panel">
     <h3>IV. Synthèse de liquidation</h3>
 
-    <table class="table-premium">
+    <div class="cp-table-wrap"><table class="table-premium">
         <tr>
             <th>Principal dû</th>
             <td><?= moneyNDView($nd['montant_acte'] ?? 0) ?></td>
@@ -257,10 +258,10 @@ $page_title = "Note de Débit";
             <th>Total exigible</th>
             <td><strong><?= moneyNDView($nd['montant_total'] ?? $nd['total_exigible']) ?></strong></td>
         </tr>
-    </table>
+    </table></div>
 </div>
 
-<div class="panel">
+<div class="panel cp-liquidation-panel">
     <h3>V. Observation / Contrôle</h3>
 
     <p>
@@ -274,7 +275,7 @@ $page_title = "Note de Débit";
     </p>
 </div>
 
-<div class="panel">
+<div class="panel cp-liquidation-panel">
     <a href="nd_list.php" class="btn">Retour liste</a>
 
     <a href="../rapports/nd_pdf.php?numero=<?= urlencode($nd['numero_nd']) ?>"

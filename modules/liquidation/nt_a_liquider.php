@@ -46,7 +46,7 @@ function formatDateLiquidation($date) {
 <head>
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-<link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+<link rel="stylesheet" href="../../assets/css/admin.css">
 
 <style>
 .hero-luxoria{
@@ -107,9 +107,10 @@ function formatDateLiquidation($date) {
     color:#0f3460;
 }
 </style>
+<link rel="stylesheet" href="../../assets/css/liquidation.css">
 </head>
 
-<body>
+<body class="cp-liquidation-page cp-nt-a-liquider">
 
 <div class="admin-layout">
 
@@ -119,13 +120,14 @@ function formatDateLiquidation($date) {
 
 <?php require_once "../../includes/topbar.php"; ?>
 
-<div class="hero-luxoria">
+<div class="hero-luxoria cp-liquidation-hero">
     <h2>NT à liquider</h2>
     <p>Liste des Notes de Taxation soumises et prêtes pour liquidation.</p>
 </div>
 
-<div class="panel">
-    <h3>Notes de Taxation en attente de liquidation</h3>
+<div class="panel cp-liquidation-panel">
+    <div class="cp-section-head"><div><span class="cp-eyebrow">Liquidation</span><h3>Notes de Taxation en attente de liquidation</h3><p>Vérifiez les NT soumises puis générez la Note de Débit correspondante.</p></div></div>
+    <div class="cp-table-wrap">
 
     <table class="table-premium">
         <tr>
@@ -179,6 +181,7 @@ function formatDateLiquidation($date) {
             </tr>
         <?php endif; ?>
     </table>
+    </div>
 </div>
 
 </main>

@@ -153,7 +153,7 @@ function badgeStatutND($statut) {
 <head>
     <meta charset="UTF-8">
     <title><?= htmlspecialchars($page_title) ?> | cOllect_Pay</title>
-    <link rel="stylesheet" href="/collect_pay/assets/css/admin.css">
+    <link rel="stylesheet" href="../../assets/css/admin.css">
 
     <style>
         .filter-form{
@@ -219,8 +219,9 @@ function badgeStatutND($statut) {
             }
         }
     </style>
+<link rel="stylesheet" href="../../assets/css/liquidation.css">
 </head>
-<body>
+<body class="cp-liquidation-page cp-nd-list">
 
 <div class="admin-layout">
     <?php require_once "../../includes/sidebar.php"; ?>
@@ -228,8 +229,8 @@ function badgeStatutND($statut) {
     <main class="main-content">
         <?php require_once "../../includes/topbar.php"; ?>
 
-        <div class="panel">
-            <h3>Notes de Débit</h3>
+        <div class="panel cp-liquidation-panel">
+            <div class="cp-section-head"><div><span class="cp-eyebrow">Liquidation</span><h3>Notes de Débit</h3><p>Suivi, contrôle, impression et transmission des Notes de Débit.</p></div></div>
 
             <?php if ($isControleur): ?>
                 <div class="info-mini">
@@ -259,7 +260,8 @@ function badgeStatutND($statut) {
             </form>
         </div>
 
-        <div class="panel">
+        <div class="panel cp-liquidation-panel cp-table-panel">
+            <div class="cp-table-wrap">
             <table class="table-premium">
                 <tr>
                     <th>Numéro ND</th>
@@ -293,7 +295,7 @@ function badgeStatutND($statut) {
                             <?php endif; ?>
 
                             <?php if (function_exists('canDo') && canDo('liquidation','print_nd')): ?>
-                                <a class="btn-action btn-print" href="nd_pdf.php?numero=<?= urlencode($n['numero_nd']) ?>" target="_blank">PDF</a>
+                                <a class="btn-action btn-print" href="../rapports/nd_pdf.php?numero=<?= urlencode($n['numero_nd']) ?>" target="_blank">PDF</a>
                             <?php endif; ?>
                         </td>
                     </tr>
@@ -305,6 +307,7 @@ function badgeStatutND($statut) {
                     </tr>
                 <?php endif; ?>
             </table>
+            </div>
         </div>
 
     </main>

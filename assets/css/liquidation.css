@@ -1,0 +1,73 @@
+/* cOllect_Pay — Liquidation : présentation uniquement */
+.cp-liquidation-page{
+  --liq-ink:#10233f; --liq-muted:#64748b; --liq-border:#dbe5f0;
+  --liq-blue:#0f5fa8; --liq-navy:#173f73; --liq-soft:#f4f8fc;
+  background:#f3f7fb; color:var(--liq-ink);
+}
+.cp-liquidation-page .main-content{
+  background:radial-gradient(circle at 92% 4%,rgba(49,132,205,.10),transparent 24rem),#f3f7fb;
+}
+.cp-liquidation-page .hero-luxoria,
+.cp-liquidation-page .verify-header{
+  width:min(1180px,calc(100% - 32px)); box-sizing:border-box; margin:22px auto 16px;
+  border-radius:20px; padding:24px 26px;
+  background:linear-gradient(135deg,#102c50,#0f5fa8); color:#fff;
+  box-shadow:0 14px 30px rgba(15,52,96,.16);
+}
+.cp-liquidation-page .hero-luxoria h2,.cp-liquidation-page .verify-header h2{font-size:27px;letter-spacing:-.02em}
+.cp-liquidation-page .hero-luxoria p,.cp-liquidation-page .verify-header p{color:#dcecff}
+.cp-liquidation-panel,
+.cp-liquidation-page .verify-box{
+  width:min(1180px,calc(100% - 32px)); box-sizing:border-box; margin:16px auto 24px;
+  padding:24px; background:#fff; border:1px solid var(--liq-border);
+  border-radius:20px; box-shadow:0 12px 30px rgba(15,45,82,.07);
+}
+.cp-section-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--liq-border)}
+.cp-section-head h3{margin:4px 0 5px;font-size:22px;color:var(--liq-ink)}
+.cp-section-head p{margin:0;color:var(--liq-muted);font-size:13px;font-weight:600}
+.cp-eyebrow{font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--liq-blue)}
+.cp-table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.cp-liquidation-page .table-premium{width:100%;min-width:850px;border-collapse:separate;border-spacing:0}
+.cp-liquidation-page .table-premium th{padding:13px 12px;background:#edf4fb;color:#29465f;font-size:12px;font-weight:900;text-transform:uppercase;white-space:nowrap;border-bottom:1px solid var(--liq-border)}
+.cp-liquidation-page .table-premium td{padding:14px 12px;color:#30445b;border-bottom:1px solid #e8eef5;vertical-align:middle}
+.cp-liquidation-page .table-premium tr:last-child td{border-bottom:0}
+.cp-liquidation-page .table-premium tr:hover td{background:#f9fbfd}
+.cp-liquidation-page .amount{color:#123e70;font-weight:900;white-space:nowrap}
+.cp-liquidation-page .badge-waiting{background:#fff4e6;color:#a24b09;border:1px solid #fed7aa}
+.cp-liquidation-page .btn-liquider{padding:10px 14px;border-radius:11px;background:linear-gradient(135deg,#0b766e,#115e59);box-shadow:0 7px 16px rgba(15,118,110,.18);font-size:12px}
+.cp-liquidation-page .btn-liquider:hover{transform:translateY(-1px)}
+.cp-liquidation-page .filter-form{padding:16px;border:1px solid var(--liq-border);border-radius:16px;background:#f8fbfe}
+.cp-liquidation-page .filter-form input,.cp-liquidation-page .filter-form select,
+.cp-liquidation-page textarea{
+  box-sizing:border-box;border:1px solid #cfdbe8;border-radius:11px;background:#fff;outline:none;
+}
+.cp-liquidation-page .filter-form input:focus,.cp-liquidation-page .filter-form select:focus,
+.cp-liquidation-page textarea:focus{border-color:#4b94d2;box-shadow:0 0 0 4px rgba(43,126,196,.10)}
+.cp-liquidation-page .btn-action{border-radius:9px;padding:7px 10px;box-shadow:none}
+.cp-liquidation-page .btn-view{background:#edf2f7;color:#243b53}
+.cp-liquidation-page .btn-control{background:#174d7d;color:#fff}
+.cp-liquidation-page .btn-ordo{background:#137052;color:#fff}
+.cp-liquidation-page .btn-print{background:#f4b63f;color:#162235}
+.cp-liquidation-page .info-mini,.cp-liquidation-page .alert-info{border-radius:12px;box-shadow:none}
+.cp-liquidation-page .verify-box{padding:24px}
+.cp-liquidation-page .verify-header{width:100%;margin:0 0 20px}
+.cp-liquidation-page .decision-card{border-radius:14px;transition:.16s;background:#f8fafc}
+.cp-liquidation-page .decision-card:hover{transform:translateY(-1px)}
+.cp-liquidation-page .btn-submit,.cp-liquidation-page .btn{
+  display:inline-flex;align-items:center;justify-content:center;min-height:42px;box-sizing:border-box;
+  border:0;border-radius:11px;padding:9px 15px;background:linear-gradient(135deg,var(--liq-navy),var(--liq-blue));
+  color:#fff;text-decoration:none;font-weight:850;cursor:pointer;
+}
+.cp-nd-view .cp-liquidation-panel:first-of-type h2{margin:0 0 8px;font-size:25px}
+.cp-nd-view .cp-liquidation-panel h3,.cp-nd-create .cp-liquidation-panel h3{color:#173653;margin-top:0}
+@media(max-width:900px){
+  .cp-liquidation-page .filter-form,.cp-liquidation-page .decision-grid{grid-template-columns:1fr}
+}
+@media(max-width:760px){
+  .cp-liquidation-page .hero-luxoria,.cp-liquidation-panel,.cp-liquidation-page .verify-box{
+    width:calc(100% - 18px);padding:16px;border-radius:16px
+  }
+  .cp-liquidation-page .hero-luxoria{margin-top:12px}
+  .cp-liquidation-page .hero-luxoria h2,.cp-liquidation-page .verify-header h2{font-size:22px}
+  .cp-section-head h3{font-size:19px}
+}
