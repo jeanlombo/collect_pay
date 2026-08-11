@@ -55,6 +55,13 @@ cpRapportPageStart("Tableau de bord des rapports","Vue consolidée des émission
 <section class="rp-panel">
     <div class="rp-panel-head"><h2>Rapports disponibles</h2><span>11 analyses métier</span></div>
     <div class="rp-report-grid">
+        <a href="nt.php"><b>Notes de Taxation</b><span>Rapport complet des NT.</span></a>
+        <a href="nd.php"><b>Notes de Débit</b><span>Rapport complet des ND.</span></a>
+        <a href="np.php"><b>Notes de Perception</b><span>Payées, non payées, partielles et défaillantes.</span></a>
+        <a href="npf.php"><b>NP fractionnées</b><span>Suivi des NPF et de leur état de paiement.</span></a>
+        <a href="amr.php"><b>AMR</b><span>Avis de mise en recouvrement.</span></a>
+        <a href="attestation.php"><b>Attestations de paiement</b><span>Paiements et attestations sécurisées.</span></a>
+        <a href="apurements.php"><b>Apurements par devise</b><span>CDF, USD et EUR.</span></a>
         <a href="rapport_mensuel.php"><b>Rapport mensuel</b><span>Émissions, paiements et recouvrement du mois.</span></a>
         <a href="rapport_assujetti.php"><b>Par assujetti</b><span>Historique fiscal complet d’un contribuable.</span></a>
         <a href="rapport_analytique.php"><b>Rapport analytique</b><span>Province, centre, direction, service et articles.</span></a>
