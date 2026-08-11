@@ -104,10 +104,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $observation = trim($_POST['observation'] ?? '');
 
+    /*
+    |--------------------------------------------------------------------------
+    | Centre et province de la NT
+    |--------------------------------------------------------------------------
+    | Ne pas dépendre de province_id / centre_id dans la session :
+    | sur Railway ces clés peuvent ne pas être présentes.
+    | La NT contient déjà son centre_id ; la province est récupérée
+    | directement depuis la table centres.
+    */
+    $centre_id = (int)($nt['centre_id'] ?? 0);
+
+    if ($centre_id <= 0) {
+        die("Centre de la Note de Taxation introuvable.");
+    }
+
+    $stmtCentre = $pdo->prepare("
+        SELECT province_id
+        FROM centres
+        WHERE id = ?
+        LIMIT 1
+    ");
+    $stmtCentre->execute([$centre_id]);
+    $centreInfo = $stmtCentre->fetch(PDO::FETCH_ASSOC);
+
+    $province_id = (int)($centreInfo['province_id'] ?? 0);
+
+    if ($province_id <= 0) {
+        die("Province liée au centre de taxation introuvable.");
+    }
+
     $numero_nd = genererNumero(
         'ND',
-        $_SESSION['province_id'],
-        $_SESSION['centre_id'],
+        $province_id,
+        $centre_id,
         $pdo
     );
 
