@@ -106,6 +106,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     /*
     |--------------------------------------------------------------------------
+    | Utilisateur liquidateur
+    |--------------------------------------------------------------------------
+    | Certaines anciennes sessions Railway peuvent ne plus contenir user_id
+    | alors que l'e-mail de l'utilisateur est encore disponible.
+    | On restaure user_id proprement à partir de la table users.
+    */
+    $user_liquidateur_id = (int)($_SESSION['user_id'] ?? 0);
+
+    if ($user_liquidateur_id <= 0) {
+        $emailSession = trim((string)($_SESSION['email'] ?? $_SESSION['user_email'] ?? ''));
+
+        if ($emailSession !== '') {
+            $stmtUser = $pdo->prepare("
+                SELECT id
+                FROM users
+                WHERE email = ?
+                LIMIT 1
+            ");
+            $stmtUser->execute([$emailSession]);
+            $userSession = $stmtUser->fetch(PDO::FETCH_ASSOC);
+
+            $user_liquidateur_id = (int)($userSession['id'] ?? 0);
+
+            if ($user_liquidateur_id > 0) {
+                $_SESSION['user_id'] = $user_liquidateur_id;
+            }
+        }
+    }
+
+    if ($user_liquidateur_id <= 0) {
+        die("Utilisateur liquidateur introuvable. Veuillez vous déconnecter puis vous reconnecter.");
+    }
+
+    /*
+    |--------------------------------------------------------------------------
     | Centre et province de la NT
     |--------------------------------------------------------------------------
     | Ne pas dépendre de province_id / centre_id dans la session :
@@ -172,7 +207,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $penalite_assiette,
             $penalite_recouvrement,
             $observation,
-            $_SESSION['user_id'],
+            $user_liquidateur_id,
             $principal_cdf,
             $frais_admin_cdf,
             $frais_tech_cdf,
