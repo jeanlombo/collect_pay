@@ -67,6 +67,37 @@ $appUrl = preg_replace(
 
 define('APP_URL', $appUrl . '/');
 
+
+
+/*
+|--------------------------------------------------------------------------
+| Clés de sécurité QR
+|--------------------------------------------------------------------------
+|
+| En production Railway, ces valeurs doivent être définies dans :
+| Service CollectPay > Variables
+|
+| QR_SECRET_KEY
+| QR_ENCRYPTION_KEY
+|
+| Ne jamais enregistrer les vraies clés directement dans Git.
+|
+*/
+
+if (!defined('QR_SECRET_KEY')) {
+    define(
+        'QR_SECRET_KEY',
+        trim((string) getenv('QR_SECRET_KEY'))
+    );
+}
+
+if (!defined('QR_ENCRYPTION_KEY')) {
+    define(
+        'QR_ENCRYPTION_KEY',
+        trim((string) getenv('QR_ENCRYPTION_KEY'))
+    );
+}
+
 define('APP_EMAIL', 'contact@collectpay.cd');
 define('APP_PHONE', '+243 000 000 000');
 
