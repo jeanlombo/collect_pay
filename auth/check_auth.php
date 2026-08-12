@@ -85,87 +85,6 @@ if (!function_exists('cpCurrentRoleId')) {
     }
 }
 
-/*
-|--------------------------------------------------------------------------
-| Synchronisation centrale des alias de rôle
-|--------------------------------------------------------------------------
-| Certains anciens modules lisent role, d'autres user_role, role_code,
-| role_nom ou nom_role. On les harmonise ici à chaque requête authentifiée.
-| Ainsi le login historique reste intact et tous les modules voient le même
-| rôle sans dépendre d'une clé de session particulière.
-|--------------------------------------------------------------------------
-*/
-if (!function_exists('cpSyncRoleSession')) {
-    function cpSyncRoleSession(): void
-    {
-        if (empty($_SESSION['user_id'])) {
-            return;
-        }
-
-        $role = trim((string)(
-            $_SESSION['role']
-            ?? $_SESSION['nom_role']
-            ?? $_SESSION['user_role']
-            ?? $_SESSION['role_code']
-            ?? $_SESSION['role_nom']
-            ?? $_SESSION['user_role_code']
-            ?? $_SESSION['user_role_nom']
-            ?? ''
-        ));
-
-        /*
-         * Si aucun nom de rôle n'est dans la session mais qu'un role_id existe,
-         * on relit la source de vérité dans la table roles.
-         */
-        if ($role === '' && cpCurrentRoleId() > 0) {
-            try {
-                $stmt = cpDb()->prepare("SELECT nom_role FROM roles WHERE id = ? LIMIT 1");
-                $stmt->execute([cpCurrentRoleId()]);
-                $role = trim((string)($stmt->fetchColumn() ?: ''));
-            } catch (Throwable $e) {
-                $role = '';
-            }
-        }
-
-        if ($role === '') {
-            return;
-        }
-
-        $_SESSION['role'] = $role;
-        $_SESSION['nom_role'] = $role;
-        $_SESSION['user_role'] = $role;
-        $_SESSION['role_code'] = $role;
-        $_SESSION['role_nom'] = $role;
-        $_SESSION['user_role_code'] = $role;
-        $_SESSION['user_role_nom'] = $role;
-    }
-}
-
-if (!function_exists('cpIsSuperAdmin')) {
-    function cpIsSuperAdmin(): bool
-    {
-        cpSyncRoleSession();
-
-        $role = strtoupper(trim((string)(
-            $_SESSION['role']
-            ?? $_SESSION['nom_role']
-            ?? $_SESSION['user_role']
-            ?? ''
-        )));
-
-        $roleNormalise = str_replace([' ', '-'], '_', $role);
-        $roleNormalise = preg_replace('/_+/', '_', $roleNormalise) ?? $roleNormalise;
-
-        return in_array($roleNormalise, [
-            'SUPER_ADMIN',
-            'SUPER_ADMINISTRATEUR'
-        ], true);
-    }
-}
-
-/* Synchroniser immédiatement après chargement de l'authentification. */
-cpSyncRoleSession();
-
 if (!function_exists('logAction')) {
     function logAction(string $module, string $action, string $description = ''): void
     {
@@ -239,7 +158,7 @@ if (!function_exists('requireRole')) {
     {
         $role = cpCurrentRole();
 
-        if (cpIsSuperAdmin()) {
+        if ($role === 'SUPER_ADMIN') {
             return;
         }
 

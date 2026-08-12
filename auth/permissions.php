@@ -1,263 +1,598 @@
 <?php
 /*
 |--------------------------------------------------------------------------
-| cOllect_Pay - Moteur central des permissions V2
+| cOllect_Pay - Permissions Dynamiques Safe Columns
 |--------------------------------------------------------------------------
-| Principe :
-| 1. Super Administrateur = TRUE systématiquement.
-| 2. Autres rôles = lecture de permissions(role_id,module,action,autorise).
-| 3. Compatible avec :
-|    hasPermission('module','action')
-|    hasPermission('DASHBOARD_VIEW')
-|    requirePermission('module','action')
-|    requirePermission('DASHBOARD_VIEW')
-|    canDo('module','action')
+| Corrige :
+| - Unknown column 'label'
+| - Permissions cochées mais non actives
+| - Gestion dynamique selon la structure réelle de la table permissions
 |--------------------------------------------------------------------------
 */
 
-if (!function_exists('cpPermissionNormalize')) {
-    function cpPermissionNormalize(?string $value): string
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+if (!function_exists('cpDb')) {
+    function cpDb(): PDO
     {
-        $value = mb_strtolower(trim((string)$value), 'UTF-8');
-        $value = strtr($value, [
-            'à'=>'a','â'=>'a','ä'=>'a','á'=>'a',
-            'ç'=>'c',
-            'è'=>'e','é'=>'e','ê'=>'e','ë'=>'e',
-            'ì'=>'i','í'=>'i','î'=>'i','ï'=>'i',
-            'ò'=>'o','ó'=>'o','ô'=>'o','ö'=>'o',
-            'ù'=>'u','ú'=>'u','û'=>'u','ü'=>'u',
-            'ý'=>'y'
-        ]);
+        global $pdo;
 
-        $value = preg_replace('/[^a-z0-9]+/', '_', $value) ?? $value;
-        $value = preg_replace('/_+/', '_', $value) ?? $value;
+        if ($pdo instanceof PDO) {
+            return $pdo;
+        }
 
-        return trim($value, '_');
+        $dbFile = __DIR__ . "/../config/database.php";
+        if (file_exists($dbFile)) {
+            require_once $dbFile;
+        }
+
+        if (isset($pdo) && $pdo instanceof PDO) {
+            return $pdo;
+        }
+
+        throw new Exception("Connexion PDO indisponible.");
     }
 }
 
-if (!function_exists('cpPermissionActionVariants')) {
-    function cpPermissionActionVariants(string $action): array
+if (!function_exists('cpCurrentRole')) {
+    function cpCurrentRole(): string
     {
-        $a = cpPermissionNormalize($action);
-
-        $groups = [
-            ['view','voir','liste','list','consult','consulter','access'],
-            ['create','creer','add','ajouter','new'],
-            ['edit','modifier','update','mettre_a_jour'],
-            ['delete','supprimer','remove'],
-            ['validate','valider','validation'],
-            ['print','imprimer','pdf'],
-            ['manage','gerer','gestion'],
-            ['history','historique'],
-            ['export','exporter'],
-            ['scan','scanner'],
-        ];
-
-        $variants = [$a];
-
-        foreach ($groups as $group) {
-            if (in_array($a, $group, true)) {
-                $variants = array_merge($variants, $group);
-            }
-        }
-
-        return array_values(array_unique(array_filter($variants)));
+        return strtoupper(trim((string)(
+            $_SESSION['role']
+            ?? $_SESSION['nom_role']
+            ?? $_SESSION['role_code']
+            ?? ''
+        )));
     }
 }
 
-if (!function_exists('cpPermissionFromCode')) {
-    function cpPermissionFromCode(string $code): array
+if (!function_exists('cpCurrentRoleId')) {
+    function cpCurrentRoleId(): int
     {
-        $code = cpPermissionNormalize($code);
-
-        if ($code === '') {
-            return ['', ''];
-        }
-
-        // Ex. DASHBOARD_VIEW -> dashboard / view
-        //     UTILISATEURS_CREATE -> utilisateurs / create
-        $actionsConnues = [
-            'view','voir','create','creer','add','ajouter','edit','modifier',
-            'delete','supprimer','validate','valider','print','imprimer',
-            'manage','gerer','history','historique','export','scan','access'
-        ];
-
-        foreach ($actionsConnues as $action) {
-            $suffix = '_' . $action;
-
-            if (str_ends_with($code, $suffix)) {
-                return [
-                    substr($code, 0, -strlen($suffix)),
-                    $action
-                ];
-            }
-        }
-
-        /*
-         * Si le code n'a pas de suffixe d'action, on l'utilise comme module
-         * et on essaiera aussi l'action access/view.
-         */
-        return [$code, 'access'];
-    }
-}
-
-if (!function_exists('cpPermissionExists')) {
-    function cpPermissionExists(int $roleId, string $module, string $action): bool
-    {
-        if ($roleId <= 0) {
-            return false;
-        }
-
-        $module = cpPermissionNormalize($module);
-        $actions = cpPermissionActionVariants($action);
-
-        if ($module === '' || !$actions) {
-            return false;
-        }
-
-        try {
-            $placeholders = implode(',', array_fill(0, count($actions), '?'));
-
-            $sql = "
-                SELECT 1
-                FROM permissions
-                WHERE role_id = ?
-                  AND LOWER(REPLACE(REPLACE(module,'-','_'),' ','_')) = ?
-                  AND LOWER(REPLACE(REPLACE(action,'-','_'),' ','_')) IN ($placeholders)
-                  AND COALESCE(autorise,1) = 1
-                LIMIT 1
-            ";
-
-            $params = array_merge([$roleId, $module], $actions);
-            $stmt = cpDb()->prepare($sql);
-            $stmt->execute($params);
-
-            return (bool)$stmt->fetchColumn();
-        } catch (Throwable $e) {
-            // Fail closed pour les rôles ordinaires.
-            return false;
-        }
-    }
-}
-
-if (!function_exists('hasPermission')) {
-    function hasPermission(string $moduleOrCode, ?string $action = null): bool
-    {
-        checkAuth();
-
-        // RÈGLE ABSOLUE : le Super Administrateur ne dépend pas des lignes permissions.
-        if (function_exists('cpIsSuperAdmin') && cpIsSuperAdmin()) {
-            return true;
-        }
-
-        $roleId = function_exists('cpCurrentRoleId')
-            ? cpCurrentRoleId()
-            : (int)($_SESSION['role_id'] ?? 0);
-
-        if ($roleId <= 0) {
-            return false;
-        }
-
-        if ($action === null || trim($action) === '') {
-            [$module, $actionResolved] = cpPermissionFromCode($moduleOrCode);
-
-            // Première forme dérivée depuis CODE_ACTION.
-            if (cpPermissionExists($roleId, $module, $actionResolved)) {
-                return true;
-            }
-
-            /*
-             * Compatibilité avec des permissions enregistrées en action
-             * complète ou module complet.
-             */
-            $code = cpPermissionNormalize($moduleOrCode);
-
-            if (cpPermissionExists($roleId, $code, 'access')) {
-                return true;
-            }
-
-            if (cpPermissionExists($roleId, $code, 'view')) {
-                return true;
-            }
-
-            if (cpPermissionExists($roleId, $code, 'voir')) {
-                return true;
-            }
-
-            return false;
-        }
-
-        return cpPermissionExists(
-            $roleId,
-            $moduleOrCode,
-            $action
+        return (int)(
+            $_SESSION['role_id']
+            ?? $_SESSION['id_role']
+            ?? 0
         );
     }
 }
 
-if (!function_exists('canDo')) {
-    function canDo(string $module, string $action): bool
+if (!function_exists('cpPermTableExists')) {
+    function cpPermTableExists(PDO $db, string $table): bool
     {
-        return hasPermission($module, $action);
+        try {
+            $stmt = $db->prepare("SHOW TABLES LIKE ?");
+            $stmt->execute([$table]);
+            return (bool)$stmt->fetch(PDO::FETCH_NUM);
+        } catch (Throwable $e) {
+            return false;
+        }
     }
 }
 
-if (!function_exists('canAccess')) {
-    function canAccess(string $module, string $action = 'view'): bool
+if (!function_exists('cpPermColumns')) {
+    function cpPermColumns(PDO $db, string $table): array
     {
-        return hasPermission($module, $action);
+        try {
+            $stmt = $db->query("SHOW COLUMNS FROM `$table`");
+            return array_column($stmt->fetchAll(PDO::FETCH_ASSOC), 'Field');
+        } catch (Throwable $e) {
+            return [];
+        }
     }
 }
 
-if (!function_exists('hasAnyPermission')) {
-    function hasAnyPermission(array $permissions): bool
+if (!function_exists('cpEnsurePermissionsTable')) {
+    function cpEnsurePermissionsTable(PDO $db): void
     {
-        if (function_exists('cpIsSuperAdmin') && cpIsSuperAdmin()) {
-            return true;
+        if (!cpPermTableExists($db, 'permissions')) {
+            $db->exec("
+                CREATE TABLE IF NOT EXISTS permissions (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    role_id INT NOT NULL,
+                    module VARCHAR(100) NOT NULL,
+                    action VARCHAR(100) NOT NULL,
+                    autorise TINYINT(1) NOT NULL DEFAULT 0,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE KEY uniq_role_module_action (role_id, module, action)
+                )
+            ");
+        }
+    }
+}
+
+/*
+|--------------------------------------------------------------------------
+| Matrice officielle
+|--------------------------------------------------------------------------
+*/
+if (!function_exists('collectPayPermissionMatrix')) {
+    function collectPayPermissionMatrix(): array
+    {
+        return [
+            'dashboard' => [
+                'label' => 'Tableau de bord',
+                'actions' => [
+                    'view' => 'Voir le tableau de bord',
+                ]
+            ],
+
+            'contribuables' => [
+                'label' => 'Contribuables',
+                'actions' => [
+                    'view' => 'Voir contribuables',
+                    'add' => 'Ajouter contribuable',
+                    'edit' => 'Modifier contribuable',
+                    'delete' => 'Supprimer contribuable',
+                    'import' => 'Importer contribuables',
+                ]
+            ],
+
+            'constatation' => [
+                'label' => 'Constatation',
+                'actions' => [
+                    'view' => 'Voir NT',
+                    'add' => 'Créer NT',
+                    'edit' => 'Modifier NT',
+                    'delete' => 'Supprimer NT',
+                    'submit' => 'Soumettre NT',
+                    'print' => 'Imprimer NT',
+                ]
+            ],
+
+            'liquidation' => [
+                'label' => 'Liquidation',
+                'actions' => [
+                    'view' => 'Voir liquidation',
+                    'create_nd' => 'Créer ND',
+                    'validate_nd' => 'Valider ND',
+                    'reject_nd' => 'Rejeter ND',
+                    'print_nd' => 'Imprimer ND',
+                ]
+            ],
+
+            'controle' => [
+                'label' => 'Contrôle',
+                'actions' => [
+                    'view' => 'Voir contrôle',
+                    'validate' => 'Valider contrôle',
+                    'reject' => 'Rejeter contrôle',
+                    'observe' => 'Ajouter observation',
+                ]
+            ],
+
+            'ordonnancement' => [
+                'label' => 'Ordonnancement',
+                'actions' => [
+                    'view' => 'Voir ordonnancement',
+                    'create_np' => 'Créer NP',
+                    'fractionner_np' => 'Fractionner NP',
+                    'avis_fractionnement' => 'Créer avis de fractionnement',
+                    'print_np' => 'Imprimer NP',
+                ]
+            ],
+
+            'paiements' => [
+                'label' => 'Paiements',
+                'actions' => [
+                    'view' => 'Voir paiements',
+                    'add_np' => 'Payer NP',
+                    'add_npf' => 'Payer NPF',
+                    'edit' => 'Modifier paiement',
+                    'print' => 'Imprimer reçu',
+                ]
+            ],
+
+            'recouvrement' => [
+                'label' => 'Recouvrement',
+                'actions' => [
+                    'view' => 'Voir recouvrement',
+                    'apurement' => 'Apurer NP / NPF',
+                    'quittance' => 'Générer quittance',
+                    'amr' => 'Générer AMR',
+                    'print' => 'Imprimer documents',
+                ]
+            ],
+
+            'apurement' => [
+                'label' => 'Apurement',
+                'actions' => [
+                    'view' => 'Voir apurements',
+                    'create' => 'Créer apurement',
+                    'validate' => 'Valider apurement',
+                    'print' => 'Imprimer apurement',
+                ]
+            ],
+
+            'amr' => [
+                'label' => 'AMR',
+                'actions' => [
+                    'view' => 'Voir AMR',
+                    'create' => 'Créer AMR',
+                    'print' => 'Imprimer AMR',
+                ]
+            ],
+
+            'quittances' => [
+                'label' => 'Quittances',
+                'actions' => [
+                    'view' => 'Voir quittances',
+                    'create' => 'Créer quittance',
+                    'print' => 'Imprimer quittance',
+                ]
+            ],
+
+            'penalites' => [
+                'label' => 'Pénalités',
+                'actions' => [
+                    'view' => 'Voir pénalités',
+                    'manage' => 'Gérer barème pénalités',
+                    'history' => 'Voir historique pénalités',
+                ]
+            ],
+
+            'inspection' => [
+                'label' => 'Inspection / QR',
+                'actions' => [
+                    'view' => 'Voir inspection',
+                    'scan' => 'Scanner QR',
+                    'verify' => 'Vérifier document',
+                    'revoke' => 'Révoquer document',
+                    'fraud' => 'Voir fraudes suspectes',
+                    'alerts' => 'Voir alertes',
+                ]
+            ],
+
+            'corrections' => [
+                'label' => 'Corrections Documents',
+                'actions' => [
+                    'view' => 'Voir corrections',
+                    'create' => 'Créer correction',
+                    'validate' => 'Valider correction',
+                    'history' => 'Historique corrections',
+                ]
+            ],
+
+            'parametrage' => [
+                'label' => 'Paramétrage',
+                'actions' => [
+                    'view' => 'Voir paramètres',
+                    'manage' => 'Gérer paramètres',
+                    'nomenclature' => 'Gérer nomenclature',
+                    'directions' => 'Gérer directions',
+                    'services' => 'Gérer services',
+                    'periodes' => 'Gérer périodes',
+                    'taux_change' => 'Gérer taux change',
+                ]
+            ],
+
+            'users' => [
+                'label' => 'Utilisateurs',
+                'actions' => [
+                    'view' => 'Voir utilisateurs',
+                    'add' => 'Ajouter utilisateur',
+                    'edit' => 'Modifier utilisateur',
+                    'delete' => 'Supprimer utilisateur',
+                    'status' => 'Activer / désactiver utilisateur',
+                    'password' => 'Changer mot de passe',
+                ]
+            ],
+
+            'roles' => [
+                'label' => 'Rôles',
+                'actions' => [
+                    'view' => 'Voir rôles',
+                    'add' => 'Ajouter rôle',
+                    'edit' => 'Modifier rôle',
+                    'delete' => 'Supprimer rôle',
+                    'permissions' => 'Gérer permissions',
+                ]
+            ],
+
+            'administration' => [
+                'label' => 'Administration',
+                'actions' => [
+                    'view' => 'Voir administration',
+                    'logs' => 'Voir journaux',
+                    'backup' => 'Sauvegardes',
+                    'settings' => 'Paramètres système',
+                ]
+            ],
+
+            'pwa' => [
+                'label' => 'PWA Mobile',
+                'actions' => [
+                    'view' => 'Voir PWA',
+                    'sync' => 'Synchronisation PWA',
+                    'backup' => 'Sauvegarde PWA',
+                    'agents' => 'Agents terrain',
+                    'reports' => 'Rapports PWA',
+                ]
+            ],
+        ];
+    }
+}
+
+/*
+|--------------------------------------------------------------------------
+| Lecture permissions
+|--------------------------------------------------------------------------
+*/
+if (!function_exists('getRolePermissions')) {
+    function getRolePermissions(int $roleId): array
+    {
+        if ($roleId <= 0) {
+            return [];
         }
 
-        foreach ($permissions as $permission) {
-            if (is_array($permission)) {
-                $module = (string)($permission[0] ?? '');
-                $action = (string)($permission[1] ?? 'view');
+        try {
+            $db = cpDb();
+            cpEnsurePermissionsTable($db);
 
-                if ($module !== '' && hasPermission($module, $action)) {
-                    return true;
+            $cols = cpPermColumns($db, 'permissions');
+
+            $roleCol = in_array('role_id', $cols, true) ? 'role_id' : null;
+            $moduleCol = in_array('module', $cols, true) ? 'module' : null;
+            $actionCol = in_array('action', $cols, true) ? 'action' : null;
+
+            $allowedCol = null;
+            foreach (['autorise', 'allowed', 'value', 'statut'] as $c) {
+                if (in_array($c, $cols, true)) {
+                    $allowedCol = $c;
+                    break;
                 }
-            } else {
-                if (hasPermission((string)$permission)) {
-                    return true;
+            }
+
+            if (!$roleCol || !$moduleCol || !$actionCol || !$allowedCol) {
+                return [];
+            }
+
+            $stmt = $db->prepare("
+                SELECT `$moduleCol` AS module, `$actionCol` AS action, `$allowedCol` AS autorise
+                FROM permissions
+                WHERE `$roleCol` = ?
+            ");
+            $stmt->execute([$roleId]);
+
+            $out = [];
+
+            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                $module = (string)($row['module'] ?? '');
+                $action = (string)($row['action'] ?? '');
+
+                if ($module === '' || $action === '') {
+                    continue;
                 }
+
+                $value = $row['autorise'] ?? 0;
+
+                if (is_string($value) && in_array(strtolower($value), ['actif', 'active', 'yes', 'oui', 'true'], true)) {
+                    $value = 1;
+                }
+
+                $out[$module][$action] = (int)$value;
+            }
+
+            return $out;
+
+        } catch (Throwable $e) {
+            return [];
+        }
+    }
+}
+
+/*
+|--------------------------------------------------------------------------
+| Enregistrement permissions - compatible avec colonnes existantes
+|--------------------------------------------------------------------------
+*/
+if (!function_exists('setPermission')) {
+    function setPermission(
+        int $roleId,
+        string $module,
+        string $action,
+        int $autorise,
+        string $label = '',
+        int $ordre = 0
+    ): void {
+        $db = cpDb();
+        cpEnsurePermissionsTable($db);
+
+        $cols = cpPermColumns($db, 'permissions');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Recherche si permission existe déjà
+        |--------------------------------------------------------------------------
+        */
+        $stmt = $db->prepare("
+            SELECT id
+            FROM permissions
+            WHERE role_id = ?
+              AND module = ?
+              AND action = ?
+            LIMIT 1
+        ");
+        $stmt->execute([$roleId, $module, $action]);
+        $existingId = (int)($stmt->fetchColumn() ?: 0);
+
+        $data = [
+            'role_id' => $roleId,
+            'module' => $module,
+            'action' => $action,
+            'autorise' => $autorise ? 1 : 0,
+            'allowed' => $autorise ? 1 : 0,
+            'value' => $autorise ? 1 : 0,
+            'label' => $label,
+            'libelle' => $label,
+            'description' => $label,
+            'ordre' => $ordre,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ];
+
+        $valid = [];
+
+        foreach ($data as $col => $val) {
+            if (in_array($col, $cols, true)) {
+                $valid[$col] = $val;
             }
         }
 
-        return false;
+        if ($existingId > 0) {
+            unset($valid['id']);
+            unset($valid['role_id']);
+            unset($valid['module']);
+            unset($valid['action']);
+            unset($valid['created_at']);
+
+            $sets = [];
+            $values = [];
+
+            foreach ($valid as $col => $val) {
+                $sets[] = "`$col` = ?";
+                $values[] = $val;
+            }
+
+            if (!$sets) {
+                return;
+            }
+
+            $values[] = $existingId;
+
+            $sql = "UPDATE permissions SET " . implode(", ", $sets) . " WHERE id = ?";
+            $db->prepare($sql)->execute($values);
+            return;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Insertion nouvelle ligne
+        |--------------------------------------------------------------------------
+        */
+        $insert = [];
+
+        foreach ($valid as $col => $val) {
+            if ($col === 'updated_at') {
+                continue;
+            }
+
+            $insert[$col] = $val;
+        }
+
+        if (!isset($insert['role_id']) || !isset($insert['module']) || !isset($insert['action'])) {
+            throw new Exception("La table permissions doit contenir role_id, module et action.");
+        }
+
+        $sql = "INSERT INTO permissions (`" . implode("`,`", array_keys($insert)) . "`)
+                VALUES (" . implode(",", array_fill(0, count($insert), "?")) . ")";
+        $db->prepare($sql)->execute(array_values($insert));
+    }
+}
+
+/*
+|--------------------------------------------------------------------------
+| Vérification permission
+|--------------------------------------------------------------------------
+*/
+if (!function_exists('hasPermission')) {
+    function hasPermission(string $module, string $action = 'view'): bool
+    {
+        $role = cpCurrentRole();
+
+        if ($role === 'SUPER_ADMIN') {
+            return true;
+        }
+
+        $roleId = cpCurrentRoleId();
+
+        if ($roleId <= 0) {
+            return false;
+        }
+
+        $permissions = getRolePermissions($roleId);
+
+        return isset($permissions[$module][$action])
+            && (int)$permissions[$module][$action] === 1;
+    }
+}
+
+if (!function_exists('canDo')) {
+    function canDo(string $module, string $action = 'view'): bool
+    {
+        return hasPermission($module, $action);
     }
 }
 
 if (!function_exists('requirePermission')) {
-    function requirePermission(string $moduleOrCode, ?string $action = null): void
+    function requirePermission(string $module, string $action = 'view'): void
     {
-        checkAuth();
-
-        if (function_exists('cpIsSuperAdmin') && cpIsSuperAdmin()) {
+        if (hasPermission($module, $action)) {
             return;
-        }
-
-        if (hasPermission($moduleOrCode, $action)) {
-            return;
-        }
-
-        $detail = $action !== null
-            ? $moduleOrCode . ' / ' . $action
-            : $moduleOrCode;
-
-        if (function_exists('cpAccessDenied')) {
-            cpAccessDenied('Permission requise : ' . $detail);
         }
 
         http_response_code(403);
-        exit('Accès refusé.');
+
+        die("
+            <div style='font-family:Arial;background:#f8fafc;min-height:100vh;display:flex;align-items:center;justify-content:center;'>
+                <div style='background:white;border-radius:18px;padding:28px;box-shadow:0 10px 30px rgba(0,0,0,.10);max-width:520px;text-align:center;'>
+                    <h2 style='color:#991b1b;margin-top:0;'>⛔ Accès interdit</h2>
+                    <p>Vous n'avez pas la permission nécessaire pour accéder à cette page.</p>
+                    <p style='color:#64748b;font-size:13px;'>Permission requise : <strong>" . htmlspecialchars($module) . " / " . htmlspecialchars($action) . "</strong></p>
+                    <a href='javascript:history.back()' style='display:inline-block;margin-top:12px;background:#0f3460;color:white;padding:11px 16px;border-radius:10px;text-decoration:none;font-weight:bold;'>Retour</a>
+                </div>
+            </div>
+        ");
+    }
+}
+
+/*
+|--------------------------------------------------------------------------
+| Menu dynamique
+|--------------------------------------------------------------------------
+*/
+if (!function_exists('canAccessMenu')) {
+    function canAccessMenu($menu): bool
+    {
+        if (cpCurrentRole() === 'SUPER_ADMIN') {
+            return true;
+        }
+
+        $menu = strtoupper(trim((string)$menu));
+
+        $map = [
+            'ACCUEIL' => ['dashboard', 'view'],
+            'DASHBOARD' => ['dashboard', 'view'],
+
+            'CONTRIBUABLES' => ['contribuables', 'view'],
+            'CONSTATATION' => ['constatation', 'view'],
+            'LIQUIDATION' => ['liquidation', 'view'],
+            'CONTROLE' => ['controle', 'view'],
+            'ORDONNANCEMENT' => ['ordonnancement', 'view'],
+
+            'PAIEMENT' => ['paiements', 'view'],
+            'PAIEMENTS' => ['paiements', 'view'],
+            'RECOUVREMENT' => ['recouvrement', 'view'],
+            'APUREMENT' => ['apurement', 'view'],
+            'AMR' => ['amr', 'view'],
+            'QUITTANCES' => ['quittances', 'view'],
+
+            'PENALITES' => ['penalites', 'view'],
+            'INSPECTION' => ['inspection', 'view'],
+            'CORRECTIONS' => ['corrections', 'view'],
+            'PARAMETRAGE' => ['parametrage', 'view'],
+            'ADMINISTRATION' => ['administration', 'view'],
+            'USERS' => ['users', 'view'],
+            'ROLES' => ['roles', 'view'],
+            'PWA' => ['pwa', 'view'],
+        ];
+
+        if (!isset($map[$menu])) {
+            return false;
+        }
+
+        return hasPermission($map[$menu][0], $map[$menu][1]);
     }
 }
