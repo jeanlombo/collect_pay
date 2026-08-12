@@ -4,6 +4,8 @@ require_once __DIR__ . '/auth/check_auth.php';
 
 header('Content-Type: text/plain; charset=UTF-8');
 
+echo "=== DIAGNOSTIC SESSION COLLECTPAY ===\n\n";
+
 echo "USER ID : ";
 var_dump($_SESSION['user_id'] ?? null);
 
@@ -28,5 +30,5 @@ var_dump($_SESSION['nom_role'] ?? null);
 echo "\nROLE CODE : ";
 var_dump($_SESSION['role_code'] ?? null);
 
-echo "\n\nSESSION COMPLETE :\n";
+echo "\n\n=== SESSION COMPLETE ===\n";
 print_r($_SESSION);
