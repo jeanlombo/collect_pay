@@ -1,10 +1,13 @@
 <?php
 /*
 |--------------------------------------------------------------------------
-| cOllect_Pay - Auth Check Centralisé
+| cOllect_Pay - Auth Check Centralisé V2
 |--------------------------------------------------------------------------
-| Objectif :
-| Utilisateur -> Rôle -> Permissions -> Menus + pages autorisées
+| Correctif :
+| - SUPER_ADMIN et "Super Administrateur" = accès total
+| - normalisation espaces / tirets / underscores
+| - contrôle possible via le vrai rôle enregistré en base
+| - compatibilité avec les anciens requireRole()
 |--------------------------------------------------------------------------
 */
 
@@ -28,7 +31,130 @@ if (!function_exists('cpDb')) {
             return $pdo;
         }
 
-        throw new Exception("Connexion PDO indisponible.");
+        throw new RuntimeException("Connexion PDO indisponible.");
+    }
+}
+
+if (!function_exists('cpNormalizeRole')) {
+    function cpNormalizeRole(?string $role): string
+    {
+        $role = trim((string)$role);
+
+        if ($role === '') {
+            return '';
+        }
+
+        $role = mb_strtoupper($role, 'UTF-8');
+
+        // Supprimer les accents pour fiabiliser les comparaisons.
+        $from = ['À','Â','Ä','Á','Ã','Å','Ç','È','É','Ê','Ë','Ì','Í','Î','Ï','Ò','Ó','Ô','Ö','Õ','Ù','Ú','Û','Ü','Ý'];
+        $to   = ['A','A','A','A','A','A','C','E','E','E','E','I','I','I','I','O','O','O','O','O','U','U','U','U','Y'];
+        $role = str_replace($from, $to, $role);
+
+        // Même représentation pour "SUPER ADMIN", "SUPER-ADMIN", "SUPER_ADMIN".
+        $role = preg_replace('/[^A-Z0-9]+/u', '_', $role) ?? $role;
+        $role = preg_replace('/_+/', '_', $role) ?? $role;
+
+        return trim($role, '_');
+    }
+}
+
+if (!function_exists('cpCurrentRoleId')) {
+    function cpCurrentRoleId(): int
+    {
+        return (int)(
+            $_SESSION['role_id']
+            ?? $_SESSION['id_role']
+            ?? 0
+        );
+    }
+}
+
+if (!function_exists('cpCurrentRole')) {
+    function cpCurrentRole(): string
+    {
+        $roleSession = (string)(
+            $_SESSION['role']
+            ?? $_SESSION['nom_role']
+            ?? $_SESSION['role_code']
+            ?? $_SESSION['role_nom']
+            ?? $_SESSION['user_role']
+            ?? ''
+        );
+
+        return cpNormalizeRole($roleSession);
+    }
+}
+
+if (!function_exists('cpRoleNameFromDb')) {
+    function cpRoleNameFromDb(?int $roleId = null): string
+    {
+        $roleId = $roleId ?? cpCurrentRoleId();
+
+        if ($roleId <= 0) {
+            return '';
+        }
+
+        try {
+            $stmt = cpDb()->prepare("
+                SELECT nom_role
+                FROM roles
+                WHERE id = ?
+                LIMIT 1
+            ");
+            $stmt->execute([$roleId]);
+
+            return cpNormalizeRole((string)($stmt->fetchColumn() ?: ''));
+        } catch (Throwable $e) {
+            return '';
+        }
+    }
+}
+
+if (!function_exists('cpIsSuperAdmin')) {
+    function cpIsSuperAdmin(): bool
+    {
+        static $cache = null;
+
+        if ($cache !== null) {
+            return $cache;
+        }
+
+        $superRoles = [
+            'SUPER_ADMIN',
+            'SUPER_ADMINISTRATEUR',
+            'SUPERADMIN',
+            'SUPERADMINISTRATEUR'
+        ];
+
+        // 1. Valeurs disponibles dans la session.
+        $sessionCandidates = [
+            $_SESSION['role'] ?? '',
+            $_SESSION['nom_role'] ?? '',
+            $_SESSION['role_code'] ?? '',
+            $_SESSION['role_nom'] ?? '',
+            $_SESSION['user_role'] ?? ''
+        ];
+
+        foreach ($sessionCandidates as $candidate) {
+            if (in_array(cpNormalizeRole((string)$candidate), $superRoles, true)) {
+                return $cache = true;
+            }
+        }
+
+        // 2. Source de vérité : nom du rôle enregistré dans la base.
+        $roleDb = cpRoleNameFromDb();
+
+        if ($roleDb !== '' && in_array($roleDb, $superRoles, true)) {
+            // Harmoniser aussi la session pour les anciennes pages.
+            $_SESSION['role'] = $roleDb;
+            $_SESSION['nom_role'] = $roleDb;
+            $_SESSION['role_code'] = $roleDb;
+
+            return $cache = true;
+        }
+
+        return $cache = false;
     }
 }
 
@@ -41,8 +167,8 @@ if (!function_exists('checkAuth')) {
 
         $loginUrl = '';
 
-        if (defined('APP_URL') && trim((string) APP_URL) !== '') {
-            $baseUrl = rtrim(trim((string) APP_URL), '/');
+        if (defined('APP_URL') && trim((string)APP_URL) !== '') {
+            $baseUrl = rtrim(trim((string)APP_URL), '/');
             $baseUrl = preg_replace('#:(8080|80|443)$#', '', $baseUrl);
             $loginUrl = $baseUrl . '/login.php';
         }
@@ -66,22 +192,31 @@ if (!function_exists('checkAuth')) {
     }
 }
 
-if (!function_exists('cpCurrentRole')) {
-    function cpCurrentRole(): string
+if (!function_exists('cpAccessDenied')) {
+    function cpAccessDenied(?string $detail = null): never
     {
-        return strtoupper(trim((string)(
-            $_SESSION['role']
-            ?? $_SESSION['nom_role']
-            ?? $_SESSION['role_code']
-            ?? ''
-        )));
-    }
-}
+        http_response_code(403);
 
-if (!function_exists('cpCurrentRoleId')) {
-    function cpCurrentRoleId(): int
-    {
-        return (int)($_SESSION['role_id'] ?? $_SESSION['id_role'] ?? 0);
+        $role = cpRoleNameFromDb();
+        if ($role === '') {
+            $role = cpCurrentRole();
+        }
+
+        $roleAffiche = str_replace('_', ' ', $role ?: 'NON DÉFINI');
+
+        die("
+            <div style='font-family:Arial,sans-serif;background:#f8fafc;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;'>
+                <div style='background:white;border-radius:18px;padding:28px;box-shadow:0 10px 30px rgba(0,0,0,.10);max-width:540px;text-align:center;'>
+                    <h2 style='color:#991b1b;margin-top:0;'>⛔ Accès refusé</h2>
+                    <p>Votre rôle ne vous permet pas d'accéder à cette page.</p>
+                    <p style='color:#64748b;font-size:13px;'>Votre rôle actuel : <strong>"
+                    . htmlspecialchars($roleAffiche, ENT_QUOTES, 'UTF-8')
+                    . "</strong></p>"
+                    . ($detail ? "<p style='color:#94a3b8;font-size:11px;'>".htmlspecialchars($detail, ENT_QUOTES, 'UTF-8')."</p>" : "")
+                    . "<a href='javascript:history.back()' style='display:inline-block;margin-top:12px;background:#0f3460;color:white;padding:11px 16px;border-radius:10px;text-decoration:none;font-weight:bold;'>Retour</a>
+                </div>
+            </div>
+        ");
     }
 }
 
@@ -130,15 +265,15 @@ if (!function_exists('logAction')) {
                 . ")";
 
             $db->prepare($sql)->execute(array_values($data));
-
         } catch (Throwable $e) {
+            // Un problème de journalisation ne doit jamais bloquer l'utilisateur.
         }
     }
 }
 
 /*
 |--------------------------------------------------------------------------
-| Charger permissions dynamiques
+| Charger le moteur de permissions
 |--------------------------------------------------------------------------
 */
 require_once __DIR__ . "/permissions.php";
@@ -147,58 +282,58 @@ require_once __DIR__ . "/permissions.php";
 |--------------------------------------------------------------------------
 | Compatibilité anciens fichiers avec requireRole()
 |--------------------------------------------------------------------------
-| On ne bloque plus uniquement par rôle fixe.
-| SUPER_ADMIN passe tout.
-| Sinon on laisse requirePermission() gérer les pages modernes.
-| Pour les anciens fichiers, on autorise si le rôle courant est dans la liste.
-|--------------------------------------------------------------------------
 */
 if (!function_exists('requireRole')) {
     function requireRole(array $roles): void
     {
+        checkAuth();
+
+        // Le Super Administrateur passe TOUJOURS.
+        if (cpIsSuperAdmin()) {
+            return;
+        }
+
         $role = cpCurrentRole();
 
-        if ($role === 'SUPER_ADMIN') {
+        $rolesNormalises = array_map(
+            static fn($r) => cpNormalizeRole((string)$r),
+            $roles
+        );
+
+        if (in_array($role, $rolesNormalises, true)) {
             return;
         }
 
-        $roles = array_map(fn($r) => strtoupper(trim((string)$r)), $roles);
-
-        if (in_array($role, $roles, true)) {
-            return;
-        }
-
+        /*
+         * Compatibilité historique du recouvrement.
+         * Les permissions granulaires peuvent donner l'accès à une ancienne
+         * page qui utilisait seulement requireRole().
+         */
         if (
-            in_array('RECOUVREMENT', $roles, true)
-            || in_array('CHEF_RECOUVREMENT', $roles, true)
-            || in_array('CAISSIER', $roles, true)
-            || in_array('APUREUR', $roles, true)
+            in_array('RECOUVREMENT', $rolesNormalises, true)
+            || in_array('CHEF_RECOUVREMENT', $rolesNormalises, true)
+            || in_array('DIRECTEUR_RECOUVREMENT', $rolesNormalises, true)
+            || in_array('CAISSIER', $rolesNormalises, true)
+            || in_array('APUREUR', $rolesNormalises, true)
         ) {
             if (
                 hasPermission('apurement', 'view')
                 || hasPermission('apurement', 'create')
+                || hasPermission('apurement', 'voir')
+                || hasPermission('apurement', 'creer')
                 || hasPermission('recouvrement', 'view')
+                || hasPermission('recouvrement', 'voir')
                 || hasPermission('recouvrement', 'apurement')
                 || hasPermission('quittances', 'view')
+                || hasPermission('quittances', 'voir')
                 || hasPermission('paiements', 'view')
+                || hasPermission('paiements', 'voir')
             ) {
                 return;
             }
         }
 
-        http_response_code(403);
-        die("
-            <div style='font-family:Arial;background:#f8fafc;min-height:100vh;display:flex;align-items:center;justify-content:center;'>
-                <div style='background:white;border-radius:18px;padding:28px;box-shadow:0 10px 30px rgba(0,0,0,.10);max-width:520px;text-align:center;'>
-                    <h2 style='color:#991b1b;margin-top:0;'>⛔ Accès refusé</h2>
-                    <p>Votre rôle ne vous permet pas d'accéder à cette page.</p>
-                    <p style='color:#64748b;font-size:13px;'>Votre rôle actuel : <strong>"
-                    . htmlspecialchars($role, ENT_QUOTES, 'UTF-8')
-                    . "</strong></p>
-                    <a href='javascript:history.back()' style='display:inline-block;margin-top:12px;background:#0f3460;color:white;padding:11px 16px;border-radius:10px;text-decoration:none;font-weight:bold;'>Retour</a>
-                </div>
-            </div>
-        ");
+        cpAccessDenied('Contrôle requireRole');
     }
 }
 
