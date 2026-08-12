@@ -220,32 +220,277 @@ if (!function_exists('formatTauxNomenclature')) {
 <link rel="stylesheet" href="../../assets/css/admin.css">
 
     <style>
-        .grid-2 { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
-        .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
-        label { font-weight:900; color:#0f3460; display:block; margin-bottom:6px; }
-        .success-box { background:#ecfdf5; color:#047857; border:1px solid #bbf7d0; padding:14px; border-radius:14px; font-weight:900; margin-bottom:18px; }
-        .error-box { background:#fef2f2; color:#991b1b; border:1px solid #fecaca; padding:14px; border-radius:14px; font-weight:900; margin-bottom:18px; }
-        .mini-note { color:#6b7280; font-size:13px; margin-top:4px; }
-        textarea { min-height:90px; }
-    </style>
+        :root{
+            --nom-navy:#06152b;
+            --nom-blue:#0f3460;
+            --nom-blue-2:#1d4ed8;
+            --nom-gold:#f6b21a;
+            --nom-bg:#f4f7fb;
+            --nom-border:#e2e8f0;
+            --nom-text:#0f172a;
+            --nom-muted:#64748b;
+            --nom-green:#047857;
+            --nom-red:#991b1b;
+        }
 
-<style>
-.btn-edit{
-    display:inline-block;
-    background:#f59e0b;
-    color:#111827!important;
-    padding:7px 12px;
-    border-radius:10px;
-    font-weight:900;
-    text-decoration:none;
-    white-space:nowrap;
-}
-.btn-edit:hover{
-    background:#d97706;
-    color:#fff!important;
-}
-.text-center{text-align:center;}
-</style>
+        .cp-parametrage-page{
+            background:linear-gradient(180deg,#f8fbff 0%,#f4f7fb 100%)!important;
+        }
+
+        .cp-parametrage-panel{
+            background:#fff!important;
+            border:1px solid var(--nom-border)!important;
+            border-radius:22px!important;
+            box-shadow:0 14px 35px rgba(15,23,42,.07)!important;
+            padding:22px!important;
+            margin-bottom:18px!important;
+        }
+
+        .cp-parametrage-panel h2,
+        .cp-parametrage-panel h3{
+            margin:0 0 8px!important;
+            color:var(--nom-navy)!important;
+            font-weight:1000!important;
+            letter-spacing:-.3px!important;
+        }
+
+        .cp-parametrage-panel > p{
+            margin:0!important;
+            color:var(--nom-muted)!important;
+            line-height:1.55!important;
+        }
+
+        .grid-2,
+        .grid-3{
+            display:grid!important;
+            gap:14px!important;
+            margin-bottom:14px!important;
+        }
+
+        .grid-2{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+        .grid-3{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+
+        label{
+            display:block!important;
+            margin-bottom:6px!important;
+            color:var(--nom-blue)!important;
+            font-size:12px!important;
+            font-weight:950!important;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select,
+        textarea{
+            width:100%!important;
+            box-sizing:border-box!important;
+            border:1px solid #cbd5e1!important;
+            border-radius:13px!important;
+            background:#fff!important;
+            color:var(--nom-text)!important;
+            padding:11px 12px!important;
+            font:inherit!important;
+            outline:none!important;
+            transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease!important;
+        }
+
+        textarea{
+            min-height:96px!important;
+            resize:vertical!important;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus{
+            border-color:#3b82f6!important;
+            box-shadow:0 0 0 4px rgba(59,130,246,.10)!important;
+        }
+
+        input[type="checkbox"]{
+            accent-color:var(--nom-blue-2)!important;
+            transform:translateY(1px) scale(1.08)!important;
+            margin-right:7px!important;
+        }
+
+        .mini-note{
+            margin-top:5px!important;
+            color:var(--nom-muted)!important;
+            font-size:11.5px!important;
+            line-height:1.4!important;
+        }
+
+        .success-box,
+        .error-box{
+            padding:14px 16px!important;
+            border-radius:14px!important;
+            font-weight:900!important;
+            margin-top:16px!important;
+        }
+
+        .success-box{
+            background:#ecfdf5!important;
+            color:var(--nom-green)!important;
+            border:1px solid #bbf7d0!important;
+        }
+
+        .error-box{
+            background:#fef2f2!important;
+            color:var(--nom-red)!important;
+            border:1px solid #fecaca!important;
+        }
+
+        form > button[type="submit"]{
+            border:0!important;
+            border-radius:14px!important;
+            background:linear-gradient(135deg,var(--nom-blue),var(--nom-blue-2))!important;
+            color:#fff!important;
+            padding:12px 18px!important;
+            font-weight:950!important;
+            cursor:pointer!important;
+            box-shadow:0 10px 24px rgba(29,78,216,.20)!important;
+            transition:transform .2s ease,box-shadow .2s ease!important;
+        }
+
+        form > button[type="submit"]:hover{
+            transform:translateY(-1px)!important;
+            box-shadow:0 14px 28px rgba(29,78,216,.26)!important;
+        }
+
+        .cp-table-wrap{
+            width:100%!important;
+            overflow-x:auto!important;
+            border:1px solid var(--nom-border)!important;
+            border-radius:18px!important;
+            background:#fff!important;
+        }
+
+        .cp-parametrage-table{
+            width:100%!important;
+            min-width:1650px!important;
+            border-collapse:separate!important;
+            border-spacing:0!important;
+            table-layout:auto!important;
+            margin:0!important;
+        }
+
+        .cp-parametrage-table th{
+            position:sticky!important;
+            top:0!important;
+            z-index:2!important;
+            background:linear-gradient(180deg,#0b1d38,#06152b)!important;
+            color:#fff!important;
+            padding:12px 10px!important;
+            font-size:10px!important;
+            text-transform:uppercase!important;
+            letter-spacing:.45px!important;
+            font-weight:1000!important;
+            white-space:nowrap!important;
+            border-bottom:1px solid rgba(255,255,255,.08)!important;
+        }
+
+        .cp-parametrage-table td{
+            padding:11px 10px!important;
+            vertical-align:top!important;
+            border-bottom:1px solid #eef2f7!important;
+            color:#334155!important;
+            font-size:11.5px!important;
+            line-height:1.35!important;
+            background:#fff!important;
+        }
+
+        .cp-parametrage-table tr:nth-child(even) td{
+            background:#f8fafc!important;
+        }
+
+        .cp-parametrage-table tr:hover td{
+            background:#eff6ff!important;
+        }
+
+        .cp-parametrage-table td:nth-child(1),
+        .cp-parametrage-table td:nth-child(2),
+        .cp-parametrage-table td:nth-child(3){
+            min-width:130px!important;
+        }
+
+        .cp-parametrage-table td:nth-child(4){
+            min-width:105px!important;
+            font-weight:950!important;
+            color:var(--nom-blue)!important;
+            white-space:nowrap!important;
+        }
+
+        .cp-parametrage-table td:nth-child(5),
+        .cp-parametrage-table td:nth-child(6),
+        .cp-parametrage-table td:nth-child(7){
+            min-width:190px!important;
+        }
+
+        .cp-parametrage-table td:nth-child(8),
+        .cp-parametrage-table td:nth-child(9),
+        .cp-parametrage-table td:nth-child(13){
+            min-width:105px!important;
+            white-space:nowrap!important;
+        }
+
+        .cp-parametrage-table td:nth-child(10),
+        .cp-parametrage-table td:nth-child(11),
+        .cp-parametrage-table td:nth-child(12){
+            min-width:105px!important;
+            white-space:nowrap!important;
+            text-align:right!important;
+            font-weight:850!important;
+        }
+
+        .cp-parametrage-table td:last-child{
+            min-width:105px!important;
+            white-space:nowrap!important;
+            text-align:center!important;
+        }
+
+        .btn-edit,
+        .btn.btn-warning.btn-sm{
+            display:inline-flex!important;
+            align-items:center!important;
+            justify-content:center!important;
+            gap:5px!important;
+            border:0!important;
+            border-radius:10px!important;
+            background:#f59e0b!important;
+            color:#111827!important;
+            padding:8px 11px!important;
+            text-decoration:none!important;
+            font-size:11px!important;
+            font-weight:950!important;
+            white-space:nowrap!important;
+        }
+
+        .btn-edit:hover,
+        .btn.btn-warning.btn-sm:hover{
+            background:#d97706!important;
+            color:#fff!important;
+        }
+
+        .text-center{text-align:center!important}
+
+        @media(max-width:1100px){
+            .grid-3{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+        }
+
+        @media(max-width:760px){
+            .cp-parametrage-panel{
+                padding:16px!important;
+                border-radius:16px!important;
+            }
+
+            .grid-2,
+            .grid-3{
+                grid-template-columns:1fr!important;
+            }
+
+            .cp-parametrage-panel h2{font-size:20px!important}
+            .cp-parametrage-panel h3{font-size:17px!important}
+        }
+    </style>
 
 <link rel="stylesheet" href="../../assets/css/parametrage.css">
 </head>
@@ -444,6 +689,7 @@ if (!function_exists('formatTauxNomenclature')) {
 <div class="panel cp-parametrage-panel">
     <h3>Liste de la nomenclature configurée</h3>
 
+    <div class="cp-table-wrap">
     <table class="table-premium cp-parametrage-table">
         <tr>
             <th>Direction</th>
@@ -467,16 +713,16 @@ if (!function_exists('formatTauxNomenclature')) {
                 <td><?= htmlspecialchars($n['nom_direction'] ?? '-') ?></td>
                 <td><?= htmlspecialchars($n['nom_service'] ?? '-') ?></td>
                 <td><?= htmlspecialchars($n['secteur'] ?? '-') ?></td>
-                <td><strong><?= htmlspecialchars($n['code_article']) ?></strong></td>
+                <td><strong><?= htmlspecialchars($n['code_article'] ?? '-') ?></strong></td>
                 <td><?= htmlspecialchars(mb_strimwidth($n['acte_generateur'] ?? '-', 0, 45, '...')) ?></td>
                 <td><?= htmlspecialchars($n['libelle_taux'] ?? '-') ?></td>
-                <td><?= htmlspecialchars(mb_strimwidth($n['nature_acte'], 0, 55, '...')) ?></td>
-                <td><?= htmlspecialchars($n['periodicite']) ?></td>
-                <td><?= htmlspecialchars($n['mode_calcul']) ?></td>
+                <td><?= htmlspecialchars(mb_strimwidth((string)($n['nature_acte'] ?? '-'), 0, 55, '...')) ?></td>
+                <td><?= htmlspecialchars($n['periodicite'] ?? '-') ?></td>
+                <td><?= htmlspecialchars($n['mode_calcul'] ?? '-') ?></td>
                 <td><?= formatTauxNomenclature($n['taux_acte'], $n['devise_base'] ?? '', $n['mode_calcul'] ?? '', $n['type_taux'] ?? '') ?></td>
-                <td><?= number_format($n['frais_administratif'], 2, ',', ' ') ?></td>
-                <td><?= number_format($n['frais_technique'], 2, ',', ' ') ?></td>
-                <td><?= htmlspecialchars($n['devise_base']) ?></td>
+                <td><?= number_format((float)($n['frais_administratif'] ?? 0), 2, ',', ' ') ?></td>
+                <td><?= number_format((float)($n['frais_technique'] ?? 0), 2, ',', ' ') ?></td>
+                <td><?= htmlspecialchars($n['devise_base'] ?? '-') ?></td>
                 <td>
                     <a href="nomenclature_edit.php?id=<?= (int)$n['id'] ?>" class="btn btn-warning btn-sm">✏ Modifier</a>
                 </td>
@@ -489,6 +735,7 @@ if (!function_exists('formatTauxNomenclature')) {
             </tr>
         <?php endif; ?>
     </table>
+</div>
 </div>
 
 </main>
